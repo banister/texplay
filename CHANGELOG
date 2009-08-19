@@ -1,0 +1,45 @@
+14/8/09
+version 0.1.9.0
+* major rewrite. TP now supports beziers, polylines, polygons, and more
+* also supports alpha_blending (though still tempermental)
+* This is a BETA release
+
+1/7/09
+version 0.1.6.2
+* fixed another subtle bug in constrain_local_boundaries(). Function was 
+unable to deal with drawing actions that were 100% outside the image 
+boundaries.
+
+28/6/09
+version 0.1.6
+* gen_eval now working as a replacement for instance_eval in the #paint block. Allows for more user-friendly interface.
+* #paint can now be called without a block; if invoked this way it executes any commands in the action queue, e.g
+  @img.circle 20, 20, 40
+  @img.pixel 30, 30
+  @img.paint
+* above will function as if: @img.paint { circle 20, 20, 40; pixel 30, 30 }
+* collected 1.8.6/1.9.1 compatibility into compat.h
+
+16/6/09
+version 0.1.4.6
+* allowed arity of 0 (as well as -1) for ruby 1.9 compatibility
+
+13/6/09
+version 0.1.4.5
+* major bugfix with TexPlay#splice method (segfaut). Also added new color format parameter: color [1, 1, 0, 1] (e.g purple with full alpha).
+Also fixed subtle edge-case bug in constrain_local_boundaries().
+
+9/6/09
+version 0.1.4
+* improved error checking. should work better with later gosu releases
+
+20/2/09 
+version 0.1.1
+* rerelease of this version fixing the oversized image bug for refresh_cache (i.e images over 500 x 500
+
+version 0.1.1
+* oops, bug in leftshift/rightshift functions, fixed!
+
+version 0.1.0
+* release!
+

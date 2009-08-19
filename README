@@ -1,0 +1,17 @@
+INSTRUCTIONS 
+
+* version: 0.1.9.0 BETA
+
+To compile TexPlay first run extconf.rb
+=> ruby extconf.rb
+
+Then type 'make' (or nmake for windows):
+=> make
+
+If all goes well, run the example program:
+=> ruby test.rb
+
+*like any gosu application, gosu.so must be in the current directory (or the gosu gem installed) when running the examples.
+
+Enjoy!
+(note that TexPlay has only been tested on 32 bit linux systems and WindowsXP using VS 6.0)
