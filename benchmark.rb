@@ -154,6 +154,22 @@ class MyWindow < Gosu::Window
         @img.each2 { |v| v[0] = 1}
     end
 
+    def bench_dup
+        @img.dup
+    end
+
+    def bench_clone
+        @img.clone
+    end
+
+    def bench_composite
+        @img.splice @img2, 0, 0
+    end
+
+    def bench_rect
+        @img.rect 0, 0, 1024, 1024, :fill => true
+    end
+
     def bench_gen_eval
         @img.paint {
             0.upto(1000) { 
@@ -243,7 +259,6 @@ class MyWindow < Gosu::Window
     end
 
     def _draw
-        bench_all
         @img.draw(200, 200, 0)
     end
 

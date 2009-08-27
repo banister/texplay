@@ -1,5 +1,6 @@
 require 'mkmf'
 
+
 # linux
 if RUBY_PLATFORM =~ /linux/ then
     exit unless have_library("glut")
@@ -14,4 +15,4 @@ else
     exit unless have_library("glut32") && have_library("math")
 end
 
-create_makefile('ctexplay')
+create_makefile('src/ctexplay')

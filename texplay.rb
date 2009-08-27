@@ -8,6 +8,7 @@ end
 # include gosu first
 require 'gosu'
 
+# monkey patches required _before_ loading TexPlay
 module Gosu
     class Image
         class << self
@@ -96,10 +97,16 @@ module Gosu
                 # run custom setup
                 TexPlay::setup(obj)
 
+               #   obj.instance_variable_set(:@__window__, args.first)
+
                 # return the new image
                 obj
             end
         end
+        
+      #   def __window__
+#             @__window__
+#         end
     end
 end
 

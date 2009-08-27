@@ -14,7 +14,7 @@ class W < Gosu::Window
 
         # NOTE: TexPlay also accepts points. a 'point' is any object that responds to 'x' or 'y'
         # NOTE: current maximum points for a bezier is 13
-        (0..@img.width).step(50) { |x|
+        (0..@img.width + 100).step(50) { |x|
             p = TexPlay::TPPoint.new
             p.x = x
             p.y = @img.height * rand
@@ -22,7 +22,15 @@ class W < Gosu::Window
             points << p
         }
 
-        @img.bezier points, :color => :red
+        @img.move_to(points.first.x, points.first.y)
+        @img.bezier points, :color => :red, :color_control => proc { |c, x, y|
+            if((x % 10) == 0) then
+                @img.line_to(x, y + rand * 20 - 10)
+            end
+            :none
+        }
+
+        #@img.fill 100, 400, :color => :yellow
         
         # NOTE: can 'close' a bezier curve too (as with polylines)
     end
