@@ -1,0 +1,286 @@
+
+actions.c,3564
+do_sync(action_struct * cur, texture_info * tex) do_sync34,1286
+line_do_action(int x1, int y1, int x2, int y2, texture_info * tex, VALUE hash_arg,line_do_action44,1509
+#define SIMPLE_FORMAT SIMPLE_FORMAT126,3531
+#define POINT_FORMAT POINT_FORMAT127,3555
+polyline_point(VALUE points, int k, int * x, int * y, int format, int draw_offset_x,polyline_point131,3622
+polyline_do_action(VALUE points, texture_info * tex, VALUE hash_arg,polyline_do_action154,4324
+ngon_do_action(int x, int y, int r, int num_sides, texture_info * tex, VALUE hash_arg,ngon_do_action231,6780
+rect_do_action(int x1, int y1, int x2, int y2, texture_info * tex, VALUE hash_arg,rect_do_action275,8056
+circle_do_action(int x1, int y1, int r, texture_info * tex, VALUE hash_arg,circle_do_action329,9856
+pixel_do_action(int x1, int y1, texture_info * tex, VALUE hash_arg,pixel_do_action403,12271
+typedef struct { int x1, x2, y, dy; } LINESEGMENT;x1417,12704
+typedef struct { int x1, x2, y, dy; } LINESEGMENT;x2417,12704
+typedef struct { int x1, x2, y, dy; } LINESEGMENT;y417,12704
+typedef struct { int x1, x2, y, dy; } LINESEGMENT;dy417,12704
+typedef struct { int x1, x2, y, dy; } LINESEGMENT;LINESEGMENT417,12704
+#define MAXDEPTH MAXDEPTH419,12756
+#define PUSH(PUSH421,12780
+#define POP(POP425,12997
+flood_fill_do_action(int x, int y, texture_info * tex, VALUE hash_arg,flood_fill_do_action429,13142
+glow_floodFill( int x, int y, rgba * seed_color, action_struct * cur, texture_info * tex, texture_info * tex2 )glow_floodFill498,15194
+glow_fill_do_action(int x, int y, texture_info * tex, VALUE hash_arg,glow_fill_do_action552,17088
+#define stackSize stackSize586,18167
+int stack[stackSize];stack587,18194
+int stackPointer;stackPointer588,18216
+pop(int * x, int * y, int h) pop591,18247
+push(int x, int y, int h) push608,18559
+emptyStack() emptyStack623,18834
+scan_fill_do_action(int x, int y, texture_info * tex, VALUE hash_arg,scan_fill_do_action630,18902
+bezier_point(VALUE points, float u, float * x, float * y, int n, int format,bezier_point700,21601
+bezier_do_action(VALUE points, texture_info * tex, VALUE hash_arg, sync sync_mode,bezier_do_action731,22561
+set_color_array(VALUE ary, rgba * color)set_color_array831,25683
+each_pixel_do_action(int x1, int y1, int x2, int y2, VALUE proc, texture_info * tex, VALUE hash_arg,each_pixel_do_action840,25963
+splice_do_action(int x0, int y0, int cx1, int cy1, int cx2, int cy2, texture_info * splice_tex,splice_do_action869,26797
+process_common_hash_args(action_struct * cur, VALUE * hash_arg, sync sync_mode, bool primary)process_common_hash_args940,29218
+update_lazy_bounds(action_struct * cur, texture_info * tex)update_lazy_bounds1021,32185
+update_bounds(action_struct * cur, int xmin, int ymin, int xmax, int ymax)update_bounds1044,33016
+set_local_bounds(action_struct * cur, int xmin, int ymin, int xmax, int ymax, texture_info * tex)set_local_bounds1056,33341
+draw_prologue(action_struct * cur, texture_info * tex, int xmin, int ymin, int xmax, int ymax,draw_prologue1072,33773
+draw_epilogue(action_struct * cur, texture_info * tex, bool primary)draw_epilogue1089,34284
+prepare_color_control(action_struct * cur)prepare_color_control1119,34991
+exec_color_control_proc(action_struct * cur, texture_info * tex, int x, int y)exec_color_control_proc1135,35475
+prepare_fill_texture(action_struct * payload)prepare_fill_texture1179,37313
+set_pixel_color_with_style(action_struct * payload, texture_info * tex, int x, int y)set_pixel_color_with_style1195,37707
+
+actions.h,45
+#define GUARD_ACTIONS_HGUARD_ACTIONS_H2,24
+
+bindings.c,2070
+sync sync_mode = eager_sync;sync_mode31,585
+process_x_y_pairs(VALUE image, int num_pairs, VALUE * argv, ...)process_x_y_pairs34,627
+M_create_macro(VALUE self, VALUE method_name) M_create_macro78,1755
+M_remove_macro(VALUE self, VALUE method_name) M_remove_macro96,2138
+M_refresh_cache_all(VALUE self) M_refresh_cache_all107,2385
+M_create_blank(VALUE self, VALUE window, VALUE width, VALUE height)M_create_blank116,2500
+rb_lazy_bounds_to_image_bounds(VALUE image, image_bounds * bounds)rb_lazy_bounds_to_image_bounds128,2767
+parse_sync_mode(VALUE user_sync_mode)parse_sync_mode143,3223
+m_paint(int argc, VALUE * argv, VALUE self) m_paint166,3853
+m_force_sync(VALUE self, VALUE ary)m_force_sync239,5754
+m_dup_image(VALUE self)m_dup_image261,6219
+m_clone_image(VALUE self)m_clone_image290,7033
+m_user_set_options(VALUE self, VALUE options)m_user_set_options305,7329
+m_user_delete_options(VALUE self)m_user_delete_options318,7587
+m_get_options(VALUE self)m_get_options329,7723
+m_getpixel(int argc, VALUE * argv, VALUE self) m_getpixel338,7882
+m_circle(int argc, VALUE * argv, VALUE self) m_circle363,8384
+m_ngon(int argc, VALUE * argv, VALUE self)m_ngon392,8958
+m_flood_fill(int argc, VALUE * argv, VALUE self)m_flood_fill420,9519
+m_line(int argc, VALUE * argv, VALUE self) m_line463,10488
+m_rect(int argc, VALUE * argv, VALUE self) m_rect487,10973
+m_pixel(int argc, VALUE * argv, VALUE self) m_pixel513,11463
+m_bezier(int argc, VALUE * argv, VALUE self)m_bezier537,11925
+m_polyline(int argc, VALUE * argv, VALUE self)m_polyline563,12455
+m_splice(int argc, VALUE * argv, VALUE self) m_splice591,12982
+m_clear(int argc, VALUE * argv, VALUE self) m_clear638,14314
+m_offset(int argc, VALUE * argv, VALUE self) m_offset654,14599
+m_color(int argc, VALUE * argv, VALUE self) m_color688,15349
+m_missing(int argc, VALUE * argv, VALUE self) m_missing718,16182
+m_cache_refresh(VALUE self) m_cache_refresh736,16672
+m_quad_cached(VALUE self) m_quad_cached751,16895
+m_each(int argc, VALUE * argv, VALUE self)m_each777,17450
+
+bindings.h,47
+#define GUARD_BINDINGS_HGUARD_BINDINGS_H2,25
+
+cache.c,338
+static cache_t cache = {0}; cache16,219
+cache_create_entry(int tname) {cache_create_entry20,293
+find_in_cache(int tname) {find_in_cache59,1556
+find_or_create_cache_entry(int tname) {find_or_create_cache_entry73,1908
+cache_refresh_all(void) {cache_refresh_all84,2130
+cache_refresh_entry(int tname) {cache_refresh_entry109,2794
+
+cache.h,350
+#define GUARD_CACHE_HGUARD_CACHE_H5,71
+#define CACHE_SIZE CACHE_SIZE8,108
+    int tname;tname12,167
+    int sidelength;sidelength13,182
+    float * tdata;tdata14,202
+} cache_entry;cache_entry15,221
+    int len;len18,254
+    cache_entry entry[CACHE_SIZE];                                          entry19,267
+} cache_t;cache_t20,344
+
+compat.h,241
+#define GUARD_COMPAT_HGUARD_COMPAT_H4,102
+# define RUBY_19RUBY_1910,218
+# define RCLASS_M_TBL(RCLASS_M_TBL15,309
+# define RCLASS_SUPER(RCLASS_SUPER16,353
+# define RCLASS_IV_TBL(RCLASS_IV_TBL17,397
+#define KLASS_OF(KLASS_OF21,534
+
+gen_eval.c,444
+retrieve_hidden_self(VALUE duped_context)retrieve_hidden_self11,247
+set_hidden_self(VALUE duped_context, VALUE hidden_self)set_hidden_self25,652
+rb_capture(VALUE self) {rb_capture38,1103
+redirect_iv_for_object(VALUE obj, VALUE dest)redirect_iv_for_object59,1553
+release_iv_for_object(VALUE obj)release_iv_for_object79,2305
+rb_gen_eval(int argc, VALUE * argv, VALUE self) {rb_gen_eval93,2658
+Init_gen_eval() {Init_gen_eval185,5307
+
+gen_eval.h,87
+#define GUARD_GEN_EVAL_HGUARD_GEN_EVAL_H4,43
+#define ADJUST_SELF(ADJUST_SELF14,345
+
+object2module.c,410
+class_alloc(VALUE flags, VALUE klass)class_alloc18,359
+j_class_new(VALUE module, VALUE sup)j_class_new34,752
+rb_to_module(VALUE self)rb_to_module81,1735
+rb_reset_tbls(VALUE self)rb_reset_tbls115,2493
+rb_gen_extend(int argc, VALUE * argv, VALUE self)rb_gen_extend124,2738
+rb_gen_include(int argc, VALUE * argv, VALUE self)rb_gen_include145,3259
+void Init_object2module()Init_object2module163,3696
+
+object2module.h,57
+#define GUARD_OBJECT2MODULE_HGUARD_OBJECT2MODULE_H4,53
+
+texplay.c,410
+Init_ctexplay() {Init_ctexplay29,843
+m_init_TPPoint(int argc, VALUE * argv, VALUE self)m_init_TPPoint133,5456
+m_init_EmptyImageStub(int argc, VALUE * argv, VALUE self)m_init_EmptyImageStub157,6066
+m_EmptyImageStub_columns(VALUE self)m_EmptyImageStub_columns176,6583
+m_EmptyImageStub_rows(VALUE self)m_EmptyImageStub_rows182,6672
+m_EmptyImageStub_to_blob(VALUE self)m_EmptyImageStub_to_blob188,6758
+
+texplay.h,2622
+#define GUARD_TEXPLAY_HGUARD_TEXPLAY_H8,201
+#define OOB_VAL OOB_VAL13,260
+#define XMAX_OOB XMAX_OOB14,281
+#define YMAX_OOB YMAX_OOB15,306
+#define XMIN_OOB XMIN_OOB16,331
+#define YMIN_OOB YMIN_OOB17,357
+#define PI PI19,384
+#define SWAP(SWAP22,426
+#define ROUND(ROUND23,485
+#define ARY_SIZE(ARY_SIZE24,519
+#define SGN(SGN25,562
+#define MAX(MAX26,597
+#define MIN(MIN27,638
+#define ABS(ABS28,680
+typedef enum e_bool {e_bool31,732
+    false, truefalse32,754
+    false, truetrue32,754
+} bool;bool33,770
+typedef enum e_color {e_color35,779
+    red, green, blue, alphared36,802
+    red, green, blue, alphagreen36,802
+    red, green, blue, alphablue36,802
+    red, green, blue, alphaalpha36,802
+} color_t;color_t37,830
+typedef enum e_sync_mode {e_sync_mode39,842
+    lazy_sync, eager_sync, no_synclazy_sync40,869
+    lazy_sync, eager_sync, no_synceager_sync40,869
+    lazy_sync, eager_sync, no_syncno_sync40,869
+} sync;sync41,904
+typedef struct s_rgba {s_rgba44,927
+    float red, green, blue, alpha;red45,951
+    float red, green, blue, alpha;green45,951
+    float red, green, blue, alpha;blue45,951
+    float red, green, blue, alpha;alpha45,951
+} rgba;rgba46,986
+    int width, height;    width50,1036
+    int width, height;    height50,1036
+    float top, left;    top51,1063
+    float top, left;    left51,1063
+    int tname;tname52,1088
+    float * td_array;td_array53,1103
+    int yincr, firstpixel;yincr54,1125
+    int yincr, firstpixel;firstpixel54,1125
+    int x_offset, y_offset;x_offset55,1152
+    int x_offset, y_offset;y_offset55,1152
+    VALUE image;image56,1180
+} texture_info;texture_info57,1197
+#define IMAGE_BOUNDS(IMAGE_BOUNDS61,1239
+    int xmin;xmin63,1303
+    int ymin;ymin64,1317
+    int xmax;xmax65,1331
+    int ymax;ymax66,1345
+} image_bounds;image_bounds67,1359
+typedef struct action_struct {action_struct69,1376
+    int xmin, ymin, xmax, ymax;xmin70,1407
+    int xmin, ymin, xmax, ymax;ymin70,1407
+    int xmin, ymin, xmax, ymax;xmax70,1407
+    int xmin, ymin, xmax, ymax;ymax70,1407
+    rgba color;color71,1439
+    sync sync_mode;sync_mode72,1455
+    VALUE color_control_proc;color_control_proc75,1504
+    bool has_color_control_proc;has_color_control_proc76,1534
+    int color_control_arity;color_control_arity77,1567
+    texture_info source_tex;source_tex80,1620
+    bool has_source_texture;has_source_texture81,1649
+    bool alpha_blend;alpha_blend84,1701
+    texture_info * tex;tex89,1880
+    VALUE hash_arg;hash_arg91,1909
+} action_struct;action_struct92,1929
+
+utils.c,4100
+static const rgba not_a_color_v = { -1.0, -1.0, -1.0, -1.0 };not_a_color_v36,974
+lowercase(char * string) lowercase40,1067
+sym2string(VALUE sym) sym2string53,1228
+string2sym(char * string) string2sym59,1298
+is_a_hash(VALUE try_hash)is_a_hash65,1373
+is_an_array(VALUE try_array)is_an_array71,1446
+bool is_a_num(VALUE try_num)is_a_num76,1519
+get_from_hash(VALUE hash, char * sym) get_from_hash82,1625
+set_hash_value(VALUE hash, char * sym, VALUE val)set_hash_value91,1808
+delete_from_hash(VALUE hash, char * sym)delete_from_hash101,2016
+hash_value_is(VALUE hash, char * sym, VALUE val)hash_value_is111,2295
+has_optional_hash_arg(VALUE hash, char * sym) has_optional_hash_arg122,2482
+set_array_value(VALUE array, int index, VALUE val)set_array_value134,2710
+get_from_array(VALUE array, int index) get_from_array144,2913
+init_image_local(VALUE image)init_image_local154,3092
+set_image_local(VALUE image, int name, VALUE val)set_image_local173,3553
+get_image_local(VALUE image, int name)get_image_local183,3731
+convert_image_local_color_to_rgba(VALUE image)convert_image_local_color_to_rgba252,5880
+save_rgba_to_image_local_color(VALUE image, rgba color)save_rgba_to_image_local_color266,6319
+create_image(VALUE window, int width, int height)create_image283,6877
+not_a_color(rgba color1) not_a_color303,7451
+is_a_color(rgba color1)is_a_color309,7516
+cmp_color(rgba color1, rgba color2) cmp_color315,7583
+color_copy(float * source, float * dest) color_copy323,7778
+zero_color(float * tex) zero_color330,7908
+get_pixel_color_from_chunk(float * chunk, int width, int height, int x, int y)get_pixel_color_from_chunk336,7982
+get_pixel_color(texture_info * tex, int x, int y) get_pixel_color357,8429
+get_pixel_data(texture_info * tex, int x, int y) get_pixel_data379,9024
+set_pixel_color(rgba * pixel_color, texture_info * tex, int x, int y) set_pixel_color388,9204
+find_color_from_string(char * try_color) find_color_from_string410,9769
+convert_rgba_to_rb_color(rgba * pix)convert_rgba_to_rb_color471,12271
+convert_rb_color_to_rgba(VALUE cval)convert_rb_color_to_rgba487,12747
+check_mask(VALUE mask) check_mask530,13964
+check_image(VALUE image) check_image548,14470
+is_gosu_image(VALUE try_image)is_gosu_image555,14634
+#define outcode outcode565,14808
+const int RIGHT = 8;  //1000RIGHT566,14828
+const int TOP = 4;    //0100TOP567,14857
+const int LEFT = 2;   //0010LEFT568,14886
+const int BOTTOM = 1; //0001BOTTOM569,14915
+ComputeOutCode (int x, int y, int xmin, int ymin, int xmax, int ymax)ComputeOutCode574,15083
+cohen_sutherland_clip (int * x0, int * y0,int * x1, int * y1, int xmin, int ymin,cohen_sutherland_clip592,15643
+constrain_boundaries(int * x0, int * y0, int * x1, int * y1, int width, int height) constrain_boundaries669,18664
+bound_by_rect_and_inner(int x, int y, int x0, int y0, int x1, int y1, int inner) bound_by_rect_and_inner692,19249
+bound_by_rect(int x, int y, int x0, int y0, int x1, int y1) bound_by_rect701,19577
+calc_pixel_offset_for_action(action_struct * cur, texture_info * tex, int x, int y) calc_pixel_offset_for_action708,19783
+calc_pixel_offset(texture_info * tex, int x, int y) calc_pixel_offset717,20019
+max_quad_size(void)max_quad_size726,20217
+check_for_texture_info(VALUE image) check_for_texture_info751,20843
+allocate_texture(int width, int height)allocate_texture772,21587
+sync_to_gl(int tex_name, int x_offset, int y_offset, int width, int height, void * sub)sync_to_gl787,21894
+create_subtexture_and_sync_to_gl(image_bounds * img_bounds, texture_info * tex)create_subtexture_and_sync_to_gl799,22251
+get_image_chunk(texture_info * tex, int xmin, int ymin, int xmax, int ymax)get_image_chunk823,23096
+get_texture_info(VALUE image, texture_info * tex) get_texture_info852,23802
+is_a_point(VALUE try_point)is_a_point897,25165
+point_x(VALUE point)point_x907,25380
+point_y(VALUE point)point_y913,25461
+power(float base, int exp)power920,25598
+fact(int n)fact940,25926
+comb(int n, int k)comb948,26031
+bernstein(int n, int k, float u)bernstein955,26132
+
+utils.h,201
+#define GUARD_UTILS_HGUARD_UTILS_H2,22
+#define DRAW_OFFSET DRAW_OFFSET6,102
+#define LAZY_BOUNDS LAZY_BOUNDS7,124
+#define IMAGE_COLOR IMAGE_COLOR8,146
+#define USER_DEFAULTS USER_DEFAULTS9,168
