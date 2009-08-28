@@ -951,6 +951,7 @@ process_common_hash_args(action_struct * cur, VALUE * hash_arg, sync sync_mode, 
     cur->sync_mode = sync_mode;
     cur->color = convert_image_local_color_to_rgba(cur->tex->image);
     cur->sync_mode = sync_mode;
+    cur->is_a_shadow = false;
     cur->has_color_control_proc = false;
     cur->has_source_texture = false;
     cur->alpha_blend = false;
@@ -981,7 +982,12 @@ process_common_hash_args(action_struct * cur, VALUE * hash_arg, sync sync_mode, 
             set_hash_value(*hash_arg, "color", convert_rgba_to_rb_color(&cur->color));
         }
     }
+
+    /* shadows */
+    if(has_optional_hash_arg(*hash_arg, "shadow")) 
+        cur->is_a_shadow = true;
     
+    /* sync mode */
     if(has_optional_hash_arg(*hash_arg, "sync_mode")) {
         VALUE user_sync_mode = get_from_hash(*hash_arg, "sync_mode");
 
@@ -1195,6 +1201,14 @@ set_pixel_color_with_style(action_struct * payload, texture_info * tex, int x, i
 {
 
     rgba blended_pixel;
+
+    /* for shadow */
+    if(payload->is_a_shadow) {
+        payload->color = get_pixel_color(tex, x, y);
+        payload->color.red /= 1.5;
+        payload->color.green /= 1.5;
+        payload->color.blue /= 1.5;
+    }
     
     /*    for texture fill  */
     if(payload->has_source_texture)

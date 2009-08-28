@@ -35,4 +35,9 @@ task :clean do
     Dir.chdir("../")
 end
 
+task :selene do
+    puts "updating selene's ctexplay.so..."
+    cp "ctexplay.#{$dlext}", "/home/john/ruby/projects/selene/lib/"
+    puts "...done!"
+end
     

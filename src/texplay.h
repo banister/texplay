@@ -80,6 +80,9 @@ typedef struct action_struct {
     texture_info source_tex;
     bool has_source_texture;
 
+    /* is a shadow? */
+    bool is_a_shadow;
+
     /* alpha blend */
     bool alpha_blend;
 
