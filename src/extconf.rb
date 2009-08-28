@@ -12,7 +12,7 @@ elsif RUBY_PLATFORM =~ /darwin/
 
 # windows    
 else
-    exit unless have_library("glut32") && have_library("math")
+    exit unless have_library("glut32") 
 end
 
-create_makefile('Fuck/ctexplay')
+create_makefile('ctexplay')

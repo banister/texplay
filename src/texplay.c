@@ -184,14 +184,16 @@ m_EmptyImageStub_rows(VALUE self)
     return rb_iv_get(self, "@h");
 }
 
+/* TODO: does RMagick need the buffer to hang around after loading?
+   or can i free() the buffer after?
+*/
 static VALUE
 m_EmptyImageStub_to_blob(VALUE self)
 {
-
     int width = NUM2INT(rb_iv_get(self, "@w"));
     int height = NUM2INT(rb_iv_get(self, "@h"));
     int size = width * height * 4;
-    char buf[size];
+    char * buf = malloc(size);
 
     memset(buf, 0, size);
         

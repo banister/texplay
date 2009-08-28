@@ -1,5 +1,12 @@
+28/8/09
+version 0.1.9.1 (still BETA)
+* experimental features: Gosu::Image#dup and Gosu::Image#clone
+* also TexPlay::create_blank_image(window, width, height)
+* I noticed this features SEG FAULT in windows, so be warned
+* This is a BETA release
+
 14/8/09
-version 0.1.9.0
+version 0.1.9.0 (BETA)
 * major rewrite. TP now supports beziers, polylines, polygons, and more
 * also supports alpha_blending (though still tempermental)
 * This is a BETA release

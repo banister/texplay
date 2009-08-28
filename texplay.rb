@@ -32,7 +32,7 @@ module Gosu
 end
 
 module TexPlay
-    TEXPLAY_VERSION = "0.1.9.0 BETA"
+    TEXPLAY_VERSION = "0.1.9.1 BETA"
 
     def self.on_setup(&block)
         raise "need a block" if !block
