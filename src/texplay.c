@@ -18,32 +18,17 @@
 /** constructor for TPPoint class **/
 static VALUE m_init_TPPoint(int argc, VALUE * argv, VALUE self);
 
-/** methods for EmptyImageStub **/
-static VALUE m_init_EmptyImageStub(int argc, VALUE * argv, VALUE self);
-static VALUE m_EmptyImageStub_columns(VALUE self);
-static VALUE m_EmptyImageStub_rows(VALUE self);
-static VALUE m_EmptyImageStub_to_blob(VALUE self);
-/** end of EmptyImageStub prototypes **/
-
 void
 Init_ctexplay() {
 
     VALUE jm_Module = rb_define_module("TexPlay");
     VALUE TPPoint = rb_define_class_under(jm_Module, "TPPoint", rb_cObject);
-    VALUE EmptyImageStub = rb_define_class_under(jm_Module, "EmptyImageStub", rb_cObject);
 
     /** define basic point class TPPoint **/
     rb_attr(TPPoint, rb_intern("x"), 1, 1, Qtrue);
     rb_attr(TPPoint, rb_intern("y"), 1, 1, Qtrue);
     rb_define_method(TPPoint, "initialize", m_init_TPPoint, -1);
     /** end of TPPoint definition **/
-
-    /** define EmptyImageStub class for creating blank images **/
-    rb_define_method(EmptyImageStub, "rows", m_EmptyImageStub_rows, 0);
-    rb_define_method(EmptyImageStub, "columns", m_EmptyImageStub_columns, 0);
-    rb_define_method(EmptyImageStub, "to_blob", m_EmptyImageStub_to_blob, 0);
-    rb_define_method(EmptyImageStub, "initialize", m_init_EmptyImageStub, -1);
-    /** end EmptyImageStub definition **/
 
     /* TexPlay methods */
     rb_define_method(jm_Module, "paint", m_paint, -1);
@@ -108,14 +93,6 @@ Init_ctexplay() {
     rb_define_method(rb_cObject, "gen_extend", rb_gen_extend, -1);
     rb_define_method(rb_cModule, "gen_include", rb_gen_include, -1);
 
-    /* below is much too hard to achieve in pure C */
-    rb_eval_string("class Proc;"
-                   "    def __context__;"
-                   "        eval('self', self.binding);"
-                   "    end;"
-                   "end;"
-                   );
-    
     rb_define_alias(rb_cObject, "gen_eval_with", "gen_eval");
     /** end of gen_eval defs **/
 
@@ -152,56 +129,6 @@ m_init_TPPoint(int argc, VALUE * argv, VALUE self)
 }
 /** end constructor for TPPoint **/
 
-/** methods for EmptyImageStub **/
-static VALUE
-m_init_EmptyImageStub(int argc, VALUE * argv, VALUE self)
-{
-    VALUE width = argv[0];
-    VALUE height = argv[1];
-    
-    if(argc == 2) {
-        if(!is_a_num(argv[0]) || !is_a_num(argv[1]))
-            rb_raise(rb_eArgError, "must provide two numbers (width and height)");
-        
-        rb_iv_set(self, "@w", width);
-        rb_iv_set(self, "@h", height);
-    }
-    else
-        rb_raise(rb_eArgError, "invalid arguments, provide either an (x, y) or an image to dup");
-        
-    return Qnil;
-}
-
-static VALUE
-m_EmptyImageStub_columns(VALUE self)
-{
-    return rb_iv_get(self, "@w");
-}
-
-static VALUE
-m_EmptyImageStub_rows(VALUE self)
-{
-    return rb_iv_get(self, "@h");
-}
-
-/* TODO: does RMagick need the buffer to hang around after loading?
-   or can i free() the buffer after?
-*/
-static VALUE
-m_EmptyImageStub_to_blob(VALUE self)
-{
-    int width = NUM2INT(rb_iv_get(self, "@w"));
-    int height = NUM2INT(rb_iv_get(self, "@h"));
-    int size = width * height * 4;
-    char * buf = malloc(size);
-
-    memset(buf, 0, size);
-        
-    return rb_str_new(buf, size);
-}
-/** end methods for EmptyImageStub **/
-    
-            
     
 
 

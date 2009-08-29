@@ -155,6 +155,16 @@ class MyWindow < Gosu::Window
         @img.each2 { |v| v[0] = 1}
     end
 
+    def bench_image_new
+        Gosu::Image.new(self, "#{Common::MEDIA}/empty2.png")
+    end
+
+    def bench_create_blank
+        truck = TexPlay::create_blank_image(self, @img.width, @img.height)
+        truck.splice(@img, 0, 0)
+        
+    end
+
     def bench_dup
         @img.dup
     end

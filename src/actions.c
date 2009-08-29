@@ -984,8 +984,9 @@ process_common_hash_args(action_struct * cur, VALUE * hash_arg, sync sync_mode, 
     }
 
     /* shadows */
-    if(has_optional_hash_arg(*hash_arg, "shadow")) 
+    if(RTEST(get_from_hash(*hash_arg, "shadow"))) {
         cur->is_a_shadow = true;
+    }
     
     /* sync mode */
     if(has_optional_hash_arg(*hash_arg, "sync_mode")) {

@@ -8,26 +8,22 @@ end
 # include gosu first
 require 'gosu'
 
-# monkey patches required _before_ loading TexPlay
-module Gosu
-    class Image
-        class << self
-            alias_method :original_new_old, :new
-
-            def new(*args, &block)
-
-                obj = original_new_old(*args, &block)
-                
-                # keep track of window instance
-                obj.instance_variable_set(:@__window__, args.first)
-
-                obj
-            end
-        end
-
-        def __window__
-            @__window__
-        end
+# credit to philomory for this class
+class EmptyImageStub
+    def initialize(w,h)
+        @w, @h = w, h;
+    end
+    
+    def to_blob
+        "\0" * @w * @h * 4
+    end
+    
+    def rows
+        @h
+    end
+    
+    def columns
+        @w
     end
 end
 
@@ -47,6 +43,10 @@ module TexPlay
                 receiver.instance_eval(&init_proc)
             end
         end
+    end
+
+    def self.create_blank_image(window, width, height)
+        Gosu::Image.new(window, EmptyImageStub.new(width, height))
     end
 
     module Colors
@@ -97,26 +97,23 @@ module Gosu
                 # run custom setup
                 TexPlay::setup(obj)
 
-               #   obj.instance_variable_set(:@__window__, args.first)
+                 obj.instance_variable_set(:@__window__, args.first)
 
                 # return the new image
                 obj
             end
         end
         
-      #   def __window__
-#             @__window__
-#         end
+        def __window__
+            @__window__
+        end
     end
 end
 
 # a bug in ruby 1.8.6 rb_eval_string() means i must define this here (rather than in texplay.c)
-
-if RUBY_VERSION =~ /1.8/ then
-    class Proc  
-        def __context__
-            eval('self', self.binding)
-        end
+class Proc  
+    def __context__
+        eval('self', self.binding)
     end
 end
 

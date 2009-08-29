@@ -11,8 +11,8 @@ class W < Gosu::Window
     end
     
     def draw
-        x = @img.width * rand
-        y = @img.height * rand
+        x = (@img.width - 100/2) * rand 
+        y = (@img.height - 100/2) * rand 
 
         @img.splice @img, x, y + 1, :crop => [x, y, x + 100, y + 100]
 

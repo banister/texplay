@@ -36,8 +36,11 @@ task :clean do
 end
 
 task :selene do
-    puts "updating selene's ctexplay.so..."
+    puts "updating selene's texplay version to most recent..."
     cp "ctexplay.#{$dlext}", "/home/john/ruby/projects/selene/lib/"
+    cp "texplay.rb", "/home/john/ruby/projects/selene/lib/"
+    cp "texplay-contrib.rb", "/home/john/ruby/projects/selene/lib/"
+    
     puts "...done!"
 end
     
