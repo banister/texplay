@@ -29,16 +29,6 @@ static void set_pixel_color_with_style(action_struct * payload, texture_info * t
 /* end helpers */
 
 
-/* syncs to gl */
-void
-do_sync(action_struct * cur, texture_info * tex) 
-{
-    image_bounds * bounds = IMAGE_BOUNDS(cur);
-
-    create_subtexture_and_sync_to_gl(bounds, tex);
-}
-/* end do_sync */
-
 /** line_do_action, bresenham's algorithm **/
 void
 line_do_action(int x1, int y1, int x2, int y2, texture_info * tex, VALUE hash_arg,
