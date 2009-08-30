@@ -21,7 +21,7 @@ task :build => :clean do
     puts "(3) building ctexplay.#{$dlext}..."
     sh "#{$make_program}"
     puts "(4) copying ctexplay.#{$dlext} to current directory..."
-    cp "ctexplay.#{$dlext}", "../" 
+    cp "ctexplay.#{$dlext}", "../" , :verbose => true
     puts "(5) ...done!"
 end
 

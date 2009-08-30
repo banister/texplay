@@ -791,6 +791,10 @@ m_each(int argc, VALUE * argv, VALUE self)
         Check_Type(options, T_HASH);
         if(RTEST(get_from_hash(options, "region"))) {
             VALUE region = get_from_hash(options, "region");
+            Check_Type(region, T_ARRAY);
+
+            if(RARRAY_LEN(region) < 4)
+                rb_raise(rb_eArgError, "region requires 4 elements");
             
             x1 = NUM2INT(get_from_array(region, 0));
             y1 = NUM2INT(get_from_array(region, 1));

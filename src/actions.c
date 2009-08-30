@@ -830,10 +830,12 @@ each_pixel_do_action(int x1, int y1, int x2, int y2, VALUE proc, texture_info * 
                      sync sync_mode, bool primary, action_struct * payload)
 {
     action_struct cur;
-    int x, y;
+    int x, y, arity;
     VALUE rb_pix = rb_ary_new2(4);
     
     draw_prologue(&cur, tex, x1, y1, x2, y2, &hash_arg, sync_mode, primary, &payload);
+
+    arity = FIX2INT(rb_funcall(proc, rb_intern("arity"), 0));
 
     for(y = y1; y < y2 + 1; y++)
         for(x = x1; x < x2 + 1; x++) {
@@ -842,7 +844,18 @@ each_pixel_do_action(int x1, int y1, int x2, int y2, VALUE proc, texture_info * 
             set_color_array(rb_pix, &pix);
             
             /* invoke the block */
-            rb_funcall(proc, rb_intern("call"), 1, rb_pix);
+            switch(arity) {
+            case 1:
+                rb_funcall(proc, rb_intern("call"), 1, rb_pix);
+                break;
+            case 3:
+                rb_funcall(proc, rb_intern("call"), 3, rb_pix, INT2FIX(x), INT2FIX(y));
+                break;
+            default:
+                rb_raise(rb_eArgError, "permissible arities for each are 1 & 3. Got %d\n",
+                         arity);
+
+            }
 
             pix = convert_rb_color_to_rgba(rb_pix);
 
@@ -926,6 +939,7 @@ splice_do_action(int x0, int y0, int cx1, int cy1, int cx2, int cy2, texture_inf
 static void
 initialize_action_struct(action_struct * cur, VALUE hash_arg, sync sync_mode)
 {
+    /* initialize action-struct to default values */
     cur->sync_mode = sync_mode;
     cur->hash_arg = hash_arg;
 
