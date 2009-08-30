@@ -687,7 +687,7 @@ m_offset(int argc, VALUE * argv, VALUE self)
 VALUE
 m_color(int argc, VALUE * argv, VALUE self) 
 {
-    VALUE first = argv[0];
+    VALUE first;
     rgba new_color;
 
     ADJUST_SELF(self);
@@ -699,6 +699,8 @@ m_color(int argc, VALUE * argv, VALUE self)
     /* otherwise set the action color */
     /* NB: we cannot just set image_local_color to 'first' because first may not be an array,
        it could also be a symbol */
+
+    first = argv[0];
     
     new_color = convert_rb_color_to_rgba(first);
 
@@ -779,7 +781,7 @@ m_each(int argc, VALUE * argv, VALUE self)
     int x1 = 0, y1 = 0, x2 = XMAX_OOB, y2 = YMAX_OOB;
     texture_info tex;
     VALUE proc;
-    VALUE options = argv[0];
+    VALUE options;
 
     rb_need_block();
 
@@ -787,7 +789,10 @@ m_each(int argc, VALUE * argv, VALUE self)
 
     get_texture_info(self, &tex);
 
-    if(argc == 1) {
+    
+
+    if(argc >= 1) {
+        options = argv[0];
         Check_Type(options, T_HASH);
         if(RTEST(get_from_hash(options, "region"))) {
             VALUE region = get_from_hash(options, "region");
