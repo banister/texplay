@@ -5,7 +5,7 @@
 #define GUARD_CACHE_H
 
 /* defines */
-#define CACHE_SIZE 1000
+#define CACHE_SIZE 10000
 
 /* data types */
 typedef struct {
@@ -13,11 +13,6 @@ typedef struct {
     int sidelength;
     float * tdata;
 } cache_entry;
-
-typedef struct {
-    int len;
-    cache_entry entry[CACHE_SIZE];                                          
-} cache_t;
 
 /* functions */
 void cache_refresh_all(void);

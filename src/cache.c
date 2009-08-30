@@ -11,6 +11,11 @@
 #include "cache.h"
 #include "texplay.h"
 
+typedef struct {
+    int len;
+    cache_entry entry[CACHE_SIZE];                                          
+} cache_t;
+
 /* var has internal linkage, static duration */
 /* contains cache data */
 static cache_t cache = {0}; 
