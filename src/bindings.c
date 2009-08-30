@@ -781,15 +781,13 @@ m_each(int argc, VALUE * argv, VALUE self)
     int x1 = 0, y1 = 0, x2 = XMAX_OOB, y2 = YMAX_OOB;
     texture_info tex;
     VALUE proc;
-    VALUE options;
+    VALUE options = Qnil;
 
     rb_need_block();
 
     ADJUST_SELF(self);
 
     get_texture_info(self, &tex);
-
-    
 
     if(argc >= 1) {
         options = argv[0];
