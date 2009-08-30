@@ -68,23 +68,7 @@ typedef struct {
 
 typedef struct action_struct {
     int xmin, ymin, xmax, ymax;
-    rgba color;
     sync sync_mode;
-    
-    /* color control */
-    VALUE color_control_proc;
-    bool has_color_control_proc;
-    int color_control_arity;
-
-    /* texture fill */
-    texture_info source_tex;
-    bool has_source_texture;
-
-    /* is a shadow? */
-    bool is_a_shadow;
-
-    /* alpha blend */
-    bool alpha_blend;
 
     /* pointer to associated texture */
     /* a bit of a kludge having this here
@@ -92,6 +76,31 @@ typedef struct action_struct {
     texture_info * tex;
     
     VALUE hash_arg;
+
+    /* action color */
+    rgba color;
+
+    /* pen data */
+    struct {
+
+        /* color control, dynamic */
+        VALUE color_control_proc;
+        bool has_color_control_proc;
+        int color_control_arity;
+
+        /* color control, static */
+        bool has_color_control_transform;
+        rgba color_mult;
+        rgba color_add;
+
+        /* texture fill */
+        texture_info source_tex;
+        bool has_source_texture;
+
+        /* alpha blend */
+        bool alpha_blend;
+    } pen;
+
 } action_struct;
 
 

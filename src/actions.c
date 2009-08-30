@@ -432,7 +432,7 @@ flood_fill_do_action(int x, int y, texture_info * tex, VALUE hash_arg,
     draw_prologue(&cur, tex, 0, 0, 1024, 1024, &hash_arg, sync_mode, primary, &payload);
 
     /* fill hates alpha_blend so let's turn it off */
-    payload->alpha_blend = false;
+    payload->pen.alpha_blend = false;
 
     nMinX = cur.xmin; nMinY = cur.ymin;
     nMaxX = cur.xmax; nMaxY = cur.ymax;
@@ -552,7 +552,7 @@ glow_fill_do_action(int x, int y, texture_info * tex, VALUE hash_arg,
     draw_prologue(&cur, tex, 0, 0, 1024, 1024, &hash_arg, sync_mode, primary, &payload);
 
     /* fill hates alpha_blend so let's turn it off */
-    payload->alpha_blend = false;
+    payload->pen.alpha_blend = false;
 
     if(is_a_hash(hash_arg)) {
         VALUE try_image = get_from_hash(hash_arg, "texture");
@@ -632,7 +632,7 @@ scan_fill_do_action(int x, int y, texture_info * tex, VALUE hash_arg,
     draw_prologue(&cur, tex, XMAX_OOB, YMAX_OOB, XMIN_OOB, YMIN_OOB, &hash_arg, sync_mode, primary, &payload);
 
     /* fill hates alpha_blend so let's turn it off */
-    payload->alpha_blend = false;
+    payload->pen.alpha_blend = false;
     
     old_color = get_pixel_color(tex, x, y);
 
@@ -923,7 +923,30 @@ splice_do_action(int x0, int y0, int cx1, int cy1, int cx2, int cy2, texture_inf
 }
 /** end splice **/
 
+static void
+initialize_action_struct(action_struct * cur, VALUE hash_arg, sync sync_mode)
+{
+    cur->sync_mode = sync_mode;
+    cur->hash_arg = hash_arg;
 
+    cur->color = convert_image_local_color_to_rgba(cur->tex->image);
+    cur->pen.has_color_control_proc = false;
+    cur->pen.has_color_control_transform = false;
+    cur->pen.has_source_texture = false;
+    cur->pen.alpha_blend = false;
+
+    /* set static color control transformations to defaults */
+    cur->pen.color_mult.red = 1.0;
+    cur->pen.color_mult.green = 1.0;
+    cur->pen.color_mult.blue = 1.0;
+    cur->pen.color_mult.alpha = 1.0;
+
+    cur->pen.color_add.red = 0.0;
+    cur->pen.color_add.green = 0.0;
+    cur->pen.color_add.blue = 0.0;
+    cur->pen.color_add.alpha = 0.0;
+}
+    
 /* TODO: fix this function below, it's too ugly and bulky and weird **/
 static void
 process_common_hash_args(action_struct * cur, VALUE * hash_arg, sync sync_mode, bool primary)
@@ -937,37 +960,17 @@ process_common_hash_args(action_struct * cur, VALUE * hash_arg, sync sync_mode, 
     if(!is_a_hash(*hash_arg)) 
         *hash_arg = rb_hash_new();
 
-    /* fall-back values */
-    cur->sync_mode = sync_mode;
-    cur->color = convert_image_local_color_to_rgba(cur->tex->image);
-    cur->sync_mode = sync_mode;
-    cur->is_a_shadow = false;
-    cur->has_color_control_proc = false;
-    cur->has_source_texture = false;
-    cur->alpha_blend = false;
-    cur->hash_arg = *hash_arg;
+    /* init the action to default values */
+    initialize_action_struct(cur, *hash_arg, sync_mode);
 
-    /* get the user default options */
+    /* get the user default options & merge with given options */
     user_defaults = get_image_local(cur->tex->image, USER_DEFAULTS);
-
-    /* create a merge of the defaults and the action hash_args giving precedence to action hash_args */
     hash_blend = rb_funcall(user_defaults, rb_intern("merge"), 1, *hash_arg);
-
-    /* now blend that merge with the original hash_arg */
     rb_funcall(*hash_arg, rb_intern("merge!"), 1, hash_blend);
-
-    /* the hash_args below need to be processed here since they modify the pixel style and so would be
-       too expensive to simply leave it up to the pixel action to parse itself (since pixel action
-       is called many times per second for most actions)
-    */
 
     if(has_optional_hash_arg(*hash_arg, "color")) {
         VALUE c = get_from_hash(*hash_arg, "color");
-
         cur->color = convert_rb_color_to_rgba(c);
-
-        /* color SHOULD be forwarded on to sub-actions EXCEPT in the case of random - we must fix the
-           random colour now for the whole composite */
         if(c == string2sym("random")) {
             set_hash_value(*hash_arg, "color", convert_rgba_to_rb_color(&cur->color));
         }
@@ -975,7 +978,12 @@ process_common_hash_args(action_struct * cur, VALUE * hash_arg, sync sync_mode, 
 
     /* shadows */
     if(RTEST(get_from_hash(*hash_arg, "shadow"))) {
-        cur->is_a_shadow = true;
+        cur->pen.color_mult.red = 0.66;
+        cur->pen.color_mult.green = 0.66;
+        cur->pen.color_mult.blue = 0.66;
+        cur->pen.color_mult.alpha = 1;
+
+        cur->pen.has_color_control_transform = true;
     }
     
     /* sync mode */
@@ -995,13 +1003,11 @@ process_common_hash_args(action_struct * cur, VALUE * hash_arg, sync sync_mode, 
                      ":lazy_sync, :eager_sync, :no_sync.",
                      sym2string(user_sync_mode));
 
-        /* sync mode is not a forwardable parameter - it is up to each composite action to decide what sync_mode
-           sub-actions should use, not the user. */
         delete_from_hash(*hash_arg, "sync_mode");
         
     }
 
-    /* process the color_control block (if there is one) */
+    /* process the color_control block or transform (if there is one) */
     prepare_color_control(cur);
 
     /* process the filling texture (if there is one) */
@@ -1009,7 +1015,7 @@ process_common_hash_args(action_struct * cur, VALUE * hash_arg, sync sync_mode, 
 
     /* does the user want to blend alpha values ? */
     if(get_from_hash(*hash_arg, "alpha_blend") == Qtrue)
-        cur->alpha_blend = true;
+        cur->pen.alpha_blend = true;
 
 }
 
@@ -1114,15 +1120,42 @@ draw_epilogue(action_struct * cur, texture_info * tex, bool primary)
 static void
 prepare_color_control(action_struct * cur)
 {
-    if(cur->has_color_control_proc) return;
 
     if(is_a_hash(cur->hash_arg)) {
-        VALUE try_proc = get_from_hash(cur->hash_arg, "color_control");
+        VALUE try_val = get_from_hash(cur->hash_arg, "color_control");
         
-        if(rb_respond_to(try_proc, rb_intern("call"))) {
-            cur->color_control_proc = try_proc;
-            cur->color_control_arity = FIX2INT(rb_funcall(try_proc, rb_intern("arity"), 0));
-            cur->has_color_control_proc = true;
+        if(rb_respond_to(try_val, rb_intern("call"))) {
+            cur->pen.color_control_proc = try_val;
+            cur->pen.color_control_arity = FIX2INT(rb_funcall(try_val, rb_intern("arity"), 0));
+            cur->pen.has_color_control_proc = true;
+        }
+        else if(is_a_hash(try_val)) {
+            VALUE try_add = get_from_hash(try_val, "add");
+            VALUE try_mult = get_from_hash(try_val, "mult");
+
+            if(is_an_array(try_add)) {
+                if(RARRAY_LEN(try_add) < 4)
+                    rb_raise(rb_eArgError, ":color_control transform :add needs 4 parameters");
+                
+                cur->pen.color_add.red = NUM2DBL(get_from_array(try_add, 0));
+                cur->pen.color_add.green = NUM2DBL(get_from_array(try_add, 1));
+                cur->pen.color_add.blue = NUM2DBL(get_from_array(try_add, 2));
+                cur->pen.color_add.alpha = NUM2DBL(get_from_array(try_add, 3));
+
+                cur->pen.has_color_control_transform = true;
+            }
+            if(is_an_array(try_mult)) {
+                if(RARRAY_LEN(try_mult) < 4)
+                    rb_raise(rb_eArgError, ":color_control transform :mult needs 4 parameters");
+
+                cur->pen.color_mult.red = NUM2DBL(get_from_array(try_mult, 0));
+                cur->pen.color_mult.green = NUM2DBL(get_from_array(try_mult, 1));
+                cur->pen.color_mult.blue = NUM2DBL(get_from_array(try_mult, 2));
+                cur->pen.color_mult.alpha = NUM2DBL(get_from_array(try_mult, 3));
+
+                cur->pen.has_color_control_transform = true;
+            }
+                
         }
     }
 }
@@ -1130,13 +1163,13 @@ prepare_color_control(action_struct * cur)
 static rgba 
 exec_color_control_proc(action_struct * cur, texture_info * tex, int x, int y)
 {
-    int arity = cur->color_control_arity;
-    VALUE proc = cur->color_control_proc;
+    int arity = cur->pen.color_control_arity;
+    VALUE proc = cur->pen.color_control_proc;
     rgba old_color = get_pixel_color(tex, x, y);
     rgba current_color = cur->color;
     rgba new_color;
 
-    if(!cur->has_color_control_proc)
+    if(!cur->pen.has_color_control_proc)
         rb_raise(rb_eRuntimeError, "needs a proc");
 
     switch(arity) {
@@ -1174,18 +1207,31 @@ exec_color_control_proc(action_struct * cur, texture_info * tex, int x, int y)
 static void
 prepare_fill_texture(action_struct * payload)
 {
-    if(payload->has_source_texture) return;
-    
     if(is_a_hash(payload->hash_arg)) {
         VALUE try_image = get_from_hash(payload->hash_arg, "texture");
         if(is_gosu_image(try_image)) {
 
-            get_texture_info(try_image, &payload->source_tex);
-            payload->has_source_texture = true;
+            get_texture_info(try_image, &payload->pen.source_tex);
+            payload->pen.has_source_texture = true;
         }
     }
 }
-    
+
+static void
+apply_color_control_transform(action_struct * payload, texture_info * tex, int x, int y)
+{
+    payload->color = get_pixel_color(tex, x, y);
+        
+    payload->color.red += payload->pen.color_add.red; 
+    payload->color.green += payload->pen.color_add.green; 
+    payload->color.blue += payload->pen.color_add.blue; 
+    payload->color.alpha += payload->pen.color_add.alpha;
+
+    payload->color.red *= payload->pen.color_mult.red; 
+    payload->color.green *= payload->pen.color_mult.green; 
+    payload->color.blue *= payload->pen.color_mult.blue; 
+    payload->color.alpha *= payload->pen.color_mult.alpha;
+}
 
 static void
 set_pixel_color_with_style(action_struct * payload, texture_info * tex, int x, int y)
@@ -1193,22 +1239,18 @@ set_pixel_color_with_style(action_struct * payload, texture_info * tex, int x, i
 
     rgba blended_pixel;
 
-    /* for shadow */
-    if(payload->is_a_shadow) {
-        payload->color = get_pixel_color(tex, x, y);
-        payload->color.red /= 1.5;
-        payload->color.green /= 1.5;
-        payload->color.blue /= 1.5;
-    }
+    /* for color_control transform */
+    if(payload->pen.has_color_control_transform)
+        apply_color_control_transform(payload, tex, x, y);
     
     /*    for texture fill  */
-    if(payload->has_source_texture)
-        payload->color = get_pixel_color(&payload->source_tex,
-                                         x % payload->source_tex.width,
-                                         y % payload->source_tex.height);
+    if(payload->pen.has_source_texture)
+        payload->color = get_pixel_color(&payload->pen.source_tex,
+                                         x % payload->pen.source_tex.width,
+                                         y % payload->pen.source_tex.height);
 
     /* for color_control block */
-    if(payload->has_color_control_proc)
+    if(payload->pen.has_color_control_proc)
         payload->color = exec_color_control_proc(payload, tex, x,  y);
     
 
@@ -1223,7 +1265,7 @@ set_pixel_color_with_style(action_struct * payload, texture_info * tex, int x, i
     /*  alpha blending
         TO DO: refactor into its own helper function
         & rewrite using sse2 */
-    if(payload->alpha_blend) {
+    if(payload->pen.alpha_blend) {
         rgba dest_pixel = get_pixel_color(tex, x, y);
             
         /* alpha blending is nothing more than a weighted average of src and dest pixels

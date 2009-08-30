@@ -2,8 +2,8 @@ require 'rake/clean'
 
 $dlext = Config::CONFIG['DLEXT']
 
-CLEAN.include("**/*.#{$dlext}", "**/*.o")
-CLOBBER.include("**/*~", "**/*#*", "**/*.log")
+CLEAN.include("src/*.#{$dlext}", "src/*.log", "src/*.o", "src/*~", "src/*#*")
+CLOBBER.include("**/*.#{$dlext}", "**/*~", "**/*#*", "**/*.log", "**/*.o")
 
 $make_program = if RUBY_PLATFORM =~ /win/ 
                     "nmake"
