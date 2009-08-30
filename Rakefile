@@ -16,13 +16,14 @@ task :default => [:build]
 desc "Build TexPlay"
 task :build => :clean do
     puts "(2) building Makefile..."
-    Dir.chdir("./src/")
-    ruby "extconf.rb"
-    puts "(3) building ctexplay.#{$dlext}..."
-    sh "#{$make_program}"
-    puts "(4) copying ctexplay.#{$dlext} to current directory..."
-    cp "ctexplay.#{$dlext}", "../" , :verbose => true
-    puts "(5) ...done!"
+    chdir("./src/") do
+        ruby "extconf.rb"
+        puts "(3) building ctexplay.#{$dlext}..."
+        sh "#{$make_program}"
+        puts "(4) copying ctexplay.#{$dlext} to current directory..."
+        cp "ctexplay.#{$dlext}", "../" , :verbose => true
+        puts "(5) ...done!"
+    end
 end
 
 SELENE = '/home/john/ruby/projects/selene'

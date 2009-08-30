@@ -8,27 +8,8 @@ end
 # include gosu first
 require 'gosu'
 
-# credit to philomory for this class
-class EmptyImageStub
-    def initialize(w,h)
-        @w, @h = w, h;
-    end
-    
-    def to_blob
-        "\0" * @w * @h * 4
-    end
-    
-    def rows
-        @h
-    end
-    
-    def columns
-        @w
-    end
-end
-
 module TexPlay
-    TEXPLAY_VERSION = "0.1.9.1 BETA"
+    TEXPLAY_VERSION = "0.2.0"
 
     def self.on_setup(&block)
         raise "need a block" if !block
@@ -66,6 +47,25 @@ module TexPlay
         Tyrian = [0.4, 0.007, 0.235, 1]
     end
     include Colors
+end
+
+# credit to philomory for this class
+class EmptyImageStub
+    def initialize(w,h)
+        @w, @h = w, h;
+    end
+    
+    def to_blob
+        "\0" * @w * @h * 4
+    end
+    
+    def rows
+        @h
+    end
+    
+    def columns
+        @w
+    end
 end
 
 # bring in user-defined extensions to TexPlay
