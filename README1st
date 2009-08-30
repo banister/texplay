@@ -2,7 +2,7 @@ INSTRUCTIONS
 
 TexPlay version 0.1.9.1 BETA
 
-*Ensure that ctexplay.so and gosu.so, and texplay.rb are in the working directory for your project
+*Ensure that ctexplay.so and gosu.so, and texplay.rb and texplay-contrib.rb are in the working directory for your project
 *require 'texplay' in your ruby program to access the TexPlay module
 *see example programs, for illustration of use
 
