@@ -1,5 +1,9 @@
+require 'rake/clean'
 
 $dlext = Config::CONFIG['DLEXT']
+
+CLEAN.include("**/*.#{$dlext}", "**/*.o")
+CLOBBER.include("**/*~", "**/*#*", "**/*.log")
 
 $make_program = if RUBY_PLATFORM =~ /win/ 
                     "nmake"
@@ -8,12 +12,6 @@ $make_program = if RUBY_PLATFORM =~ /win/
                 end
 
 task :default => [:build]
-
-desc "Remove files whose names ends with a tilde"
-task :delete_backups do
-    files = Dir['*~']
-    rm(files, :verbose => true) unless files.empty?
-end
 
 desc "Build TexPlay"
 task :build => :clean do
@@ -27,20 +25,21 @@ task :build => :clean do
     puts "(5) ...done!"
 end
 
-task :clean do
-    puts "(1) clearing away old files..."
-    Dir.chdir("src/")
-    files = Dir['*.{so,o,log}']
-    rm(files, :verbose => true) unless files.empty?
-    Dir.chdir("../")
-end
-
-task :selene do
-    puts "updating selene's texplay version to most recent..."
-    cp "ctexplay.#{$dlext}", "/home/john/ruby/projects/selene/lib/"
-    cp "texplay.rb", "/home/john/ruby/projects/selene/lib/"
-    cp "texplay-contrib.rb", "/home/john/ruby/projects/selene/lib/"
-    
+SELENE = '/home/john/ruby/projects/selene'
+desc "update selene's version of texplay"
+task :selene => ["#{SELENE}/lib/texplay.rb", "#{SELENE}/lib/texplay-contrib.rb",
+              "#{SELENE}/lib/ctexplay.so"] do
     puts "...done!"
 end
-    
+
+file "#{SELENE}/lib/texplay.rb" => "texplay.rb" do |t|
+    cp t.prerequisites.first, t.name, :verbose => true
+end
+
+file "#{SELENE}/lib/texplay-contrib.rb" => "texplay-contrib.rb" do |t|
+    cp t.prerequisites.first, t.name, :verbose => true
+end
+
+file "#{SELENE}/lib/ctexplay.#{$dlext}" => "ctexplay.#{$dlext}" do |t|
+    cp t.prerequisites.first, t.name, :verbose => true
+end
