@@ -1,7 +1,7 @@
 31/8/09
 version 0.2.0
 * added each iterator
-* added alternative to proc for :color_control proc (allowing static liear transforms to pixels)
+* added alternative to proc for :color_control proc (allowing static linear transforms to pixels)
 * no longer segfaulting on windows (no idea why not)
 * rewrote EmptyImageStub in ruby, using philomory's code. now alot faster.
 * implemented 'shadow' in terms of static :color_control pixel transform
