@@ -187,7 +187,7 @@ class MyTest < Test::Unit::TestCase
                 
             end
 
-            should "do an alternative way to draw lines" do
+            should "do an alternative way to thick draw lines" do
                 x1 = @img.width * rand
                 y1 = @img.height * rand
                 x2 = @img.width * rand

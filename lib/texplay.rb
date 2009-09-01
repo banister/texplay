@@ -6,6 +6,7 @@ rescue LoadError
 end
 
 # include gosu first
+require 'rbconfig'
 require 'gosu'
 
 module TexPlay
@@ -69,8 +70,19 @@ class EmptyImageStub
 end
 
 # bring in user-defined extensions to TexPlay
-require 'ctexplay'
-require 'texplay-contrib'
+direc = File.dirname(__FILE__)
+dlext = Config::CONFIG['DLEXT']
+begin
+    if RUBY_VERSION && RUBY_VERSION =~ /1.9/
+        require "#{direc}/ctexplay19.#{dlext}"
+    else
+        require "#{direc}/ctexplay18.#{dlext}"
+    end
+rescue LoadError => e
+    require "#{direc}/ctexplay.#{dlext}"
+end
+    
+require "#{direc}/texplay-contrib"
 
 # monkey patching the Gosu::Image class to add image manipulation functionality
 module Gosu
