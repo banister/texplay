@@ -51,7 +51,7 @@ specification = Gem::Specification.new do |s|
         FileList["src/*", "examples/*.rb", "examples/media/*"].to_a 
 
     if RUBY_PLATFORM =~ /mswin/
-        s.platform = Gem::Platform::WIN32
+        s.platform = Gem::Platform::CURRENT
         s.files += ["lib/ctexplay18.so", "lib/ctexplay19.so"]
         
     else
