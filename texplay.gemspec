@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
     s.has_rdoc = false
     s.files = ["Rakefile", "README", "CHANGELOG", "README1st",
                 "lib/texplay.rb", "lib/texplay-contrib.rb"] +
-        FileList["src/*", "examples/*.rb", "examples/media/*"].to_a
+        Dir.glob("src/*") + Dir.glob("examples/*.rb")  + Dir.glob("examples/media/*")
  
     if RUBY_PLATFORM =~ /mswin/
         s.platform = Gem::Platform::WIN32
