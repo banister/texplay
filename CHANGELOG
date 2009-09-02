@@ -1,3 +1,8 @@
+2/9/09
+version 0.2.1
+* releasing a gem for TexPlay
+* bumped version number so can add add gosu 0.7.14 dependency to github gem
+* hopefully gem works on both github and rubyforge
 31/8/09
 version 0.2.0
 * added each iterator

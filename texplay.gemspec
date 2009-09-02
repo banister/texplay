@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
     s.name = "texplay"
     s.summary = "TexPlay is a light-weight image manipulation framework for Ruby and Gosu"
-    s.version = "0.2.0"
+    s.version = "0.2.1"
     s.date = "2009-09-02"
     s.author = "John Mair (banisterfiend)"
     s.email = 'jrmair@gmail.com'

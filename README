@@ -1,6 +1,6 @@
 INSTRUCTIONS 
 
-TexPlay version 0.2.0
+TexPlay version 0.2.1
 
 To compile TexPlay, ensure you are in the directory with the Rakefile and type:
 => rake
