@@ -74,9 +74,9 @@ direc = File.dirname(__FILE__)
 dlext = Config::CONFIG['DLEXT']
 begin
     if RUBY_VERSION && RUBY_VERSION =~ /1.9/
-        require "#{direc}/ctexplay19.#{dlext}"
+        require "#{direc}/ctexplay.19.#{dlext}"
     else
-        require "#{direc}/ctexplay18.#{dlext}"
+        require "#{direc}/ctexplay.18.#{dlext}"
     end
 rescue LoadError => e
     require "#{direc}/ctexplay.#{dlext}"

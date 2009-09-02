@@ -26,9 +26,9 @@ task :build => :clean do
 
         if RUBY_PLATFORM =~ /mswin/
             if RUBY_VERSION =~ /1.9/
-                File.rename("../lib/ctexplay.#{dlext}", "../lib/ctexplay.19.#{$dlext}")
+                File.rename("../lib/ctexplay.#{$dlext}", "../lib/ctexplay.19.#{$dlext}")
             else
-                File.rename("../lib/ctexplay.#{dlext}", "../lib/ctexplay.18.#{$dlext}")
+                File.rename("../lib/ctexplay.#{$dlext}", "../lib/ctexplay.18.#{$dlext}")
             end
         end
         puts "(5) ...done!"
