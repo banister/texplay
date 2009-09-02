@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
  
     if RUBY_PLATFORM =~ /mswin/
         s.platform = Gem::Platform::CURRENT
-        s.files += ["lib/ctexplay18.so", "lib/ctexplay19.so"]
+        s.files += ["lib/ctexplay.18.so", "lib/ctexplay.19.so"]
         
     else
         s.platform = Gem::Platform::RUBY
