@@ -7,6 +7,7 @@ Gem::Specification.new do |s|
     s.email = 'jrmair@gmail.com'
     s.description = s.summary
     s.require_path = 'lib'
+    s.add_dependency("gosu",">=0.7.14")
     s.homepage = "http://banisterfiend.wordpress.com/2008/08/23/texplay-an-image-manipulation-tool-for-ruby-and-gosu/"
     s.has_rdoc = false
     s.files = ["Rakefile", "README", "CHANGELOG", "README1st",
