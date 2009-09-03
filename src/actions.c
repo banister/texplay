@@ -919,10 +919,11 @@ splice_do_action(int x0, int y0, int cx1, int cy1, int cx2, int cy2, texture_inf
                 payload->color = get_pixel_color_from_chunk(image_buf, xbound, ybound, x, y);
                 
             if(has_chroma) {
-                bool cmp = cmp_color(payload->color, chromakey);
-                if(!cmp && !inverse_chroma)
-                    set_pixel_color_with_style(payload, tex, x0 + x, y0 + y);
-                else if(cmp && inverse_chroma)
+                bool chroma_match = cmp_color(payload->color, chromakey);
+                
+                /* look at released 0.2.0 code to see how USED to do this.
+                   this is now a simplified boolean expression */
+                if(chroma_match == inverse_chroma)
                     set_pixel_color_with_style(payload, tex, x0 + x, y0 + y);
             }
             else
