@@ -134,6 +134,10 @@ class MyWindow < Gosu::Window
         }        
     end
 
+    def bench_get_pixel
+        @img.get_pixel(@img.width * rand, @img.height * rand)
+    end
+
     def bench_anti_each
         0.upto(@img.width - 1) { |x|
             0.upto(@img.height - 1) { |y|

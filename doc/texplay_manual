@@ -1,0 +1,596 @@
+TexPlay version 0.2.0 has been released!
+
+TexPlay is a C extension specifically designed for Ruby and Gosu. It enables very fast manipulation of Gosu images in the spirit of RMagick.
+The Basics
+
+Note the guide below applies only to TexPlay 0.2.0 and above.
+
+Quick Start: the following code draws a red circle, a green box, and a blue pixel on a Gosu image called image1.
+
+[sourcecode language='ruby']
+image1.paint {
+    circle 20,20,10, :color =&gt; :red
+    rect 40,40,50,50, :color =&gt; :green
+    pixel 60,60, :color =&gt; :blue
+}
+[/sourcecode]
+
+And to find the color of the pixel at 60,60:
+
+[sourcecode language='ruby']
+image1.get_pixel(60,60)
+[/sourcecode]
+
+Drawing commands:
+
+TexPlay supports the following drawing commands:
+
+Basic commands:
+
+These commands provide the basic drawing functionality:
+
+circle x, y, rad
+line x1, y1, x2, y2
+rect x1, y1, x2, y2
+pixel x, y
+splice x, y, source_image
+bezier points
+polyline points
+ngon x, y, rad, num_sides
+fill x, y
+
+All the above drawing actions support an optional list of named parameters (or hash args). The optional parameter list must appear after the mandatory parameters shown above.  Some of the named parameters are: :color (as shown in the first example), :thickness, :alpha, :fill, and so on. A full list of the valid named parameters will be given later.
+
+Color parameter:
+
+The color for the drawing actions can be specified in two ways:
+
+:color => [r, g, b, <alpha>]
+
+OR
+
+:color => symbol
+
+In the first form r, g, b and alpha must all be floats between 0 and 1. If alpha is not given, it defaults to 1.
+
+In the second form 'symbol' must be a recognized symbol representing a pre-fab color. Supported symbols are: :red, :green, :blue, :cyan, :yellow, :tyrian, :purple, :black, :white, :alpha and :random (or :rand). The special color :none is also accepted. When the color is set to :none nothing is drawn (this is useful for color control procs, discussed later)
+
+Circle, Line and Rect:
+
+In addition to the :color parameter the circle, line and rect actions also respond to some other parameters:
+
+:thickness => line_thickness
+
+Rect, and line and in fact _all_ drawing actions that are built  on lines respond to this hash parameter. Using it specifies the line thickness to use in pixels. (Circles do not yet respond to thickness, however)
+Use it as follows:
+
+[sourcecode language='ruby']
+line 0, 0, 100, 100, :thickness =&gt; 10
+[/sourcecode]
+
+The above draws a line with a thickness of 10 pixels.
+
+Circle and rect actions also respond to the :fill (or :filled) hash parameter.  Use as follows:
+
+[sourcecode language='ruby']
+circle 20, 20, :fill =&gt; true
+[/sourcecode]
+
+OR
+
+[sourcecode language='ruby']
+rect 10, 10, 30, 30, :fill =&gt; true
+[/sourcecode]
+
+The above will draw filled circles and rectangles (applying either the default colour or the colour specified with the :color hash parameter).
+
+Splice:
+
+This function enables you to splice two images together, the syntax is:
+
+splice image2, x, y, <:chroma_key>, <:crop>
+
+Where image2 is the Gosu Image you wish to splice (the source image) and x,y specifies the location in the destination image.
+
+The :crop hash parameter is used to select a sub-section of the source image to be spliced. It looks like this:
+
+:crop => [x1, y1, x2, y2]
+
+Where the x1,y1,x2,y2 parameters delineate a boxed region in the source image.
+
+The :chroma_key parameter specifies a color value that will be excluded from the splice. A common application of this is to exclude all full alpha values. :chroma_key accepts the same parameters as the :color hash parameter.
+
+:chroma_key => color
+
+The :chroma_key parameter also has its opposite, :chroma_key_not. When using :chroma_key_not only the pixels that DO match the given color value are included in the splice.
+
+Here is an example that splices in only non-alpha pixels from the region bounded by 20,20,70,70 from the image: 'image1' and saves it in location 100,100 in the destination image:
+
+[sourcecode language='ruby']
+image1.paint {
+    splice(image2, 100,100, :chroma_key =&gt; :alpha, :crop =&gt; [20, 20, 70, 70])
+}
+[/sourcecode]
+
+Bezier:
+
+Here is how to draw a Bezier curve:
+
+[sourcecode language='ruby']
+bezier [0,0, 50,50, 100, 0]
+[/sourcecode]
+
+Note that in the above there are three points specified (a point is an x and y pair)
+
+A Bezier curve may also be 'closed' by providing a :closed (or :close) hash parameter (a closed Bezier curve is also called a 'Beziergon')
+When a Bezier is closed its first point is connected to its last point.
+
+Here is how we close the Bezier given above:
+
+[sourcecode language='ruby']
+bezier[0,0, 50,50, 100, 0], :closed =&gt; true
+[/sourcecode]
+
+A Bezier curve is guaranteed to interpolate its first and last points. The other points work as 'magnets' attracting the curve towards them.
+
+Polyline:
+
+A polyline takes exactly the same parameters as a bezier. A 'closed' polyline is known as a polygon.
+
+Here is an example of a polygon drawn using polyline:
+
+[sourcecode language='ruby']
+polyline [00, 50, 50, 100, 0], :closed =&gt; true
+[/sourcecode]
+
+In the above each successive pair of points is connected by a line to the one before. The last point is also connected to the first as a result of the :closed hash parameter.
+
+Ngon:
+
+An ngon is a regular polygon with a user specified number of sides and a user specified radius.
+
+Here is an example of an ngon with 7 sides (heptagon):
+
+[sourcecode language='ruby']
+ngon 100, 100, 100, 7
+[/sourcecode]
+
+The heptagon above has a radius of 100 pixels and is centered at the point 100, 100.
+Note that because an ngon is made of lines it also responds to the :thickness hash argument. Thick circles can be faked using ngons by specifing a large number of sides along with the :thickness hash argument.
+
+Fill:
+
+The fill action performs a flood fill (similar to the paint bucket utility found in some painting programs). It works by reading the color it finds at the  start point and changing the color of any connected pixels that also have that color to the fill color.
+
+Use it as follows:
+
+[sourcecode language='ruby']
+fill 100, 100, :color =&gt; :red
+[/sourcecode]
+
+The above sets the fill color to red and begins the filling process at point 100, 100.
+
+You can also perform a texture fill by providing a :texture hash argument. The :texture argument must be a valid Gosu::Image
+Here is an example of using a texture fill:
+
+[sourcecode language='ruby']
+fill 100, 100, :texture =&gt; image2
+[/sourcecode]
+
+Note that the :texture parameter is not unique to the fill action. Almost all drawing actions respond to the :texture argument and will apply that texture instead of a color.
+
+get_pixel
+
+TexPlay also supports the get_pixel command. It works as follows:
+
+[sourcecode language='ruby']
+get_pixel(x, y)
+[/sourcecode]
+
+The above will return a ruby array containing the color data.
+
+Offset:
+
+The origin for drawing actions can be changed using this function, it has the form:
+
+[sourcecode language='ruby']
+offset x,y
+[/sourcecode]
+
+And a shorthand for restoring the offset to (0,0):
+
+[sourcecode language='ruby']
+offset :default
+[/sourcecode]
+
+Advanced Topics:
+
+Points
+
+TexPlay accepts 'Points' as well as x,  y pairs for all the drawing actions. A Point is simply any object that responds to the 'x' and 'y' methods.
+
+Here is an example using Points to generate a Bezier curve:
+
+[sourcecode language='ruby']
+points = []
+
+(0..img.width + 50).step(50) { |x|
+  p = TexPlay::TPPoint.new
+  p.x = x
+  p.y = img.height * rand
+
+   points &lt;&lt; p
+ }
+
+img.bezier points, :color =&gt; :red
+[/sourcecode]
+
+Note, the TexPlay::TPPoint class is simply used for convenience, you do not have to use TPPoint to generate valid points.
+
+The Paint Block
+
+The Paint Block is one of a few ways to invoke the drawing actions. Here is an example of its use:
+
+[sourcecode language='ruby']
+image1.paint {
+    circle 10, 10, 20, :color =&gt; :green
+    bezier [0, 0, 10, 10, 50, 0], :closed =&gt; true
+}
+
+[/sourcecode]
+
+The Paint Block may look like an ordinary instance_eval, but it is not.  The problem that plagues the serious use of instance_eval: namely the inability to use local  instance variables in the block does not affect the Paint Block. This means that code like the following is possible in TexPlay (but impossible with an instance_eval):
+
+[sourcecode language='ruby']
+@x = 20
+@y = 30
+my_image.paint {
+    circle @x, @y, 20
+}
+[/sourcecode]
+
+How does it work? TexPlay uses an alternative to instance_eval known as gen_eval (http://github.com/banister/gen_eval/tree/master)
+
+Another peculiarity of Paint Blocks is how they sync the drawing actions (syncing will be discussed in greater depth later on). The drawing actions in a Paint Block are not sync'd until the very end of the Paint Block and are then sync'd to video memory all in one go (This style of syncing is called 'lazy' syncing in TexPlay)
+
+Direct Invocation and Fluent API
+
+Drawing actions may also be invoked directly on the image:
+
+[sourcecode language='ruby']
+image1.circle 10, 10, 20, :color =&gt; :rand
+image1.fill 10, 10, :texture =&gt; image3
+
+c = image1.get_pixel(10, 10)
+[/sourcecode]
+
+Or, if you prefer, using a fluent api:
+
+[sourcecode language='ruby']
+image1.
+    circle(10, 10, 20, :color =&gt; :rand).
+    fill(10, 10, :texture =&gt; image3).
+    rect(5, 5, 20, 20, :color =&gt; :blue, :fill =&gt; true).
+    bezier([1,1,100,100,300,0])
+
+c = image1.get_pixel(10, 10)
+[/sourcecode]
+
+When using direct invocation each drawing action is sync'd to video memory immediately after its completion (TexPlay calls this 'eager' syncing).
+
+Alpha Blending
+
+Alpha blending can be applied to almost all drawing actions in TexPlay:
+
+[sourcecode language='ruby']
+image1.circle 100, 100, 50, :alpha_blend =&gt; true
+[/sourcecode]
+
+The effect of the above is to alpha blend the color values of the circle pixels with the pixels already in image1.
+
+Note you can combine the use of :alpha_blend and :color_control to force variable alpha blending even on textures that have full alpha channels:
+
+[sourcecode language='ruby']
+img1.circle 100, 100, 50, :alpha_blend =&gt; true, :fill =&gt; true, :texture =&gt; img2,
+  :color_control =&gt; proc { |c, c1|
+    c1[3] = 0.1
+    c1
+ }
+[/sourcecode]
+
+Note that the fill action does not support alpha blending.
+
+The Each Iterator:
+
+You can iterate over all the pixels in an image using the each iterator:
+
+[sourcecode language='ruby']
+image1.each { |c| c[0] = 1 }
+[/sourcecode]
+
+The each iterator works like any other iterator and yields the current pixel (in the form of a color array) to the block. You can then modify the array and these changes directly affect the pixel. In the above example the red component of the pixel color is set to 1.  Note that because the each iterator iterates over all the pixels in the image the effect is to set the red component of all pixels to 1.
+
+The each iterator also accepts a block arity of 3 and a :region parameter:
+
+[sourcecode language='ruby']
+img.each(:region =&gt; [100, 250, 200, 350]) do |c, x, y|
+     c[0] = (x - 100) / 100.0
+     c[1] = 0
+     c[2] = 0
+ end
+[/sourcecode]
+
+The above code generates a red 'gradient' across a one hundred pixel interval. It should be clear that :region demarcates a rectangular region within which the each iterator operates. Also it should be obvious that a block with an arity of three passed to each is yielded not only the pixel color but also the x and y values corresponding to the pixel.
+
+In the future I hope to make TexPlay fully enumberable (implement the Enumberable module) and so support other iterators such as: all?, map, any?, and so on.
+
+Creating and duplicating images
+
+Empty images with an arbitrary width and height can be created at runtime in TexPlay:
+
+[sourcecode language='ruby']
+blank_image = TexPlay::create_blank_image(window, 100, 100)
+[/sourcecode]
+
+Where 'window' is the standard window parameter required by many Gosu methods. In the above code blank_image stores a reference to a new image of 100 x 100 pixels.
+
+As well as creating new images  TexPlay enables you to duplicate extant images:
+
+[sourcecode language='ruby']
+dupped_image = image1.dup
+cloned_image = image1.clone
+[/sourcecode]
+
+These methods make deep copies of the image. and so changing a dupped image has no effect on the original image and vice versa. The clone method also behaves as expected and duplicates not only the object but its singleton class.
+
+Turtle Graphics
+
+The following Turtle functions are supported:
+
+move_to(x, y)
+move_rel(dx, dy)
+line_to(x, y)
+line_rel(dx, dy)
+turn_to(theta)
+turn(dtheta)
+forward(distance, <true>)
+
+Turtle Graphics works by maintaining a a record of the current 'Turtle' position and angle,  using that position and angle as a starting point for its drawing actions.
+
+The move_to, and move_rel actions manipulate the Turtle position directly: move_to sets the Turtle position to a given point and move_rel moves the Turtle dx and dy pixels relative to its current position.
+
+Similarly the line_to action draws a line from the current Turtle position to the specified point; line_rel follows the same rule as for move_rel (but draws a line).
+
+The turn_to and turn (think of as turn_rel) actions manipulate the Turtle angle. The angle is measured in degrees.
+
+The forward action moves a distance along the current Turtle angle from the current Turtle position. The forward action is visible if the optional  second parameter is true, and invisible otherwise.
+
+Here is an example drawing a nice a spiral pattern using Turtle Graphics:
+
+[sourcecode language='ruby']
+
+(0..100).step(2) { |length|
+img.paint {
+     forward(length, true, :color =&gt; :red)
+     turn(89.5)
+     length += 2
+   }
+ }
+[/sourcecode]
+
+Here is another example showing how the combination of Turtle Graphics and a Color Control Proc (discussed below) can facilitate some quite sophisticated drawing techniques:
+
+[sourcecode language='ruby']
+img.move_to(points.first.x, points.first.y)
+
+img.bezier points, :color_control =&gt; proc { |c, x, y|
+  if((x % 10) == 0)
+    img.line_to(x, y + rand * 20 - 10)
+  end
+ :none
+ }
+[/sourcecode]
+
+The above Color Control Proc is being used to 'tap' into the coordinates of the Bezier curve. Turtle Graphics is then used to connected every tenth point of the curve by a line. Combined with a slight randomization of the 'y' coordinate.  The resulting 'Bezier' has a rough and jagged appearance.
+
+The Color Control Proc
+
+All drawing actions respond to the :color_control parameter. This parameter takes two forms: (1)  the color control proc and (2) the color control hash
+
+Here is how it is used:
+
+[sourcecode language='ruby']
+image1.bezier [0, 0, 100, 100, 200, 50, 300, 400],
+  :color_control =&gt; proc { |c| c[0] = 1; c }
+[/sourcecode]
+
+When a color control proc is specified every pixel that the drawing action manipulates is yielded to the proc. The return value of the proc (which must be a valid colour) is then used to set the color of that pixel.
+In the above code the value 'c' yielded to the proc corresponds to the pixel the bezier is currently manipulating; the red component of that pixel is set to 1 and returned from the proc. This new color is then used to set that pixel.
+
+Here is another example:
+
+[sourcecode language='ruby']
+img1.rect 10, 10, 100, 100, :filled =&gt; true, :texture =&gt; img2,
+ :color_control =&gt; proc { |c1, c2|
+     c1[0] = (c1[0] + c2[0] / 2 )
+     c1[1] = (c1[1] + c2[1] / 2 )
+     c1[2] = (c1[2] + c2[2] / 2 )
+     c1[3] = 1
+     c1
+ }
+[/sourcecode]
+
+The above is another valid proc format, note there are two parameters. The first parameter, c1, correponds to the 'c' in the previous example but the second parameter corresponds to the color that _would_ be used if there were no color control proc. In this case since the rect specifies a :texture parameter the value of c2 is a pixel from the img2 texture. The color control proc then averages the colors between c1 and c2. and returns that average in c1. The effect of this color control proc, therefore, is a kind of 50% alpha blending of img1 and img2 within the bounds of the rect.
+
+Here is one more example of the color control proc, this time using another proc format:
+
+[sourcecode language='ruby']
+img1.fill 42, 70, :color_control =&gt; proc { |c, x, y|
+     img2.get_pixel(x % img2.width, y % img2.height)
+ }
+[/sourcecode]
+
+In the three parameter proc, the first parameter is the same as in the first example but the next two are the corresponding x and y values for the pixel. The effect of the color control proc above is to perform a texture fill using img2 as the source texture (note the :texture parameter is the best (and fastest) way to perform a texture fill, this example just illustrates it _could_ also be done with a color control proc)
+
+Here is a list of the valid proc arities (number of parameters) accepted by color_control and the corresponding objects that are yielded (in order):
+
+arity of 1: yields -> dest pixel
+arity of 2: yields -> dest pixel, source pixel
+arity of 3: yields -> dest pixel, x,  y
+arity of 4: yields -> dest pixel, source pixel, x,  y
+
+Remember, the return value of the proc is used as the new pixel color so it must be a valid color (symbols are allowed).
+
+The :none color symbol can be especially useful here when you simply want to 'tap' into the x and y of a drawing action but do not in fact want anything drawn.
+
+The Color Control Hash
+
+The color control hash is significantly less flexible than the color color proc but is also substantially faster.
+
+Here is how it is used:
+
+[sourcecode language='ruby']
+img1.circle 100, 100, 40, :fill =&gt; true,
+  :color_control =&gt; { :mult =&gt; [0.5, 0.5, 0.5, 1.0] }
+[/sourcecode]
+
+If a color control hash is specified then any color the drawing action may have is ignored. Instead the current color of the destination pixel is transformed (linearly) by the parameters given in the hash. In the example above the red green and blue components of the destination pixel are multiplied by 0.5 but the alpha component is left unchanged.
+
+The color control hash supports two parameter types: :mult and :add. The array given for :mult specifies a factor that each of the color components (rgba) of the destination pixel will be multiplied by. In the case of :add the array specifies a value each component of the desintation pixel will have added. Division and subtraction are not provided since they can be implemented easily in terms of :mult and :add.
+(Note that the color control hash is significantly faster than the color control proc because it only requires a simple and fast linear transformation at every pixel and not the invocation of a lambda.)
+
+The color control hash can be used to implement 'fake' shadows quite effectively. There is even a parameter, :shadow, that simply darkens the background corresponding to the drawing action, and it is implemented in terms of the color control hash.
+
+Here is how to use the :shadow parameter:
+
+[sourcecode language='ruby']
+img1.circle, 100, 100, 60, :fill =&gt; true, :shadow =&gt; true
+[/sourcecode]
+
+Syncing
+
+TexPlay has three syncing modes. These modes are eager_sync,  lazy_sync, and no_sync. As stated earlier, eager_sync is the default syncing mode for all drawing actions that are directly invoked on an image. Similarly, lazy_sync is the default syncing mode for drawing actions that appear in a Paint Block. The no_sync mode is not used by default in TexPlay at all, but must be specified by the user.
+
+eager_sync:
+
+[sourcecode language='ruby']
+img1.rect 100,100, 200, 200
+img1.rect 100, 100, 210, 210
+[/sourcecode]
+
+The first rectangle in above  is sync'd in eager mode since it was directly invoked  upon the image. This means that immediately after updating the cached image TexPlay will determine which portion of the image has changed and sync that part to video memory. In this case that portion is  the rectangle [100,100, 200, 200]. A similar case is the second rect above. First the cached image is updated and then the changed portion of the image  ([100,100, 210, 210]) is sync'd to video memory.
+
+lazy_sync:
+
+Compare the above scenario to the following:
+
+[sourcecode language='ruby']
+img1.paint {
+    rect 100,100, 200, 200
+    rect 100,100, 210, 210
+}
+[/sourcecode]
+
+In lazy_sync mode the syncing only happens once (unlike twice in the previous example, one time for each rect). And the portion of the image that has changed is calculated by taking all the drawing actions in the Paint Block into account. In the above example, TexPlay is able to identify that the changed region is determined solely by the second rectangle and so it only syncs the region bounded by this rectangle, and only syncs once.
+
+no_sync:
+
+If for some reason you do not want any syncing to occur you can specify the syncing mode to be no_sync. You do this as follows:
+
+[sourcecode language='ruby']
+img1.rect 100, 100, 200, 200, :sync_mode =&gt; :no_sync
+[/sourcecode]
+
+In the above no syncing to video memory will take place and the modifications you have made to the image will not be visible to Gosu. The no_sync mode may in some circumstances provide a performance increase especially if you have a large number of drawing actions to perform.
+
+Note that the :sync_mode parameter accepts  any of the three syncing modes as valid parameters, that is: :eager_sync, :lazy_sync, and :no_sync
+
+As a corollary to no_sync TexPlay also provides a method to manually sync a region to video memory:
+
+[sourcecode language='ruby']
+img1.force_sync [100, 100, 200, 200]
+[/sourcecode]
+
+The :sync_mode parameter can also be given as a parameter to the paint method to override the default lazy_sync mode:
+
+[sourcecode language='ruby']
+img1.paint(:sync_mode =&gt; :no_sync)  {   
+    rect 100,100, 200, 200
+    rect 100,100, 210, 210
+}
+[/sourcecode]
+
+Macros
+
+Users may also define macros. TexPlay macros are built up from the basic drawing commands; here is an example:
+
+[sourcecode language='ruby']
+TexPlay::create_macro(:example1) { |x,y|
+        circle x,y, 10, :color =&gt; :red
+        circle x, y, 30, :color =&gt; :purple
+   }
+[/sourcecode]
+
+Where 'example1' is the name of the macro and the associated block the macro definition.
+
+The macro may then be used like any of the basic drawing commands:
+
+[sourcecode language='ruby']
+image1.paint {
+    example1 20,20
+}
+[/sourcecode]
+
+You may also remove a defined macro using:
+
+[sourcecode language='ruby']
+
+TexPlay::remove_macro(:example1)
+
+[/sourcecode]
+
+If your macro needs to access or manipulate ivars of the Image (that is, your macro has state) then you must surround the macro code in a 'capture' block:
+
+[sourcecode language='ruby']
+TexPlay::create_macro(:line_to) do |x, y, *other|
+ capture {
+   line(@turtle_pos.x, @turtle_pos.y, x, y, *other)
+
+   @turtle_pos.x, @turtle_pos.y = x, y
+  }
+end
+[/sourcecode]
+
+The above is from the Turtle Graphics code (found in texplay-contrib.rb).
+
+The capture block is necessary so that the macro may be invoked both directly upon the image as well as used in a Paint Block.
+
+If your macro requires initial setup to be done, such as setting up ivars, the TexPlay::onsetup() method should be used:
+
+[sourcecode language='ruby']
+TexPlay::on_setup do
+ @turtle_pos = TexPlay::TPPoint.new(width / 2, height / 2 )
+ @turtle_angle = 0
+end
+[/sourcecode]
+
+The above code will be executed immediately after a new Image is instantiated. In the example, the @turtle_pos and @turtle_angle ivars will be initialized for the new image.
+
+Uses of TexPlay
+
+TexPlay began as a side project while designing a worms-style Gosu game in Ruby; such a game required pixel-level collision detection as well as the ability to 'blow up' parts of the landscape. TexPlay was therefore designed primarily to bring this functionality to Gosu. However, TexPlay is also designed as a light-weight alternative to RMagick; RMagick is a very powerful tool but it has caused many deployment nightmares and headaches for people who use it. In contrast TexPlay is easy to deploy, easy to setup, and easy to use.
+
+Download Information
+
+Currently TexPlay has been tested on Windows, Linux and MacOsX systems but it should be possible to compile and run it on other platforms too.
+
+The recommnded method is to install the cross-platform gem:
+
+sudo gem install texplay
+
+Or you can download TexPlay here: http://code.google.com/p/texplay/downloads/list
+
+The TexPlay googlecode  project page is here: http://code.google.com/p/texplay/
+
+The github page is here: http://github.com/banister/texplay/tree/master
+
