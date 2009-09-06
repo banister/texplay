@@ -23,7 +23,6 @@ static void draw_epilogue(action_struct * cur, texture_info * tex, bool primary)
 
 static void prepare_fill_texture(action_struct * cur);
 static void prepare_color_control(action_struct * cur);
-static rgba exec_color_control_proc(action_struct * cur, texture_info * tex, int x, int y);
 static void set_pixel_color_with_style(action_struct * payload, texture_info * tex,
                                        int x, int y);
 /* end helpers */
@@ -1176,18 +1175,23 @@ prepare_color_control(action_struct * cur)
 }
 
 static rgba 
-exec_color_control_proc(action_struct * cur, texture_info * tex, int x, int y)
+exec_color_control_proc(action_struct * cur, texture_info * tex, int x, int y, rgba blended_pixel)
 {
     int arity = cur->pen.color_control_arity;
     VALUE proc = cur->pen.color_control_proc;
     rgba old_color = get_pixel_color(tex, x, y);
-    rgba current_color = cur->color;
+    rgba current_color = blended_pixel;
     rgba new_color;
 
     if(!cur->pen.has_color_control_proc)
         rb_raise(rb_eRuntimeError, "needs a proc");
 
     switch(arity) {
+    case -1:
+    case 0:
+        new_color = convert_rb_color_to_rgba(rb_funcall(proc, rb_intern("call"), 0));
+        break;
+        
     case 1:
         new_color = convert_rb_color_to_rgba(rb_funcall(proc, rb_intern("call"), arity,
                                                         convert_rgba_to_rb_color(&old_color)));
@@ -1232,20 +1236,57 @@ prepare_fill_texture(action_struct * payload)
     }
 }
 
-static void
-apply_color_control_transform(action_struct * payload, texture_info * tex, int x, int y)
-{
-    payload->color = get_pixel_color(tex, x, y);
-        
-    payload->color.red += payload->pen.color_add.red; 
-    payload->color.green += payload->pen.color_add.green; 
-    payload->color.blue += payload->pen.color_add.blue; 
-    payload->color.alpha += payload->pen.color_add.alpha;
 
-    payload->color.red *= payload->pen.color_mult.red; 
-    payload->color.green *= payload->pen.color_mult.green; 
-    payload->color.blue *= payload->pen.color_mult.blue; 
-    payload->color.alpha *= payload->pen.color_mult.alpha;
+/* TODO: reimplement using SSE2 */
+static rgba
+apply_color_control_transform(action_struct * payload, texture_info * tex, int x, int y)
+                              
+{
+    rgba transformed_color;
+    
+    transformed_color = get_pixel_color(tex, x, y);
+        
+    transformed_color.red += payload->pen.color_add.red; 
+    transformed_color.green += payload->pen.color_add.green; 
+    transformed_color.blue += payload->pen.color_add.blue; 
+    transformed_color.alpha += payload->pen.color_add.alpha;
+
+    transformed_color.red *= payload->pen.color_mult.red; 
+    transformed_color.green *= payload->pen.color_mult.green; 
+    transformed_color.blue *= payload->pen.color_mult.blue; 
+    transformed_color.alpha *= payload->pen.color_mult.alpha;
+
+    return transformed_color;
+}
+
+static rgba
+apply_alpha_blend(action_struct * payload, texture_info * tex, int x, int y, rgba blended_pixel)
+{
+    rgba dest_pixel = get_pixel_color(tex, x, y);
+    rgba finished_pixel;
+
+
+    if(not_a_color(blended_pixel))
+        return blended_pixel;
+    
+    /* alpha blending is nothing more than a weighted average of src and dest pixels
+       based on source alpha value */
+    /* NB: destination alpha value is ignored */
+
+    /** TO DO: rewrite this using sse2 instructions **/
+    finished_pixel.red = blended_pixel.alpha * blended_pixel.red + (1 - blended_pixel.alpha)
+        * dest_pixel.red;
+
+    finished_pixel.green = blended_pixel.alpha * blended_pixel.green + (1 - blended_pixel.alpha)
+        * dest_pixel.green;
+
+    finished_pixel.blue = blended_pixel.alpha * blended_pixel.blue + (1 - blended_pixel.alpha)
+        * dest_pixel.blue;
+
+    finished_pixel.alpha = blended_pixel.alpha;
+    
+
+    return finished_pixel;
 }
 
 static void
@@ -1254,53 +1295,30 @@ set_pixel_color_with_style(action_struct * payload, texture_info * tex, int x, i
 
     rgba blended_pixel;
 
+    blended_pixel = payload->color;
+
     /* for color_control transform */
     if(payload->pen.has_color_control_transform)
-        apply_color_control_transform(payload, tex, x, y);
+        blended_pixel = apply_color_control_transform(payload, tex, x, y);
     
     /*    for texture fill  */
     if(payload->pen.has_source_texture)
-        payload->color = get_pixel_color(&payload->pen.source_tex,
+        blended_pixel = get_pixel_color(&payload->pen.source_tex,
                                          x % payload->pen.source_tex.width,
                                          y % payload->pen.source_tex.height);
 
     /* for color_control block */
     if(payload->pen.has_color_control_proc)
-        payload->color = exec_color_control_proc(payload, tex, x,  y);
+        blended_pixel = exec_color_control_proc(payload, tex, x,  y, blended_pixel);
     
 
     /*  TO DO: do bitwise pixel combinations here */
     
-    /* if i do not use blended_pixel and instead use payload->color in the
-       code below i get an interesting blurring effect in images (with alpha_blend => true)
-    */
-    blended_pixel = payload->color;
-    
-    
-    /*  alpha blending
-        TO DO: refactor into its own helper function
+    /*  TO DO: refactor into its own helper function
         & rewrite using sse2 */
-    if(payload->pen.alpha_blend) {
-        rgba dest_pixel = get_pixel_color(tex, x, y);
-            
-        /* alpha blending is nothing more than a weighted average of src and dest pixels
-           based on source alpha value */
-        /* NB: destination alpha value is ignored */
-        if(is_a_color(payload->color) && is_a_color(dest_pixel)) {
-
-            /** TO DO: rewrite this using sse2 instructions **/
-            blended_pixel.red = payload->color.alpha * payload->color.red + (1 - payload->color.alpha)
-                * dest_pixel.red;
-
-            blended_pixel.green = payload->color.alpha * payload->color.green + (1 - payload->color.alpha)
-                * dest_pixel.green;
-
-            blended_pixel.blue = payload->color.alpha * payload->color.blue + (1 - payload->color.alpha)
-                * dest_pixel.blue;
-
-            blended_pixel.alpha = payload->color.alpha;
-        }
-    }
+    if(payload->pen.alpha_blend)
+        blended_pixel = apply_alpha_blend(payload, tex, x,  y, blended_pixel);
+    
 
     set_pixel_color(&blended_pixel, tex, x, y);
 }
