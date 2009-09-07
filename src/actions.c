@@ -224,12 +224,13 @@ ngon_do_action(int x, int y, int r, int num_sides, texture_info * tex, VALUE has
     int x1, y1, x2, y2, x0, y0;
     int n;
     int thickness;
+    float angle = 0;
 
     draw_prologue(&cur, tex, x - r, y - r,
                   x + r, y + r, &hash_arg, sync_mode, primary, &payload);
 
 
-    if(is_a_hash(hash_arg))
+    if(is_a_hash(hash_arg)) {
         if(RTEST(get_from_hash(hash_arg, "thickness"))) {
             thickness = NUM2INT(get_from_hash(hash_arg, "thickness"));
 
@@ -240,13 +241,18 @@ ngon_do_action(int x, int y, int r, int num_sides, texture_info * tex, VALUE has
             cur.ymax = y + r + thickness / 2;
         }
 
+        if(RTEST(get_from_hash(hash_arg, "start_angle"))) {
+            angle = NUM2INT(get_from_hash(hash_arg, "start_angle")) / 360.0 * 2 * PI;
+        }
+    }
+    
     /* calculate first point */
-    x0 = x1 = x + r;
-    y0 = y1 = y;
+    x0 = x1 = x + r * cos(angle);
+    y0 = y1 = y + r * sin(angle);
 
     for(n = 0; n < num_sides; n++) {
-        x2 = x + r * cos((2 * PI / num_sides) * n);
-        y2 = y + r * sin((2 * PI / num_sides) * n);
+        x2 = x + r * cos((2 * PI / num_sides) * n + angle);
+        y2 = y + r * sin((2 * PI / num_sides) * n + angle);
 
         line_do_action(x1, y1, x2, y2, tex, hash_arg, no_sync, false, payload);
 

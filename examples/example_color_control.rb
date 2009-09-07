@@ -4,7 +4,7 @@ require 'texplay'
 
 class W < Gosu::Window
     def initialize
-        super(1024, 769, false, 20)
+        super(1024, 768, false, 20)
         @img = Gosu::Image.new(self, "#{Common::MEDIA}/empty2.png")
         @tp = Gosu::Image.new(self, "#{Common::MEDIA}/texplay.png")
         @gosu = Gosu::Image.new(self, "#{Common::MEDIA}/gosu.png")
@@ -18,6 +18,7 @@ class W < Gosu::Window
         # a valid color symbol)
         
         # color_control accepts procs of 4 types:
+        # arity of 0: nothing is yielded and color is set by return value of block
         # arity of 1: just the destination pixel color is yielded
         # arity of 2: both the destination and the source pixel colors are yielded (in that order)
         # arity of 3: the destination pixel color is yielded along with the x and y coords of the current pixel
@@ -52,7 +53,7 @@ class W < Gosu::Window
         }
 
         # this just fills a rect with random colours
-        @img.rect 400, 400, 470, 470, :fill => true, :color_control => proc { |c| :rand }
+        @img.rect 400, 400, 470, 470, :fill => true, :color_control => proc { :rand }
     end
 
     def draw

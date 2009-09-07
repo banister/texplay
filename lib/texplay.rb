@@ -12,14 +12,14 @@ require 'gosu'
 module TexPlay
     TEXPLAY_VERSION = "0.2.1"
 
-    def self.on_setup(&block)
+    def self::on_setup(&block)
         raise "need a block" if !block
         
         @__init_procs__ ||= []
         @__init_procs__.push(block)
     end
 
-    def self.setup(receiver)
+    def self::setup(receiver)
         if @__init_procs__ then
             @__init_procs__.each do |init_proc|
                 receiver.instance_eval(&init_proc)
@@ -27,7 +27,7 @@ module TexPlay
         end
     end
 
-    def self.create_blank_image(window, width, height)
+    def self::create_blank_image(window, width, height)
         Gosu::Image.new(window, EmptyImageStub.new(width, height))
     end
 
@@ -37,7 +37,7 @@ module TexPlay
         Blue = [0, 0, 1, 1]
         Black = [0, 0, 0, 1]
         White = [1, 1, 1, 1]
-        Grey = [0.5, 0.5, 0.5, 0.5]
+        Grey = [0.5, 0.5, 0.5, 1]
         Alpha = [0, 0, 0, 0]
         Purple = [1, 0, 1, 1]
         Yellow = [1, 1, 0, 1]
@@ -52,8 +52,8 @@ end
 
 # credit to philomory for this class
 class EmptyImageStub
-    def initialize(w,h)
-        @w, @h = w, h;
+    def initialize(w, h)
+        @w, @h = w, h
     end
     
     def to_blob

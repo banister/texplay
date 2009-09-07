@@ -7,7 +7,7 @@ require 'texplay'
 
 class MyWindow < Gosu::Window
     def initialize
-        super(1024, 769, false, 20)
+        super(1024, 768, false, 20)
     end
 end
 

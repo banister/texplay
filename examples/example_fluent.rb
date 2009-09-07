@@ -5,7 +5,7 @@ require 'texplay'
 
 class W < Gosu::Window
     def initialize
-        super(1024, 769, false, 20)
+        super(1024, 768, false, 20)
         @img = Gosu::Image.new(self, "#{Common::MEDIA}/sunset.png")
         @img.rect 0,0, @img.width - 1, @img.height - 1
 

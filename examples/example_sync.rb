@@ -5,7 +5,7 @@ require 'texplay'
 
 class W < Gosu::Window
     def initialize
-        super(1024, 769, false, 20)
+        super(1024, 768, false, 20)
         @img = Gosu::Image.new(self, "#{Common::MEDIA}/empty2.png")
 
         # sets the 'global' color for all actions in this image

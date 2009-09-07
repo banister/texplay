@@ -762,7 +762,7 @@ check_for_texture_info(VALUE image)
         rb_raise(rb_eException, "Error: gl_tex_info returns nil for %s (%i x %i). Could be caused by "
                  "very large image or Gosu bug. Try updating Gosu or use a smaller image. Note: TexPlay should"
                  " be able to work with %i x %i images.",
-                 StringValuePtr(image_name), width, height, max_quad_size(), max_quad_size());
+                 StringValuePtr(image_name), width, height, max_quad_size() - 2, max_quad_size() - 2);
     }
 
     return info;
@@ -897,7 +897,7 @@ bool
 is_a_point(VALUE try_point)
 {
     /* if it responds to 'x' it's near enough (technically must respond to x AND y) */
-    if(rb_respond_to(try_point, rb_intern("x")))
+    if(rb_respond_to(try_point, rb_intern("x")) && !is_a_num(try_point))
         return true;
 
     return false;
