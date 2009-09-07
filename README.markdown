@@ -1,6 +1,6 @@
 ![Alt text](https://dl.getdropbox.com/u/239375/texplay.png)
 
-*image manipulation tool for ruby and gosu*
+*an image manipulation tool for ruby and gosu*
 
 INSTRUCTIONS 
 ============
