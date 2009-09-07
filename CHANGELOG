@@ -1,3 +1,11 @@
+8/9/09
+version 0.2.2
+* fixed color_control bug, action_struct->color was being overwritten (now using a temp).
+* fixed faulty error msg where max tex size was being displayed as 1024 but is actually 1022
+* added :start_angle parameter to ngon action
+* fixed example screen height from 769 to 768
+* arity of -1 and 0 now supported for color_control procs
+
 2/9/09
 version 0.2.1
 * releasing a gem for TexPlay

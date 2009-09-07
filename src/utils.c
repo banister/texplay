@@ -897,6 +897,7 @@ bool
 is_a_point(VALUE try_point)
 {
     /* if it responds to 'x' it's near enough (technically must respond to x AND y) */
+    /* added the is_a_num() check due to WEIRD bug where FIXNUMS were responding to the 'x' method (wtf?) but returning nil when invoked */
     if(rb_respond_to(try_point, rb_intern("x")) && !is_a_num(try_point))
         return true;
 
