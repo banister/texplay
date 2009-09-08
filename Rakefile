@@ -1,6 +1,8 @@
 require 'rake/clean'
 require 'rake/gempackagetask'
 
+TEXPLAY_VERSION = "0.2.2"
+
 $dlext = Config::CONFIG['DLEXT']
 
 CLEAN.include("src/*.#{$dlext}", "src/*.log", "src/*.o", "src/*~", "src/*#*", "src/*.obj", "src/*.def", "src/*.pdb")
@@ -38,7 +40,7 @@ end
 specification = Gem::Specification.new do |s|
     s.name = "texplay"
     s.summary = "TexPlay is a light-weight image manipulation framework for Ruby and Gosu"
-    s.version = "0.2.2"
+    s.version = TEXPLAY_VERSION
     s.date = "2009-09-09"
     s.author = "John Mair (banisterfiend)"
     s.email = 'jrmair@gmail.com'
