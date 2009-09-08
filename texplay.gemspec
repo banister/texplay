@@ -1,8 +1,8 @@
 Gem::Specification.new do |s|
     s.name = "texplay"
     s.summary = "TexPlay is a light-weight image manipulation framework for Ruby and Gosu"
-    s.version = "0.2.1"
-    s.date = "2009-09-02"
+    s.version = "0.2.2"
+    s.date = "2009-09-09"
     s.author = "John Mair (banisterfiend)"
     s.email = 'jrmair@gmail.com'
     s.description = s.summary
@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
     s.add_dependency("gosu",">=0.7.14")
     s.homepage = "http://banisterfiend.wordpress.com/2008/08/23/texplay-an-image-manipulation-tool-for-ruby-and-gosu/"
     s.has_rdoc = false
-    s.files = ["Rakefile", "README", "CHANGELOG", "README1st",
+    s.files = ["Rakefile", "README.markdown", "CHANGELOG", "README1st",
                 "lib/texplay.rb", "lib/texplay-contrib.rb"] +
         Dir.glob("src/*") + Dir.glob("examples/*.rb")  + Dir.glob("examples/media/*")
  

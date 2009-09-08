@@ -369,7 +369,7 @@ m_circle(int argc, VALUE * argv, VALUE self)
     
     ADJUST_SELF(self);
     
-    if(argc < 1) rb_raise(rb_eArgError, "circle action needs at least 1 parameter");
+    if(argc < 2) rb_raise(rb_eArgError, "circle action needs at least 2 parameter");
 
     process_x_y_pairs(self, 1, argv, &x1, &y1);
 
@@ -398,7 +398,7 @@ m_ngon(int argc, VALUE * argv, VALUE self)
 
     ADJUST_SELF(self);
     
-    if(argc < 4) rb_raise(rb_eArgError, "ngon requires at least 4 parameters (x, y, radius, num_sides)");
+    if(argc < 3) rb_raise(rb_eArgError, "ngon requires at least 3 parameters (x, y, radius, num_sides)");
 
     process_x_y_pairs(self, 1, argv, &x1, &y1);
 

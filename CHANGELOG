@@ -5,6 +5,8 @@ version 0.2.2
 * added :start_angle parameter to ngon action
 * fixed example screen height from 769 to 768
 * arity of -1 and 0 now supported for color_control procs
+* fixed parameter checks for circle and ngon
+* updated documentation to reflect changes, and added details on caching
 
 2/9/09
 version 0.2.1

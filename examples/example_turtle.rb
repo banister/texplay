@@ -9,7 +9,7 @@ class W < Gosu::Window
         @img = Gosu::Image.new(self, "#{Common::MEDIA}/empty2.png")
 
         # put a border on the image
-        @img.rect 0,0, @img.width - 1, @img.height - 1
+        @img.rect 0, 0, @img.width - 1, @img.height - 1
 
         @length = 0
     end

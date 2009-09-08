@@ -8,13 +8,6 @@ class W < Gosu::Window
     def initialize
         super(1024, 768, false, 20)
         @img = Gosu::Image.new(self, "#{Common::MEDIA}/sunset.png")
-        puts @img.width
-        puts @img.height
-        puts @img.get_pixel(0,0).inspect
-        puts @img.get_pixel(499,0).inspect
-        puts @img.get_pixel(500,374).inspect
-        puts @img.get_pixel(499,374).inspect
-        puts @img.get_pixel(nil, 4)
     end
     
     def draw

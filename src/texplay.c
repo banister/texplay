@@ -68,7 +68,7 @@ Init_ctexplay() {
     rb_define_method(jm_Module, "refresh_cache", m_cache_refresh, 0);
     
     /* a constant containing the sidelength of largest allowable quad */
-    rb_define_const(jm_Module, "TP_MAX_QUAD_SIZE", INT2FIX(max_quad_size()));
+    rb_define_const(jm_Module, "TP_MAX_QUAD_SIZE", INT2FIX(max_quad_size() - 2));
 
     /* singleton method for creating & removing macros */
     rb_define_singleton_method(jm_Module, "create_macro", M_create_macro, 1);

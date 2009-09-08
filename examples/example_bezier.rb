@@ -6,7 +6,7 @@ require 'texplay'
 class W < Gosu::Window
     def initialize
         super(1024, 768, false, 20)
-        @img = Gosu::Image.new(self, "#{Common::MEDIA}/empty2.png")
+        @img = TexPlay::create_blank_image(self, 500, 500)
 
         # put a border on the image
         @img.rect 0,0, @img.width - 1, @img.height - 1
@@ -23,18 +23,9 @@ class W < Gosu::Window
             points << p
         }
 
-        @img.move_to(points.first.x, points.first.y)
+        # making the bezier 
+        @img.bezier points, :color => :red
 
-        # making the bezier more interesting by using turtle graphics :) (a rough bezier)
-        @img.bezier points, :color => :red, :color_control => proc { |c, x, y|
-            if((x % 10) == 0) then
-                @img.line_to(x, y + rand * 20 - 10)
-            end
-            :none
-        }
-
-        #@img.fill 100, 400, :color => :yellow
-        
         # NOTE: can 'close' a bezier curve too (as with polylines)
     end
     

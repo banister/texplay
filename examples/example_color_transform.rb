@@ -14,9 +14,9 @@ class W < Gosu::Window
         x = (@img.width - 100/2) * rand 
         y = (@img.height - 100/2) * rand 
 
-        @img.rect x, y, x + 50, y + 50, :fill => true, :color_control => { :mult => [0.9 , 0.3, 0.3, 1] }
+        @img.rect x, y, x + 50, y + 50, :fill => true,
+        :color_control => { :mult => [0.9 , 0.3, 0.3, 1] }
 
-        
 
         @img.draw 100, 50,1
     end

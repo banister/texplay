@@ -1,6 +1,6 @@
 INSTRUCTIONS
 
-TexPlay version 0.2.1
+TexPlay version 0.2.2
 
 *Ensure that ctexplay.so and gosu.so, and texplay.rb and texplay-contrib.rb are in the working directory for your project
 *require 'texplay' in your ruby program to access the TexPlay module
