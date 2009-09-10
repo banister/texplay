@@ -49,7 +49,7 @@ specification = Gem::Specification.new do |s|
     s.add_dependency("gosu",">=0.7.14")
     s.homepage = "http://banisterfiend.wordpress.com/2008/08/23/texplay-an-image-manipulation-tool-for-ruby-and-gosu/"
     s.has_rdoc = false
-    s.files =  ["Rakefile", "README.markdown", "CHANGELOG", "README1st",
+    s.files =  ["Rakefile", "README.markdown", "CHANGELOG", 
                 "lib/texplay.rb", "lib/texplay-contrib.rb"] +
         FileList["src/*", "examples/*.rb", "examples/media/*"].to_a 
 
