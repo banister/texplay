@@ -6,7 +6,9 @@
 #include <ruby.h>
 
 /* this is the test we use to identify ruby 1.9.1 */
-#ifdef RCLASS_M_TBL
+
+/* commenting out this test because it doesn't seem to work in 1.8.7 */
+/*#ifdef RCLASS_M_TBL
 # define RUBY_19
 #endif
 

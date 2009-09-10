@@ -1,4 +1,4 @@
-TEXPLAY_VERSION = "0.2.2"
+TEXPLAY_VERSION = "0.2.3"
 
 Gem::Specification.new do |s|
     s.name = "texplay"

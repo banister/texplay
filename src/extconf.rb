@@ -15,4 +15,7 @@ else
     exit unless have_library("glut32") 
 end
 
+# 1.9 compatibility
+$CPPFLAGS += " -DRUBY_19" if RUBY_VERSION =~ /1.9/
+
 create_makefile('ctexplay')
