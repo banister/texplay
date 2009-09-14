@@ -138,6 +138,8 @@ VALUE point_y(VALUE point);
 double power(float base, int exp);
 unsigned fact(int n);
 unsigned comb(int n, int k);
+unsigned perm(int n, int r);
+
 double bernstein(int n, int k, float u);
 
 #endif

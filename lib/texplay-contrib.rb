@@ -5,11 +5,21 @@ end
 
 require 'texplay'
 
+# monkey-patches to core classes
+class String
+    if !method_defined? :each_char
+        alias_method :_each_char,  :each_byte
+    else
+        alias_method :_each_char, :each_char
+    end
+end
+
 # setup will be executed straight after Gosu::Image instantiation
 TexPlay::on_setup do
     @turtle_pos = TexPlay::TPPoint.new(width / 2, height / 2 )
     @turtle_angle = 0
 end
+
 
 TexPlay::create_macro(:move_to) do |x, y|
     capture { 
@@ -73,5 +83,71 @@ TexPlay::create_macro(:forward) do |dist, *other|
     }
 end
 
+## L-System code
 
+# monkeypatches to TexPlay class
+module TexPlay
+    class LSystem
+        def initialize(&block)
+            @rules = {}
+            
+            instance_eval(&block) if block
+        end
+        
+        def rule(new_rule)
+            @rules.merge!(new_rule)
+        end
 
+        def atom(new_atom)
+            @atom = new_atom
+        end
+
+        def angle(new_angle=nil)
+            return @angle if !new_angle
+            @angle = new_angle
+        end
+
+        def produce_string(order)
+            order = order[:order]
+            string = @atom.dup
+            
+            order.times do
+                i = 0
+                while(i < string.length)
+                    sub = @rules[string[i, 1]]
+                    
+                    string[i] = sub if sub
+                    
+                    i += sub ? sub.length : 1
+                end
+            end
+            
+            string
+        end
+    end
+end
+
+# L-System macro
+TexPlay::create_macro(:lsystem) do |x, y, system, options|
+    capture {
+        theta = system.angle
+        turtle_stack = []
+        move_to(x, y)
+        line_length = options[:line_length] || 1
+        
+        system.produce_string(options)._each_char do |v|
+            case v
+            when "F"
+                forward(line_length, true)
+            when "+"
+                turn(theta)
+            when "-"
+                turn(-theta)
+            when "["
+                turtle_stack.push([@turtle_pos.dup, @turtle_angle])
+            when "]"
+                @turtle_pos, @turtle_angle = turtle_stack.pop
+            end
+        end
+    }
+end

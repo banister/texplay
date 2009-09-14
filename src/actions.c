@@ -787,7 +787,7 @@ bezier_do_action(VALUE points, texture_info * tex, VALUE hash_arg, sync sync_mod
         num_point_pairs = RARRAY_LEN(points) / 2;
     }
 
-    if(num_point_pairs > 13)
+    if(num_point_pairs > 50)
         rb_raise(rb_eArgError, "too many points for bezier curve. 13 points is current maximum. got %d\n",
                  num_point_pairs);
 

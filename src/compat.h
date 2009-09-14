@@ -8,9 +8,11 @@
 /* this is the test we use to identify ruby 1.9.1 */
 
 /* commenting out this test because it doesn't seem to work in 1.8.7 */
-/*#ifdef RCLASS_M_TBL
+/*
+#ifdef RCLASS_M_TBL
 # define RUBY_19
 #endif
+*/
 
 /* macros for backwards compatibility with 1.8 */
 #ifndef RUBY_19
