@@ -948,11 +948,13 @@ fact(int n)
 unsigned
 comb(int n, int r)
 {
-    //    double temp = fact(n) / (fact(k) * fact(n - k));
-    if(r > (n / 2))
+    double temp = fact(n) / (fact(r) * fact(n - r));
+    return temp;
+    /*    if(r > (n / 2))
         r = n - r;
     
     return perm(n, r) / fact(r);
+    */
 }
 
 unsigned

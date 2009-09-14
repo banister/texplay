@@ -6,7 +6,7 @@ require 'texplay'
 class W < Gosu::Window
     def initialize
         super(1024, 768, false, 20)
-        @img = TexPlay::create_blank_image(self, 1022, 1022)
+        @img = TexPlay::create_blank_image(self, 1022, 800)
         @tp = Gosu::Image.new(self, "#{Common::MEDIA}/texplay.png")
         @gosu = Gosu::Image.new(self, "#{Common::MEDIA}/sand1.png")
 
@@ -25,7 +25,7 @@ class W < Gosu::Window
         @img.bezier points
 
         # NOTE: the :texture hash argument works on ALL drawing actions; not just fills
-        @img.fill 300, 600, :texture => @gosu
+        @img.fill 300, 650, :texture => @gosu
 
         # let's demonstrate by drawing a circle using the gosu.png texture
         # NOTE: :texture even works on lines, boxes, polylines, beziers etc. 
