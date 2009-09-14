@@ -38,8 +38,8 @@ end
 class W < Gosu::Window
     def initialize
         super(1024, 768, false, 20)
-        @img = TexPlay::create_blank_image(self, 800, 500)
-        @img.lsystem(250, 250, Dragon, :order => 13, :line_length => 2)
+        @img = TexPlay::create_blank_image(self, 500, 500)
+        @img.lsystem(0, 250, Bush2, :order => 5, :line_length => 5)
     end
 
     def draw

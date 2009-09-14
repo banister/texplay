@@ -5,13 +5,9 @@ end
 
 require 'texplay'
 
-# monkey-patches to core classes
-class String
-    if !method_defined? :each_char
-        alias_method :_each_char,  :each_byte
-    else
-        alias_method :_each_char, :each_char
-    end
+# to bring in String#each_char for 1.8
+if RUBY_VERSION =~ /1.8/
+    require 'jcode'
 end
 
 # setup will be executed straight after Gosu::Image instantiation
@@ -135,7 +131,8 @@ TexPlay::create_macro(:lsystem) do |x, y, system, options|
         move_to(x, y)
         line_length = options[:line_length] || 1
         
-        system.produce_string(options)._each_char do |v|
+        system.produce_string(options).each_char do |v|
+                      
             case v
             when "F"
                 forward(line_length, true)

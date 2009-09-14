@@ -1,3 +1,8 @@
+15/9/09
+version 0.2.4
+* added lsystem
+* made lsystem both 1.9.1 and 1.8.6 compatible
+
 11/9/09
 version 0.2.3
 * added Ruby 1.8.7 compatibility by modifying extconf.rb to define RUBY_19 macro
