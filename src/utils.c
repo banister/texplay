@@ -948,21 +948,22 @@ fact(int n)
 unsigned
 comb(int n, int r)
 {
-    double temp = fact(n) / (fact(r) * fact(n - r));
-    return temp;
-    /*    if(r > (n / 2))
+    /* double temp = fact(n) / (fact(r) * fact(n - r)); */
+    /* return temp; */
+
+    /* nCr is symmetrical about n / 2 */
+    if(r > (n / 2))
         r = n - r;
     
     return perm(n, r) / fact(r);
-    */
 }
 
 unsigned
 perm(int n, int r)
 {
-    int val = n;
+    int val = 1;
     int i;
-    for(i = n - 1; i > (n - r); i--)
+    for(i = n; i > (n - r); i--)
         val *= i;
 
     return val;
@@ -971,6 +972,6 @@ perm(int n, int r)
 double
 bernstein(int n, int k, float u)
 {
-    double temp = comb(n, k) * pow(u, k) * power(1 - u, n - k);
+    double temp = comb(n, k) * pow(u, k) * pow(1 - u, n - k);
     return temp;
 }

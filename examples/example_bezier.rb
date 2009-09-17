@@ -15,7 +15,7 @@ class W < Gosu::Window
 
         # NOTE: TexPlay also accepts points. a 'point' is any object that responds to 'x' or 'y'
         # NOTE: current maximum points for a bezier is 13
-        (0..@img.width + 100).step(50) { |x|
+        (0..@img.width + 100).step(40) { |x|
             p = TexPlay::TPPoint.new
             p.x = x
             p.y = @img.height * rand
