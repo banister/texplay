@@ -79,47 +79,44 @@ TexPlay::create_macro(:forward) do |dist, *other|
     }
 end
 
-## L-System code
+# L-System code
+# adding LSystem class to TexPlay module
+class TexPlay::LSystem
+    def initialize(&block)
+        @rules = {}
+        
+        instance_eval(&block) if block
+    end
+    
+    def rule(new_rule)
+        @rules.merge!(new_rule)
+    end
 
-# monkeypatches to TexPlay class
-module TexPlay
-    class LSystem
-        def initialize(&block)
-            @rules = {}
-            
-            instance_eval(&block) if block
+    def atom(new_atom)
+        @atom = new_atom
+    end
+
+    def angle(new_angle=nil)
+        return @angle if !new_angle
+        @angle = new_angle
+    end
+
+    def produce_string(order)
+        order = order[:order]
+        string = @atom.dup
+        
+        order.times do
+            i = 0
+            while(i < string.length)
+                sub = @rules[string[i, 1]]
+                
+                string[i] = sub if sub
+                
+                i += sub ? sub.length : 1
+            end
         end
         
-        def rule(new_rule)
-            @rules.merge!(new_rule)
-        end
-
-        def atom(new_atom)
-            @atom = new_atom
-        end
-
-        def angle(new_angle=nil)
-            return @angle if !new_angle
-            @angle = new_angle
-        end
-
-        def produce_string(order)
-            order = order[:order]
-            string = @atom.dup
-            
-            order.times do
-                i = 0
-                while(i < string.length)
-                    sub = @rules[string[i, 1]]
-                    
-                    string[i] = sub if sub
-                    
-                    i += sub ? sub.length : 1
-                end
-            end
-            
-            string
-        end
+        string
     end
 end
 
