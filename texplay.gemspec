@@ -1,10 +1,10 @@
-TEXPLAY_VERSION = "0.2.4"
+TEXPLAY_VERSION = "0.2.5"
 
 Gem::Specification.new do |s|
     s.name = "texplay"
     s.summary = "TexPlay is a light-weight image manipulation framework for Ruby and Gosu"
     s.version = TEXPLAY_VERSION
-    s.date = "2009-09-09"
+    s.date = Time.now.strftime '%Y-%m-%d'
     s.author = "John Mair (banisterfiend)"
     s.email = 'jrmair@gmail.com'
     s.description = s.summary
@@ -14,14 +14,14 @@ Gem::Specification.new do |s|
     s.has_rdoc = false
     s.files = ["Rakefile", "README.markdown", "CHANGELOG",
                 "lib/texplay.rb", "lib/texplay-contrib.rb"] +
-        Dir.glob("src/*") + Dir.glob("examples/*.rb")  + Dir.glob("examples/media/*")
+        Dir.glob("ext/texplay/*") + Dir.glob("examples/*.rb")  + Dir.glob("examples/media/*")
  
     if RUBY_PLATFORM =~ /mswin/
         s.platform = Gem::Platform::CURRENT
-        s.files += ["lib/ctexplay.18.so", "lib/ctexplay.19.so"]
+        s.files += ["lib/1.8/ctexplay.so", "lib/1.9/ctexplay.so"]
         
     else
         s.platform = Gem::Platform::RUBY
-        s.extensions = ["src/extconf.rb"]
+        s.extensions = ["ext/texplay/extconf.rb"]
     end
 end

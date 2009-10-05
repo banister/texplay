@@ -1,3 +1,9 @@
+6/10/09
+version 0.2.5
+* fixed quad_draw flicker bug
+* added splice_and_scale (to texplay-contrib.rb)
+* now using rake-compiler to run build process
+
 15/9/09
 version 0.2.4
 * added lsystem

@@ -145,3 +145,27 @@ TexPlay::create_macro(:lsystem) do |x, y, system, options|
         end
     }
 end
+
+# Scaling
+# uses nearest-neighbour
+TexPlay::create_macro(:splice_and_scale) do |img, cx, cy, *options|
+    options = options.first ? options.first : {}
+
+    options = {
+        :color_control => proc do |c1, c2, x, y|
+            factor = options[:factor] || 1
+            factor_x = options[:factor_x] || factor
+            factor_y = options[:factor_y] || factor
+
+            x = factor_x * (x - cx) + cx
+            y = factor_y * (y - cy) + cy
+           
+            rect x, y, x + factor_x, y + factor_y, :color => c2, :fill => true
+            :none
+        end
+    }.merge!(options)
+   
+    splice img, cx, cy, options
+
+    self
+end

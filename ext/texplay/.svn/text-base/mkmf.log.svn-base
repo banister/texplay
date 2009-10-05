@@ -1,0 +1,22 @@
+have_library: checking for main() in -lglut... -------------------- yes
+
+"gcc -o conftest -I/usr/local/include/ruby19-1.9.1/i686-linux -I/usr/local/include/ruby19-1.9.1/ruby/backward -I/usr/local/include/ruby19-1.9.1 -I.  -D_FILE_OFFSET_BITS=64   -O2 -g -Wall -Wno-parentheses conftest.c  -L. -L/usr/local/lib -Wl,-R/usr/local/lib -L.  -rdynamic -Wl,-export-dynamic     -Wl,-R -Wl,/usr/local/lib -L/usr/local/lib -lruby19-static  -lpthread -lrt -ldl -lcrypt -lm   -lc"
+checked program was:
+/* begin */
+1: #include "ruby.h"
+2: 
+3: int main() {return 0;}
+/* end */
+
+"gcc -o conftest -I/usr/local/include/ruby19-1.9.1/i686-linux -I/usr/local/include/ruby19-1.9.1/ruby/backward -I/usr/local/include/ruby19-1.9.1 -I.  -D_FILE_OFFSET_BITS=64   -O2 -g -Wall -Wno-parentheses conftest.c  -L. -L/usr/local/lib -Wl,-R/usr/local/lib -L.  -rdynamic -Wl,-export-dynamic     -Wl,-R -Wl,/usr/local/lib -L/usr/local/lib -lruby19-static -lglut  -lpthread -lrt -ldl -lcrypt -lm   -lc"
+checked program was:
+/* begin */
+1: #include "ruby.h"
+2: 
+3: /*top*/
+4: int main() {return 0;}
+5: int t() { void ((*volatile p)()); p = (void ((*)()))main; return 0; }
+/* end */
+
+--------------------
+

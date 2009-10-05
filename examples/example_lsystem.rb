@@ -10,6 +10,14 @@ Dragon = TexPlay::LSystem.new do
     atom "FX"
 end
 
+Koch = TexPlay::LSystem.new do
+    rule "F" => "F-F++F-F"
+
+    angle 60
+
+    atom "F"
+end
+
 Bush1 = TexPlay::LSystem.new do
     rule "F" => "F[-F]F[+F][F]"
     
@@ -39,7 +47,7 @@ class W < Gosu::Window
     def initialize
         super(1024, 768, false, 20)
         @img = TexPlay::create_blank_image(self, 500, 500)
-        @img.lsystem(0, 250, Bush2, :order => 5, :line_length => 5)
+        @img.lsystem(250, 250, Koch, :order => 8, :line_length => 10)
     end
 
     def draw

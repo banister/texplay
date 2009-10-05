@@ -5,7 +5,7 @@
 INSTRUCTIONS 
 ============
 
-**TexPlay version 0.2.4**
+**TexPlay version 0.2.5**
 
 Gem installation:
 
@@ -13,11 +13,11 @@ Gem installation:
 
 To compile TexPlay from source, ensure you are in the directory with the Rakefile and type:
 
-+ rake
++ rake compile
 
 OR
 
-+ rake19  (assuming this is the name of your 1.9.1 version of rake)
++ rake19 compile (assuming this is the name of your 1.9.1 version of rake)
 
 **NB:** be sure to run the version of rake that corresponds to the ruby version you wish to use! on my system I use rake19 for ruby 1.9.1!
 

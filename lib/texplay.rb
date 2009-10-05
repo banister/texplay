@@ -10,7 +10,7 @@ require 'rbconfig'
 require 'gosu'
 
 module TexPlay
-    TEXPLAY_VERSION = "0.2.4"
+    TEXPLAY_VERSION = "0.2.5"
 
     def self::on_setup(&block)
         raise "need a block" if !block
@@ -74,12 +74,12 @@ direc = File.dirname(__FILE__)
 dlext = Config::CONFIG['DLEXT']
 begin
     if RUBY_VERSION && RUBY_VERSION =~ /1.9/
-        require "#{direc}/ctexplay.19.#{dlext}"
+        require "#{direc}/1.9/texplay.#{dlext}"
     else
-        require "#{direc}/ctexplay.18.#{dlext}"
+        require "#{direc}/1.8/texplay.#{dlext}"
     end
 rescue LoadError => e
-    require "#{direc}/ctexplay.#{dlext}"
+    require "#{direc}/texplay.#{dlext}"
 end
     
 require "#{direc}/texplay-contrib"

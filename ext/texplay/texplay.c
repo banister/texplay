@@ -19,7 +19,7 @@
 static VALUE m_init_TPPoint(int argc, VALUE * argv, VALUE self);
 
 void
-Init_ctexplay() {
+Init_texplay() {
 
     VALUE jm_Module = rb_define_module("TexPlay");
     VALUE TPPoint = rb_define_class_under(jm_Module, "TPPoint", rb_cObject);

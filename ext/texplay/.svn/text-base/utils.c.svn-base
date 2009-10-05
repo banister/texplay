@@ -585,9 +585,9 @@ ComputeOutCode (int x, int y, int xmin, int ymin, int xmax, int ymax)
 	return code;
 }
  
-/** Cohen-Sutherland clipping algorithm clips a line from
-P0 = (x0, y0) to P1 = (x1, y1) against a rectangle with 
-diagonal from (xmin, ymin) to (xmax, ymax). **/
+//Cohen-Sutherland clipping algorithm clips a line from
+//P0 = (x0, y0) to P1 = (x1, y1) against a rectangle with 
+//diagonal from (xmin, ymin) to (xmax, ymax).
 void
 cohen_sutherland_clip (int * x0, int * y0,int * x1, int * y1, int xmin, int ymin,
                                 int xmax, int ymax)
@@ -762,7 +762,7 @@ check_for_texture_info(VALUE image)
         rb_raise(rb_eException, "Error: gl_tex_info returns nil for %s (%i x %i). Could be caused by "
                  "very large image or Gosu bug. Try updating Gosu or use a smaller image. Note: TexPlay should"
                  " be able to work with %i x %i images.",
-                 StringValuePtr(image_name), width, height, max_quad_size() - 2, max_quad_size() - 2);
+                 StringValuePtr(image_name), width, height, max_quad_size(), max_quad_size());
     }
 
     return info;
@@ -897,8 +897,7 @@ bool
 is_a_point(VALUE try_point)
 {
     /* if it responds to 'x' it's near enough (technically must respond to x AND y) */
-    /* added the is_a_num() check due to WEIRD bug where FIXNUMS were responding to the 'x' method (wtf?) but returning nil when invoked */
-    if(rb_respond_to(try_point, rb_intern("x")) && !is_a_num(try_point))
+    if(rb_respond_to(try_point, rb_intern("x")))
         return true;
 
     return false;
@@ -946,32 +945,15 @@ fact(int n)
 }
 
 unsigned
-comb(int n, int r)
+comb(int n, int k)
 {
-    /* double temp = fact(n) / (fact(r) * fact(n - r)); */
-    /* return temp; */
-
-    /* nCr is symmetrical about n / 2 */
-    if(r > (n / 2))
-        r = n - r;
-    
-    return perm(n, r) / fact(r);
-}
-
-unsigned
-perm(int n, int r)
-{
-    int val = 1;
-    int i;
-    for(i = n; i > (n - r); i--)
-        val *= i;
-
-    return val;
+    double temp = fact(n) / (fact(k) * fact(n - k));
+    return temp;
 }
 
 double
 bernstein(int n, int k, float u)
 {
-    double temp = comb(n, k) * pow(u, k) * pow(1 - u, n - k);
+    double temp = comb(n, k) * pow(u, k) * power(1 - u, n - k);
     return temp;
 }

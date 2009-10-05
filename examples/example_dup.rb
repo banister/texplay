@@ -32,7 +32,30 @@ class W < Gosu::Window
         puts @bunk.little
 
         # add a red line to the copy to identify it
-        @bunk.line 0, 0, 1024, 1024, :color => :red
+        #@bunk.line 0, 0, 1024, 1024, :color => :red
+
+        @bunk.each(:region =>[200,200,350,350]) { |c,x,y|
+
+            num_pixels = 0
+            total = [0, 0, 0, 0]
+            @bunk.circle x, y, 2,
+            :color_control => proc { |v|
+                if v
+                    total[0] += v[0]
+                    total[1] += v[1]
+                    total[2] += v[2]
+                    total[3] += v[3]
+
+                    num_pixels += 1
+                end
+                :none
+            }
+
+            c[0] = total[0] / num_pixels.to_f
+            c[1] = total[1] / num_pixels.to_f
+            c[2] = total[2] / num_pixels.to_f
+            c[3] = total[3] / num_pixels.to_f
+        }
 
     end
     
