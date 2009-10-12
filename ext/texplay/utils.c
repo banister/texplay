@@ -847,7 +847,6 @@ get_image_chunk(texture_info * tex, int xmin, int ymin, int xmax, int ymax)
 
     return image_buf;
 }
-    
 
 /* get information from texture */
 void

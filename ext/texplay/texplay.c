@@ -60,6 +60,7 @@ Init_texplay() {
 
     rb_define_method(jm_Module, "dup", m_dup_image, 0);
     rb_define_method(jm_Module, "clone", m_clone_image, 0);
+    rb_define_method(jm_Module, "to_blob", m_to_blob, 0);
     rb_define_method(jm_Module, "force_sync", m_force_sync, 1);
     rb_define_method(jm_Module, "set_options", m_user_set_options, 1);
     rb_define_method(jm_Module, "get_options", m_get_options, 0);

@@ -30,7 +30,6 @@ VALUE m_rshift(int argc, VALUE * argv, VALUE self);
 
 VALUE m_each(int argc, VALUE * argv, VALUE self);
 
-
 VALUE m_quad_cached(VALUE self);
 VALUE m_cache_refresh(VALUE self);
 
@@ -41,5 +40,7 @@ VALUE m_force_sync(VALUE self, VALUE ary);
 
 VALUE m_dup_image(VALUE self);
 VALUE m_clone_image(VALUE self);
+
+VALUE m_to_blob(VALUE self);
 
 #endif

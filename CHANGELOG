@@ -1,3 +1,8 @@
+12/10/09
+version 0.2.6
+* added Gosu::Image#to_blob
+* above functionality enables Gosu::Images to work with DevIL library
+
 6/10/09
 version 0.2.5
 * fixed quad_draw flicker bug

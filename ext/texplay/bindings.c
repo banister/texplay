@@ -333,6 +333,61 @@ m_get_options(VALUE self)
     return get_image_local(self, USER_DEFAULTS);
 }
 
+
+static char *
+get_image_chunk_with_size(char * data, texture_info * tex)
+{
+    int x, y;
+    char * image_buf = NULL;
+
+    image_buf = malloc(4 * tex->width * tex->height);
+
+    for(y = 0; y < tex->height; y++)
+        for(x = 0; x < tex->width; x++) {
+            int buf_index = 4 * (x + y * tex->width);
+                
+            int offset = calc_pixel_offset(tex, x, y);
+
+            memcpy(image_buf + buf_index, data + offset, 4);
+        }
+
+    return image_buf;
+}
+
+VALUE
+m_to_blob(VALUE self)
+{
+    texture_info tex;
+    int sidelength;
+    VALUE blob;
+    void * new_array = NULL;
+    void * blob_array = NULL;
+    
+    ADJUST_SELF(self);
+
+    get_texture_info(self, &tex);
+
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, tex.tname);
+
+    /* get length of a side, since square texture */
+    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &sidelength);
+
+    /* initialize texture data array, mult. by 4 because {rgba} */
+    new_array = malloc(sidelength * sidelength * 4);
+
+    /* get texture data from video memory */
+    glGetTexImage(GL_TEXTURE_2D,  0, GL_RGBA, GL_UNSIGNED_BYTE,(void*)(new_array));
+
+    blob_array = get_image_chunk_with_size(new_array, &tex);
+
+    blob = rb_str_new(blob_array, 4 * tex.width * tex.height);
+
+    glDisable(GL_TEXTURE_2D);
+
+    return blob;
+}
+
 /* return the pixel colour for the given x, y */
 VALUE
 m_getpixel(int argc, VALUE * argv, VALUE self) 

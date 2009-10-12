@@ -2,7 +2,7 @@ require 'rake/clean'
 require 'rake/gempackagetask'
 require 'rake/extensiontask'
 
-TEXPLAY_VERSION = "0.2.5"
+TEXPLAY_VERSION = "0.2.6"
 
 $dlext = Config::CONFIG['DLEXT']
 
@@ -20,15 +20,14 @@ specification = Gem::Specification.new do |s|
     s.require_path = 'lib'
     s.add_dependency("gosu",">=0.7.14")
     s.platform = Gem::Platform::RUBY
-    s.extensions = ["ext/texplay/extconf.rb"]
     s.homepage = "http://banisterfiend.wordpress.com/2008/08/23/texplay-an-image-manipulation-tool-for-ruby-and-gosu/"
     s.has_rdoc = false
+
+    s.extensions = ["ext/texplay/extconf.rb"]
     s.files =  ["Rakefile", "README.markdown", "CHANGELOG", 
                 "lib/texplay.rb", "lib/texplay-contrib.rb"] +
         FileList["ext/**/extconf.rb", "ext/**/*.h", "ext/**/*.c", "examples/*.rb",
                  "examples/media/*"].to_a 
-
-
 end
 
 Rake::GemPackageTask.new(specification) do |package|
