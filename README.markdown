@@ -5,14 +5,20 @@
 INSTRUCTIONS 
 ============
 
-**TexPlay version 0.2.6**
+**TexPlay version 0.2.666**
 
 Gem installation:
 
 + sudo gem install texplay
 
-To compile TexPlay from source, ensure you are in the directory with the Rakefile and type:
+How to build the gems? (maintainers only)
 
++ Install rake-compiler (http://github.com/luislavena/rake-compiler)
++ Install 1.9.1 and 1.8.6 mingw ruby versions (instructions above)
++ Type: rake cross native gem RUBY_CC_VERSION=1.8.6:1.9.1
++ Upload new gems to rubyforge and gemcutter.
+
+How to build from source?    
 + rake compile
 
 OR
