@@ -1,5 +1,5 @@
 require 'common'
-require 'texplay'
+require 'devil/gosu'
 
 Dragon = TexPlay::LSystem.new do
     rule "F" => "F"
@@ -47,7 +47,9 @@ class W < Gosu::Window
     def initialize
         super(1024, 768, false, 20)
         @img = TexPlay::create_blank_image(self, 500, 500)
-        @img.lsystem(250, 250, Koch, :order => 8, :line_length => 10)
+        @img.set_options :color => :rand
+        @img.lsystem(400, 350, Dragon, :order => 13, :line_length => 4)
+        @img.save("dragon.jpg")
     end
 
     def draw

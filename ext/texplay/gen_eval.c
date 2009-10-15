@@ -37,6 +37,7 @@ set_hidden_self(VALUE duped_context, VALUE hidden_self)
 VALUE
 rb_capture(VALUE self) {
     VALUE hidden_self;
+    VALUE result;
     
     rb_need_block();
     
@@ -46,11 +47,12 @@ rb_capture(VALUE self) {
                 (2) otherwise simply yield to the block
     */
     if(!NIL_P(hidden_self))
-        rb_obj_instance_eval(0, 0, hidden_self);
+        result = rb_obj_instance_eval(0, 0, hidden_self);
     else
-        rb_yield(Qnil);
+        result = rb_yield(Qnil);
 
-    return hidden_self;
+    /* we want the return value of capture to be the return value of the block */
+    return result;
 }
 
 /** ruby 1.9 funcs **/
