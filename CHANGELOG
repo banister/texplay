@@ -1,7 +1,11 @@
+16/10/09
+version 0.2.7
+* removed memory leak from Gosu::Image#to_blob, now writing directly to RSTRING_PTR
+
 12/10/09
 version 0.2.666
 * added Gosu::Image#to_blob
-* above functionality enables Gosu::Images to work with DevIL library
+* to_blob functionality enables Gosu::Images to work with DevIL library
 
 6/10/09
 version 0.2.5

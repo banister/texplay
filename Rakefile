@@ -2,7 +2,7 @@ require 'rake/clean'
 require 'rake/gempackagetask'
 require 'rake/extensiontask'
 
-TEXPLAY_VERSION = "0.2.666"
+TEXPLAY_VERSION = "0.2.7"
 
 $dlext = Config::CONFIG['DLEXT']
 

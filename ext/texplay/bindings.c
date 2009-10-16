@@ -333,14 +333,10 @@ m_get_options(VALUE self)
     return get_image_local(self, USER_DEFAULTS);
 }
 
-
-static char *
-get_image_chunk_with_size(char * data, texture_info * tex)
+static void
+get_image_chunk_with_size(char * data, texture_info * tex, char * blob)
 {
     int x, y;
-    char * image_buf = NULL;
-
-    image_buf = malloc(4 * tex->width * tex->height);
 
     for(y = 0; y < tex->height; y++)
         for(x = 0; x < tex->width; x++) {
@@ -348,10 +344,8 @@ get_image_chunk_with_size(char * data, texture_info * tex)
                 
             int offset = calc_pixel_offset(tex, x, y);
 
-            memcpy(image_buf + buf_index, data + offset, 4);
+            memcpy(blob + buf_index, data + offset, 4);
         }
-
-    return image_buf;
 }
 
 VALUE
@@ -361,7 +355,6 @@ m_to_blob(VALUE self)
     int sidelength;
     VALUE blob;
     void * new_array = NULL;
-    void * blob_array = NULL;
     
     ADJUST_SELF(self);
 
@@ -379,9 +372,9 @@ m_to_blob(VALUE self)
     /* get texture data from video memory */
     glGetTexImage(GL_TEXTURE_2D,  0, GL_RGBA, GL_UNSIGNED_BYTE,(void*)(new_array));
 
-    blob_array = get_image_chunk_with_size(new_array, &tex);
-
-    blob = rb_str_new(blob_array, 4 * tex.width * tex.height);
+    blob = rb_str_new(NULL, 4 * tex.width * tex.height);
+    
+    get_image_chunk_with_size(new_array, &tex, RSTRING_PTR(blob));
 
     glDisable(GL_TEXTURE_2D);
 
