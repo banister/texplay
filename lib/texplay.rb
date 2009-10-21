@@ -10,7 +10,7 @@ require 'rbconfig'
 require 'gosu'
 
 module TexPlay
-    TEXPLAY_VERSION = "0.2.7"
+    TEXPLAY_VERSION = "0.2.700"
 
     def self::on_setup(&block)
         raise "need a block" if !block
