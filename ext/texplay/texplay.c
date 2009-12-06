@@ -12,11 +12,18 @@
 #include "bindings.h"
 #include "object2module.h"
 #include "gen_eval.h"
+#ifdef __APPLE__
+# include <glut.h>
+#else
+# include <GL/glut.h>
+#endif
+
 
 /* setup ruby bindings */
 
 /** constructor for TPPoint class **/
 static VALUE m_init_TPPoint(int argc, VALUE * argv, VALUE self);
+static void monkey_patch_gosu(void);
 
 void
 Init_texplay() {
@@ -103,6 +110,7 @@ Init_texplay() {
     /* seed the random number generator */
     srand(time(NULL));
 
+    monkey_patch_gosu();
     /** end basic setup **/
 }
 
@@ -130,7 +138,31 @@ m_init_TPPoint(int argc, VALUE * argv, VALUE self)
 }
 /** end constructor for TPPoint **/
 
+
+static VALUE
+gosu_window_to_blob(VALUE self)
+{
+    int width, height;
+    VALUE blob;
+
+    width = rb_funcall(self, rb_intern("width"), 0);
+    height = rb_funcall(self, rb_intern("height"), 0);
+
+    blob = rb_str_new(NULL, 4 * width * height);
+
+    glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, RSTRING_PTR(blob));
+
+    return blob;
+}
+
+static void
+monkey_patch_gosu(void)
+{
+    VALUE Gosu = rb_const_get(rb_cObject, rb_intern("Gosu"));
+    VALUE GosuWindow = rb_const_get(Gosu, rb_intern("Window"));
     
+    rb_define_method(GosuWindow, "to_blob", gosu_window_to_blob, 0);
+}    
 
 
 

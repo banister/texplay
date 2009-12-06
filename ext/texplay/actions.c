@@ -66,6 +66,14 @@ line_do_action(int x1, int y1, int x2, int y2, texture_info * tex, VALUE hash_ar
     if(W >= H) {
         F = 2 * H - W;
         while(x != x2) {
+           if(thickness <= 1) {
+                set_pixel_color_with_style(payload, tex, x, y);
+            }
+            else {
+                set_hash_value(hash_arg, "fill", Qtrue);
+                circle_do_action(x, y, thickness / 2, tex, hash_arg, no_sync, false, payload);
+            }
+           
             if(F < 0)
                 F += 2 * H;
             else {
@@ -73,26 +81,11 @@ line_do_action(int x1, int y1, int x2, int y2, texture_info * tex, VALUE hash_ar
                 y += yinc;
             }
             x += xinc;
-
-            if(thickness <= 1) {
-                set_pixel_color_with_style(payload, tex, x, y);
-            }
-            else {
-                set_hash_value(hash_arg, "fill", Qtrue);
-                circle_do_action(x, y, thickness / 2, tex, hash_arg, no_sync, false, payload);
-            }
         }
     }
     else {
         F = 2 * W - H;
         while(y != y2 ) {
-            if(F < 0)
-                F += 2 * W;
-            else {
-                F += 2 * (W - H);
-                x += xinc;
-            }
-            y += yinc;
 
             if(thickness <= 1) {
                 set_pixel_color_with_style(payload, tex, x, y);
@@ -102,9 +95,24 @@ line_do_action(int x1, int y1, int x2, int y2, texture_info * tex, VALUE hash_ar
                 circle_do_action(x, y, thickness / 2, tex, hash_arg, no_sync, false, payload);
             }
             
+            if(F < 0)
+                F += 2 * W;
+            else {
+                F += 2 * (W - H);
+                x += xinc;
+            }
+            y += yinc;
         }
     }
-			
+
+    if(thickness <= 1) {
+        set_pixel_color_with_style(payload, tex, x2, y2);
+    }
+    else {
+        set_hash_value(hash_arg, "fill", Qtrue);
+        circle_do_action(x2, y2, thickness / 2, tex, hash_arg, no_sync, false, payload);
+                
+    }
     draw_epilogue(&cur, tex, primary);
 }
 /** end line **/
@@ -311,7 +319,7 @@ rect_do_action(int x1, int y1, int x2, int y2, texture_info * tex, VALUE hash_ar
         int y;
         if(y1 > y2) SWAP(y1, y2);
 
-        for(y = y1; y < y2; y++)
+        for(y = y1; y <= y2; y++)
             line_do_action(x1, y, x2, y, tex, hash_arg, no_sync, false, payload);
     }
 
@@ -660,7 +668,7 @@ scan_fill_do_action(int x, int y, texture_info * tex, VALUE hash_arg,
                     /* update the drawing rectangle */
                     update_bounds(payload, x, y1, x, y1);
 
-                    if(!spanLeft && x > 1 && cmp_color(old_color, get_pixel_color(tex, x - 1, y1))) 
+                    if(!spanLeft && x > 0 && cmp_color(old_color, get_pixel_color(tex, x - 1, y1))) 
                         {
                             if(!push(x - 1, y1, tex->width - 1)) return;
                             spanLeft = true;

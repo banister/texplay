@@ -25,12 +25,8 @@ cache_entry*
 cache_create_entry(int tname) {
     float * new_array;
     int sidelength, new_element = cache.len;
-    GLint saved_tname;
 
     if(cache.len >= CACHE_SIZE) {  rb_raise(rb_eRuntimeError, "cache is full! increase CACHE_SIZE");  }
-
-    /* save current texture binding */
-    /*  glGetIntegerv(GL_TEXTURE_BINDING_2D, &saved_tname); */
 
     /* opengl initialization code */
     glEnable(GL_TEXTURE_2D);
@@ -53,11 +49,7 @@ cache_create_entry(int tname) {
     /* update size of cache */
     cache.len++;
 
-    /* restore saved texture binding */
-    /* glBindTexture(GL_TEXTURE_2D, saved_tname); */
-
     glDisable(GL_TEXTURE_2D);
-
 
     return &cache.entry[new_element];
 }
@@ -92,34 +84,26 @@ void
 cache_refresh_all(void) {
     float * tdata;
     int tname, index;
-    GLint saved_tname;
 
-    /* save current texture binding */
-    glGetIntegerv(GL_TEXTURE_BINDING_2D, &saved_tname);
+    /* opengl initialization code */
+    glEnable(GL_TEXTURE_2D);
 
     for(index = 0; index < cache.len; index++) {
         tdata = cache.entry[index].tdata;
         tname = cache.entry[index].tname;
 
-        /* opengl initialization code */
-        glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, tname);
 
         glGetTexImage(GL_TEXTURE_2D,  0, GL_RGBA, GL_FLOAT, (void*)(tdata));
     }
 
-    /* restore saved texture binding */
-    glBindTexture(GL_TEXTURE_2D, saved_tname);
+    glDisable(GL_TEXTURE_2D);
 }
 
 /* refresh the cache for a specific quad */
 void
 cache_refresh_entry(int tname) {
-    GLint saved_tname;
     cache_entry * entry;
-
-    /* save current texture binding */
-    glGetIntegerv(GL_TEXTURE_BINDING_2D, &saved_tname);
 
     entry = find_in_cache(tname);
     
@@ -129,7 +113,6 @@ cache_refresh_entry(int tname) {
 
     glGetTexImage(GL_TEXTURE_2D,  0, GL_RGBA, GL_FLOAT, (void*)(entry->tdata));
 
-    /* restore saved texture binding */
-    glBindTexture(GL_TEXTURE_2D, saved_tname);
+    glDisable(GL_TEXTURE_2D);
 }
 

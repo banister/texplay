@@ -5,30 +5,35 @@ begin
 rescue LoadError
 end
 
+direc = File.dirname(__FILE__)
+
 # include gosu first
 require 'rbconfig'
 require 'gosu'
+require '#{direc}/texplay/version'
 
 module TexPlay
-    TEXPLAY_VERSION = "0.2.700"
+    class << self
+        def on_setup(&block)
+            raise "need a block" if !block
+            
+            @__init_procs__ ||= []
+            @__init_procs__.push(block)
+        end
 
-    def self::on_setup(&block)
-        raise "need a block" if !block
-        
-        @__init_procs__ ||= []
-        @__init_procs__.push(block)
-    end
-
-    def self::setup(receiver)
-        if @__init_procs__ then
-            @__init_procs__.each do |init_proc|
-                receiver.instance_eval(&init_proc)
+        def setup(receiver)
+            if @__init_procs__ then
+                @__init_procs__.each do |init_proc|
+                    receiver.instance_eval(&init_proc)
+                end
             end
         end
-    end
 
-    def self::create_blank_image(window, width, height)
-        Gosu::Image.new(window, EmptyImageStub.new(width, height))
+        def create_blank_image(window, width, height)
+            Gosu::Image.new(window, EmptyImageStub.new(width, height))
+        end
+
+        alias_method :create_image, :create_blank_image
     end
 
     module Colors
@@ -90,6 +95,8 @@ module Gosu
 
         # bring in the TexPlay image manipulation methods
         include TexPlay
+
+        attr_reader :__window__
         
         class << self 
             alias_method :original_new, :new
@@ -100,8 +107,8 @@ module Gosu
                 obj = original_new(*args, &block)
 
                 # refresh the TexPlay image cache
-                if obj.width <= (TexPlay::TP_MAX_QUAD_SIZE - 2) &&
-                        obj.height <= (TexPlay::TP_MAX_QUAD_SIZE - 2) && obj.quad_cached? then
+                if obj.width <= (TexPlay::TP_MAX_QUAD_SIZE) &&
+                        obj.height <= (TexPlay::TP_MAX_QUAD_SIZE) && obj.quad_cached? then
                     
                     obj.refresh_cache
                 end
@@ -114,10 +121,6 @@ module Gosu
                 # return the new image
                 obj
             end
-        end
-        
-        def __window__
-            @__window__
         end
     end
 end

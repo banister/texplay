@@ -1,3 +1,14 @@
+6/12/09
+* fixed bug in line drawing code (wasn't drawing final pixel)
+* fixed bug in filled rect code (wasn't drawing final row)
+* fixed bug in flood fill (wasn't drawing on first column)
+* added glDisable(GL_TEXTURE_2D) calls to cache.c, and removed 'restore previous texture binding' (i doubt there is any previous binding to restore)
+* using version.rb to help manage versions
+
+23/11/09
+* fixed bug in texplay.rb. Replaced TexPlay::TP_MAX_QUAD_SIZE - 2 with
+just TexPlay::TP_MAX_QUAD_SIZE (the -2 is now built into the constant)
+
 16/10/09
 version 0.2.700
 * removed memory leak from Gosu::Image#to_blob, now writing directly to RSTRING_PTR

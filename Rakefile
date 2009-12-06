@@ -2,7 +2,8 @@ require 'rake/clean'
 require 'rake/gempackagetask'
 require 'rake/extensiontask'
 
-TEXPLAY_VERSION = "0.2.700"
+# get the texplay version
+require 'lib/texplay/version'
 
 $dlext = Config::CONFIG['DLEXT']
 
@@ -12,7 +13,7 @@ CLOBBER.include("**/*.#{$dlext}", "**/*~", "**/*#*", "**/*.log", "**/*.o")
 specification = Gem::Specification.new do |s|
     s.name = "texplay"
     s.summary = "TexPlay is a light-weight image manipulation framework for Ruby and Gosu"
-    s.version = TEXPLAY_VERSION
+    s.version = TexPlay::VERSION
     s.date = Time.now.strftime '%Y-%m-%d'
     s.author = "John Mair (banisterfiend)"
     s.email = 'jrmair@gmail.com'
