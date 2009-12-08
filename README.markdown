@@ -5,7 +5,7 @@
 INSTRUCTIONS 
 ============
 
-**TexPlay version 0.2.700**
+**TexPlay version 0.2.710**
 
 Gem installation:
 

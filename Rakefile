@@ -26,7 +26,7 @@ specification = Gem::Specification.new do |s|
 
     s.extensions = ["ext/texplay/extconf.rb"]
     s.files =  ["Rakefile", "README.markdown", "CHANGELOG", 
-                "lib/texplay.rb", "lib/texplay-contrib.rb"] +
+                "lib/texplay.rb", "lib/texplay-contrib.rb", "lib/texplay/version.rb"] +
         FileList["ext/**/extconf.rb", "ext/**/*.h", "ext/**/*.c", "examples/*.rb",
                  "examples/media/*"].to_a 
 end

@@ -10,7 +10,7 @@ direc = File.dirname(__FILE__)
 # include gosu first
 require 'rbconfig'
 require 'gosu'
-require '#{direc}/texplay/version'
+require "#{direc}/texplay/version"
 
 module TexPlay
     class << self
