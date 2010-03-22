@@ -21,4 +21,3 @@ end
 w = W.new
 w.show
 
-C

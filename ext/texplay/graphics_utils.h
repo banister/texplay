@@ -19,17 +19,4 @@ float* get_pixel_data(texture_info * tex, int x, int y);
 /* create a blank gosu image of width and height */
 VALUE create_image(VALUE window, int width, int height);
 
-typedef struct {
-    float * data;
-} RawImageData;
-
-static inline VALUE
-wrap_raw_image(float * image_data) {
-    RawImageData * c_data;
-    VALUE ret = Data_Make_Struct(cImageData, RawImageData, 0, NULL, c_data);
-    c_data->data = image_data;
-    return ret;    
-}
-
-
 #endif
