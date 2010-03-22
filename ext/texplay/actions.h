@@ -1,9 +1,17 @@
 #ifndef GUARD_ACTIONS_H
 #define GUARD_ACTIONS_H
 
+#include "texplay.h"
+
+/* used by line_do_action */
+typedef struct {
+  int x, y;
+  rgba color;
+} trace_match;
+
 
 /* lines */
-void line_do_action(int, int, int, int, texture_info *, VALUE, sync, bool primary, action_struct * payload);
+trace_match line_do_action(int, int, int, int, texture_info *, VALUE, sync, bool primary, action_struct * payload);
 
 /* circles */
 void circle_do_action(int, int, int, texture_info *, VALUE, sync, bool primary, action_struct * payload);

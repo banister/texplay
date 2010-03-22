@@ -40,6 +40,19 @@ typedef enum e_sync_mode {
     lazy_sync, eager_sync, no_sync
 } sync;
 
+typedef enum {
+  clear, copy, noop,
+  set, copy_inverted,
+  invert, and_reverse, and,
+  or, nand, nor, xor,
+  equiv, and_inverted,
+  or_inverted, additive,
+  multiply, screen, overlay,
+  darken, lighten, colordodge,
+  colorburn, hardlight, softlight,
+  difference, exclusion
+} draw_mode;
+
 /* structs */
 typedef struct s_rgba {
     float red, green, blue, alpha;
@@ -66,6 +79,7 @@ typedef struct {
     int ymax;
 } image_bounds;
 
+
 typedef struct action_struct {
     int xmin, ymin, xmax, ymax;
     sync sync_mode;
@@ -84,8 +98,8 @@ typedef struct action_struct {
     struct {
 
         /* color control, dynamic */
-        VALUE color_control_proc;
         bool has_color_control_proc;
+        VALUE color_control_proc;
         int color_control_arity;
 
         /* color control, static */
@@ -94,11 +108,20 @@ typedef struct action_struct {
         rgba color_add;
 
         /* texture fill */
-        texture_info source_tex;
         bool has_source_texture;
+        texture_info source_tex;
+
+        /* lerp */
+        bool has_lerp;
+        float lerp;
 
         /* alpha blend */
         bool alpha_blend;
+
+        /* drawing mode */
+        bool has_drawing_mode;
+        draw_mode drawing_mode;
+      
     } pen;
 
 } action_struct;

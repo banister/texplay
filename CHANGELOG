@@ -1,3 +1,13 @@
+23/03/10
+version 0.2.800
+* added 28 drawing modes (using :mode option)
+* added linear interpolation (:lerp)
+* added 'trace' option to line for efficient pixel-based collision detection
+	
+12/03/10
+version 0.2.721	
+* fixed bug in alpha_blend (now blends alpha channels too)
+
 6/12/09
 version 0.2.710
 * fixed bug in line drawing code (wasn't drawing final pixel)

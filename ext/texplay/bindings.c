@@ -15,6 +15,7 @@
 
 #include "texplay.h"
 #include "utils.h"
+#include "graphics_utils.h"
 #include "bindings.h"
 #include "actions.h"
 #include "cache.h"
@@ -504,7 +505,18 @@ m_flood_fill(int argc, VALUE * argv, VALUE self)
     
     return self;
 }
-    
+
+static inline VALUE
+convert_trace_match_to_ruby_array(trace_match match)
+{
+  VALUE ary = rb_ary_new();
+
+  rb_ary_store(ary, 0, INT2FIX(match.x));
+  rb_ary_store(ary, 1, INT2FIX(match.y));
+  rb_ary_store(ary, 2, convert_rgba_to_rb_color(&match.color));
+
+  return ary;
+}
 
 /* line action */
 VALUE
@@ -514,6 +526,7 @@ m_line(int argc, VALUE * argv, VALUE self)
     int last = argc - 1;
     VALUE options;
     texture_info tex;
+    trace_match match;
 
     ADJUST_SELF(self);
 
@@ -525,7 +538,14 @@ m_line(int argc, VALUE * argv, VALUE self)
 
     get_texture_info(self, &tex);
 
-    line_do_action(x1, y1, x2, y2, &tex, options, sync_mode, true, NULL);
+    match = line_do_action(x1, y1, x2, y2, &tex, options, sync_mode, true, NULL);
+
+    if (has_optional_hash_arg(options, "trace")) {
+      if (match.x == -1)
+        return Qnil;
+      else
+        return convert_trace_match_to_ruby_array(match);
+    }
 
     return self;
 }

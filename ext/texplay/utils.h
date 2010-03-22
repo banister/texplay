@@ -8,6 +8,8 @@
 #define IMAGE_COLOR 2
 #define USER_DEFAULTS 3 
 
+/* shared global */
+extern const rgba not_a_color_v;
 
 /* color and pixel related functions */
 rgba find_color_from_string(char * try_color);
@@ -85,8 +87,6 @@ void check_image(VALUE image);
 /* is try_image a Gosu::Image ? */
 bool is_gosu_image(VALUE try_image);
 
-/* create a blank gosu image of width and height */
-VALUE create_image(VALUE window, int width, int height);
 
 /* make boundaries sane */
 void constrain_boundaries(int * x0, int * y0, int * x1, int * y1, int width, int height);

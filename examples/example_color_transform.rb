@@ -2,7 +2,7 @@ require 'rubygems'
 require 'common'
 require 'gosu'
 require 'texplay'
-require 'devil/gosu'
+#require 'devil/gosu'
 
 class W < Gosu::Window
     def initialize
@@ -30,13 +30,12 @@ class W < Gosu::Window
         @y2 += 1
 
 
-        @copy2.splice @img, 0, 0, :crop => [@x2 - @rad, @y2 - @rad, @x2 + @rad, @y2 + @rad]
-        @copy.splice @img, 0, 0, :crop => [@x - @rad, @y - @rad, @x + @rad, @y + @rad]
+        @copy2.splice @img, 0, 0, :crop => [@x2 - @rad, @y2 - @rad, @x2 + @rad, @y2 + @rad], :sync_mode => :no_sync
+        @copy.splice @img, 0, 0, :crop => [@x - @rad, @y - @rad, @x + @rad, @y + @rad], :sync_mode => :no_sync
         @img.
-            circle @x, @y, @rad, :fill => true,
-        :color_control => { :mult => [1, 1, 1, 1] }
+            circle @x, @y, @rad, :fill => true, :lerp => 0.3, :color => :red
 
-         #    circle @x2, @y2, @rad, :fill => true,
+         @img.circle @x2, @y2, @rad, :fill => true, :lerp => 0.3, :color => :blue
 #             :color_control => { :mult => [0.3, 0.9, 0.3, 1] }
         
 
@@ -47,7 +46,7 @@ class W < Gosu::Window
         if button_down?(Gosu::KbEscape)
             IL.Enable(IL::ORIGIN_SET)
             IL.OriginFunc(IL::ORIGIN_UPPER_LEFT)
-            screenshot.crop(0,0, 500, 500).save("screenshot.jpg").free
+#            screenshot.crop(0,0, 500, 500).save("screenshot.jpg").free
             exit
         end  
         

@@ -32,8 +32,8 @@
                           :: "r" (X), "r" (Y)); })
 
 */
-/* internal linkage with static duration */
-static const rgba not_a_color_v = { -1.0, -1.0, -1.0, -1.0 };
+/* external linkage with static duration */
+const rgba not_a_color_v = { -1.0, -1.0, -1.0, -1.0 };
 
 /* utility functions */
 char*
@@ -276,28 +276,7 @@ save_rgba_to_image_local_color(VALUE image, rgba color)
     return ilc;
 }
 
-/* if 2nd param is Qnil, then create a blank image with 'width' and 'height
-   otherwise, try to use the 2nd param (dup) to create a duplicate image 
- */
-VALUE
-create_image(VALUE window, int width, int height)
-{
-    VALUE gosu = rb_const_get(rb_cObject, rb_intern("Gosu"));
-    VALUE image = rb_const_get(gosu, rb_intern("Image"));
 
-    VALUE TP = rb_const_get(rb_cObject, rb_intern("TexPlay"));
-    VALUE EmptyImageStub = rb_const_get(TP, rb_intern("EmptyImageStub"));
-    
-    VALUE rmagick_img;
-    VALUE new_image;
-
-    rmagick_img = rb_funcall(EmptyImageStub, rb_intern("new"), 2, INT2FIX(width), INT2FIX(height));
-
-    new_image = rb_funcall(image, rb_intern("new"), 2, window, rmagick_img);
-
-    return new_image;
-}
-    
 
 bool
 not_a_color(rgba color1) 
@@ -330,80 +309,6 @@ void
 zero_color(float * tex) 
 {
     memset(tex, 0, 4 * sizeof(float));
-}
-
-rgba
-get_pixel_color_from_chunk(float * chunk, int width, int height, int x, int y)
-{
-    rgba my_color;
-
-    int offset;
-
-    if(x > (width - 1) || x < 0 || y > (height - 1) || y < 0)
-        return not_a_color_v;
-
-    offset = 4 * (x + y * width);
-
-    my_color.red = chunk[offset + red];
-    my_color.green = chunk[offset + green];
-    my_color.blue = chunk[offset + blue];
-    my_color.alpha = chunk[offset + alpha];
-
-    return my_color;
-}
-
-
-rgba
-get_pixel_color(texture_info * tex, int x, int y) 
-{
-    rgba my_color;
-    
-    int offset;
-
-    /* if pixel location is out of range return not_a_color_v */
-    if (x > (tex->width - 1) || x < 0 || y > (tex->height - 1) || y < 0)
-        return not_a_color_v;
-
-    offset = calc_pixel_offset(tex, x, y);
-    
-    my_color.red = tex->td_array[offset + red];
-    my_color.green = tex->td_array[offset + green];
-    my_color.blue = tex->td_array[offset + blue];
-    my_color.alpha = tex->td_array[offset + alpha];
-
-    return my_color;
-}
-
-/* return the array where pixel data is stored */
-float*
-get_pixel_data(texture_info * tex, int x, int y) 
-{
-    int offset = calc_pixel_offset(tex, x, y); 
-
-    return &tex->td_array[offset];
-}
-
-/* set the pixel color at (x, y) */
-void
-set_pixel_color(rgba * pixel_color, texture_info * tex, int x, int y) 
-{
-    float * tex_data; 
-
-    /* should pixel be drawn ? */
-    if (x > (tex->width - 1) || x < 0 || y > (tex->height - 1) || y < 0)
-        return;
-
-    /* if not a color then do not draw */
-    if(not_a_color(*pixel_color))
-        return;
-    
-    tex_data = get_pixel_data(tex, x, y);
-
-    /* set the pixel color */
-    tex_data[red] = pixel_color->red;
-    tex_data[green] = pixel_color->green;
-    tex_data[blue] = pixel_color->blue;
-    tex_data[alpha] = pixel_color->alpha;    
 }
 
 rgba
@@ -721,176 +626,50 @@ calc_pixel_offset(texture_info * tex, int x, int y)
     return offset;
 }
 
-/* from Texure.cpp in Gosu Graphics folder */
+/* NEWEST version that solves segfault on linux, temporarily
+   out of action due to unavailability of MAX_TEXTURE_SIZE constant
+   in ruby 1.8 */
+/*
+unsigned
+max_quad_size(void)
+{
+
+    static unsigned size = 0;
+    
+    if (size == 0) {
+      VALUE gosu = rb_const_get(rb_cObject, rb_intern("Gosu"));
+      VALUE rb_size = rb_const_get(gosu, rb_intern("MAX_TEXTURE_SIZE"));
+
+      size = FIX2INT(rb_size);
+    }
+    
+    return size;
+}
+*/
+
+ /* old version for quick update */
 unsigned
 max_quad_size(void)
 {
 #ifdef __APPLE__
-    return 1024;
+  return 1024;
 #else
-    static unsigned MIN_SIZE = 256, MAX_SIZE = 1024;
-
-    static unsigned size = 0;
-    if (size == 0)
-        {
-            GLint width = 1;
-            size = MIN_SIZE / 2;
-            do {
-                size *= 2;
-                glTexImage2D(GL_PROXY_TEXTURE_2D, 0, 4, size * 2, size * 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-                glGetTexLevelParameteriv(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width); 
-            } while (width != 0 && size < MAX_SIZE);
-        }
-    
-    return size;
-#endif
-}
-
-/* ensure gl_tex_info returns non nil */
-VALUE
-check_for_texture_info(VALUE image) 
-{
-    VALUE info;
-
-    info = rb_funcall(image, rb_intern("gl_tex_info"), 0);
-    
-    if(NIL_P(info)) {
-        VALUE image_name = rb_inspect(image);
-        int width = FIX2INT(rb_funcall(image, rb_intern("width"), 0));
-        int height = FIX2INT(rb_funcall(image, rb_intern("height"), 0));
-        
-        rb_raise(rb_eException, "Error: gl_tex_info returns nil for %s (%i x %i). Could be caused by "
-                 "very large image or Gosu bug. Try updating Gosu or use a smaller image. Note: TexPlay should"
-                 " be able to work with %i x %i images.",
-                 StringValuePtr(image_name), width, height, max_quad_size() - 2, max_quad_size() - 2);
+  static unsigned MIN_SIZE = 256, MAX_SIZE = 1024;
+ 
+  static unsigned size = 0;
+  if (size == 0)
+    {
+      GLint width = 1;
+      size = MIN_SIZE / 2;
+      do {
+        size *= 2;
+        glTexImage2D(GL_PROXY_TEXTURE_2D, 0, 4, size * 2, size * 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+        glGetTexLevelParameteriv(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width); 
+      } while (width != 0 && size < MAX_SIZE);
     }
-
-    return info;
-}
-
-float *
-allocate_texture(int width, int height)
-{
-    float * new_texture;
-    int mval;
     
-    mval = 4 * width * height * sizeof(float);
-    assert(mval > 0); 
-        
-    new_texture = malloc(mval);
-    
-    return (float *)new_texture;
-}
-                 
-/* responsible for syncing a subimage to gl */
-void
-sync_to_gl(int tex_name, int x_offset, int y_offset, int width, int height, void * sub)
-{
-    /* set the opengl texture context */
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, tex_name);
-
-    /* sync subtexture */
-    glTexSubImage2D(GL_TEXTURE_2D, 0, x_offset, y_offset, width, height,
-                    GL_RGBA, GL_FLOAT, sub);
-
-    glDisable(GL_TEXTURE_2D);
-}
-
-void
-create_subtexture_and_sync_to_gl(image_bounds * img_bounds, texture_info * tex)
-{
-    /* image vars */
-    int xbound, ybound;
-    float * sub = NULL;
-
-    /* make the current action's boundaries sane; left until this point because we only
-       know height/width here */
-    constrain_boundaries(&img_bounds->xmin, &img_bounds->ymin, &img_bounds->xmax, &img_bounds->ymax,
-                         tex->width, tex->height);
-    
-    /* helper variables */
-    ybound = img_bounds->ymax - img_bounds->ymin + 1;
-    xbound = img_bounds->xmax - img_bounds->xmin + 1;
-        
-    sub = get_image_chunk(tex, img_bounds->xmin, img_bounds->ymin, img_bounds->xmax, img_bounds->ymax);
-
-    sync_to_gl(tex->tname, tex->x_offset + img_bounds->xmin, tex->y_offset + img_bounds->ymin, xbound,
-               ybound, (void*)sub);
-
-    free(sub);
-}
-
-float *
-get_image_chunk(texture_info * tex, int xmin, int ymin, int xmax, int ymax)
-{
-    int xbound;
-    int ybound;
-    int x, y;
-    float * image_buf = NULL;
-
-    constrain_boundaries(&xmin, &ymin, &xmax, &ymax, tex->width, tex->height);
-
-    xbound = xmax - xmin + 1;
-    ybound = ymax - ymin + 1;
-
-    image_buf = allocate_texture(xbound, ybound);
-
-    for(y = 0; y < ybound; y++)
-        for(x = 0; x < xbound; x++) {
-            int buf_index = 4 * (x + y * xbound);
-                
-            int offset = calc_pixel_offset(tex, x + xmin, y + ymin);
-
-            color_copy(tex->td_array + offset, image_buf + buf_index);
-        }
-
-    return image_buf;
-}
-
-/* get information from texture */
-void
-get_texture_info(VALUE image, texture_info * tex) 
-{
-    VALUE info, gc_state_off;
-    int toppos, leftpos;
-    float top, left;    
-    cache_entry * entry;
-
-    /* hack to prevent segfault */
-    gc_state_off = rb_gc_disable();
-
-    tex->width = FIX2INT(rb_funcall(image, rb_intern("width"), 0));
-    tex->height = FIX2INT(rb_funcall(image, rb_intern("height"), 0));
-
-    /* ensure gl_tex_info returns non nil */
-    info = check_for_texture_info(image);
-
-    top = NUM2DBL(rb_funcall(info, rb_intern("top"), 0));
-    left = NUM2DBL(rb_funcall(info, rb_intern("left"), 0));
-    tex->tname = FIX2INT(rb_funcall(info ,rb_intern("tex_name"),0));
-
-    /* search for texture in cache (& create if not extant) */
-    entry = find_or_create_cache_entry(tex->tname);
-
-    tex->td_array = entry->tdata;
-    tex->yincr = entry->sidelength;
-
-    /* scratch variables */
-    toppos = ROUND(top * entry->sidelength * entry->sidelength);
-    leftpos = ROUND(left * entry->sidelength);
-
-    /* find the first pixel for the image */
-    tex->firstpixel = (int)(toppos + leftpos);
-
-    tex->x_offset = ROUND(left * tex->yincr);
-    tex->y_offset = ROUND(top * tex->yincr);
-
-    /* save the associated Gosu::Image */
-    tex->image = image;
-    
-    /* only enable gc if was enabled on function entry */
-    if(!gc_state_off) rb_gc_enable();
+  return size;
+#endif
 }
 
 /* point format utilities */
@@ -930,8 +709,7 @@ power(float base, int exp)
     }
     else if(exp == 0) return 1;
     else {
-        int k;
-        for(k = exp; k >= 1; k--) {
+        for(int k = exp; k >= 1; k--) {
             ans = ans * base;
         }
         return ans;
@@ -949,9 +727,6 @@ fact(int n)
 unsigned
 comb(int n, int r)
 {
-    /* double temp = fact(n) / (fact(r) * fact(n - r)); */
-    /* return temp; */
-
     /* nCr is symmetrical about n / 2 */
     if(r > (n / 2))
         r = n - r;
@@ -963,8 +738,7 @@ unsigned
 perm(int n, int r)
 {
     int val = 1;
-    int i;
-    for(i = n; i > (n - r); i--)
+    for(int i = n; i > (n - r); i--)
         val *= i;
 
     return val;
