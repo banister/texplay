@@ -1,3 +1,4 @@
+
 # (C) John Mair 2009, under the MIT licence
 
 begin
@@ -114,15 +115,35 @@ module Gosu
                 end
 
                 # run custom setup
-                TexPlay::setup(obj)
+                TexPlay.setup(obj)
 
-                 obj.instance_variable_set(:@__window__, args.first)
+                obj.instance_variable_set(:@__window__, args.first)
 
                 # return the new image
                 obj
             end
+            
+            alias_method :original_from_text, :from_text
+
+            def from_text(*args, &block)
+
+                # invoke old behaviour
+                obj = original_from_text(*args, &block)
+
+                # refresh the TexPlay image cache
+                if obj.width <= (TexPlay::TP_MAX_QUAD_SIZE) &&
+                        obj.height <= (TexPlay::TP_MAX_QUAD_SIZE) && obj.quad_cached? then
+                    
+                    obj.refresh_cache
+                end
+
+                obj
+            end
         end
-    end
+
+        alias_method :rows, :height
+        alias_method :columns, :width             
+        end
 end
 
 # a bug in ruby 1.8.6 rb_eval_string() means i must define this here (rather than in texplay.c)

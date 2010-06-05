@@ -42,8 +42,6 @@ line_do_action(int x1, int y1, int x2, int y2, texture_info * tex, VALUE hash_ar
     rgba trace_color;
     trace_mode_type trace_mode = no_mode;
     
-
-
     if(has_optional_hash_arg(hash_arg, "thickness")) 
         thickness = NUM2INT(get_from_hash(hash_arg, "thickness"));
     
@@ -982,7 +980,7 @@ splice_do_action(int x0, int y0, int cx1, int cy1, int cx2, int cy2, texture_inf
                 bool chroma_match = cmp_color(payload->color, chromakey);
                 
                 /* look at released 0.2.0 code to see how USED to do this.
-                   this is now a simplified boolean expression */
+                   this is now a simplified boolean expression (XOR) */
                 if(chroma_match == inverse_chroma)
                     set_pixel_color_with_style(payload, tex, x0 + x, y0 + y);
             }

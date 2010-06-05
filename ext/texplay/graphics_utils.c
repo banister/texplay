@@ -16,6 +16,7 @@ static void process_common_hash_args(action_struct * cur, VALUE * hash_arg, sync
 static void prepare_drawing_mode(action_struct * cur);
 static void prepare_fill_texture(action_struct * cur);
 static void prepare_color_control(action_struct * cur);
+static void prepare_color_select(action_struct * cur);
 static rgba apply_lerp(action_struct * payload, texture_info * tex, int x, int y);
 static rgba apply_alpha_blend(action_struct * payload, texture_info * tex, int x, int y, rgba blended_pixel);
 static rgba apply_drawing_mode(action_struct * payload, texture_info * tex, int x, int y);
@@ -145,6 +146,31 @@ set_pixel_color(rgba * pixel_color, texture_info * tex, int x, int y)
     tex_data[alpha] = pixel_color->alpha;    
 }
 
+static bool
+skip_pixel(action_struct * payload, texture_info * tex, int x, int y)
+{
+  if (!payload->pen.has_color_select) return false;
+  
+  rgba source_color = payload->color;
+  rgba dest_color = get_pixel_color(tex, x, y);
+  
+  if (is_a_color(payload->pen.source_select) &&
+      !cmp_color(source_color, payload->pen.source_select))
+    return true;
+  if (is_a_color(payload->pen.source_ignore) &&
+      cmp_color(source_color, payload->pen.source_ignore))
+    return true;
+  if (is_a_color(payload->pen.dest_select) &&
+      !cmp_color(dest_color, payload->pen.dest_select))
+    return true;
+  if (is_a_color(payload->pen.dest_ignore) &&
+      cmp_color(dest_color, payload->pen.dest_ignore))
+    return true;
+
+  return false;
+}
+
+
 void
 set_pixel_color_with_style(action_struct * payload, texture_info * tex, int x, int y)
 {
@@ -152,6 +178,10 @@ set_pixel_color_with_style(action_struct * payload, texture_info * tex, int x, i
     rgba blended_pixel;
 
     blended_pixel = payload->color;
+
+    /* should skip this pixel? */
+    if (skip_pixel(payload, tex, x, y))
+      return;
 
     /* for linear interpolation */
     if(payload->pen.has_lerp) {
@@ -168,12 +198,12 @@ set_pixel_color_with_style(action_struct * payload, texture_info * tex, int x, i
                                          x % payload->pen.source_tex.width,
                                          y % payload->pen.source_tex.height);
 
-    /* for color_control block */
+    /* for color_control proc */
     if(payload->pen.has_color_control_proc)
         blended_pixel = exec_color_control_proc(payload, tex, x,  y, blended_pixel);
     
 
-    /*  TO DO: do bitwise pixel combinations here */
+    /* drawing modes */
     if(payload->pen.has_drawing_mode) {
       blended_pixel = apply_drawing_mode(payload, tex, x, y);
     }
@@ -293,6 +323,13 @@ initialize_action_struct(action_struct * cur, VALUE hash_arg, sync sync_mode)
 
     /* drawing mode is off by deafult */
     cur->pen.has_drawing_mode = false;
+
+    /* color selection */
+    cur->pen.has_color_select = false;
+    cur->pen.source_select = not_a_color_v;
+    cur->pen.source_ignore = not_a_color_v;
+    cur->pen.dest_select = not_a_color_v;
+    cur->pen.dest_select = not_a_color_v;
 }
     
 /* TODO: fix this function below, it's too ugly and bulky and weird **/
@@ -365,6 +402,9 @@ process_common_hash_args(action_struct * cur, VALUE * hash_arg, sync sync_mode, 
         
     }
 
+    /* prepare color selection */
+    prepare_color_select(cur);
+    
     /* process drawing mode */
     prepare_drawing_mode(cur);
 
@@ -450,14 +490,14 @@ prepare_drawing_mode(action_struct * cur)
         cur->pen.drawing_mode = darken;
       else if(draw_mode == string2sym("lighten"))
         cur->pen.drawing_mode = lighten;
-      else if(draw_mode == string2sym("colordodge"))
-        cur->pen.drawing_mode = colordodge;
-      else if(draw_mode == string2sym("colorburn"))
-        cur->pen.drawing_mode = colorburn;
-      else if(draw_mode == string2sym("hardlight"))
-        cur->pen.drawing_mode = hardlight;
-      else if(draw_mode == string2sym("softlight"))
-        cur->pen.drawing_mode = softlight;
+      else if(draw_mode == string2sym("color_dodge"))
+        cur->pen.drawing_mode = color_dodge;
+      else if(draw_mode == string2sym("color_burn"))
+        cur->pen.drawing_mode = color_burn;
+      else if(draw_mode == string2sym("hard_light"))
+        cur->pen.drawing_mode = hard_light;
+      else if(draw_mode == string2sym("soft_light"))
+        cur->pen.drawing_mode = soft_light;
       else if(draw_mode == string2sym("difference"))
         cur->pen.drawing_mode = difference;
       else if(draw_mode == string2sym("exclusion"))
@@ -491,10 +531,11 @@ prepare_color_control(action_struct * cur)
                 if(RARRAY_LEN(try_add) < 4)
                     rb_raise(rb_eArgError, ":color_control transform :add needs 4 parameters");
                 
-                cur->pen.color_add.red = NUM2DBL(get_from_array(try_add, 0));
-                cur->pen.color_add.green = NUM2DBL(get_from_array(try_add, 1));
-                cur->pen.color_add.blue = NUM2DBL(get_from_array(try_add, 2));
-                cur->pen.color_add.alpha = NUM2DBL(get_from_array(try_add, 3));
+                cur->pen.color_add = convert_rb_color_to_rgba(try_add);
+                /* cur->pen.color_add.red = NUM2DBL(get_from_array(try_add, 0)); */
+                /* cur->pen.color_add.green = NUM2DBL(get_from_array(try_add, 1)); */
+                /* cur->pen.color_add.blue = NUM2DBL(get_from_array(try_add, 2)); */
+                /* cur->pen.color_add.alpha = NUM2DBL(get_from_array(try_add, 3)); */
 
                 cur->pen.has_color_control_transform = true;
             }
@@ -502,10 +543,12 @@ prepare_color_control(action_struct * cur)
                 if(RARRAY_LEN(try_mult) < 4)
                     rb_raise(rb_eArgError, ":color_control transform :mult needs 4 parameters");
 
-                cur->pen.color_mult.red = NUM2DBL(get_from_array(try_mult, 0));
-                cur->pen.color_mult.green = NUM2DBL(get_from_array(try_mult, 1));
-                cur->pen.color_mult.blue = NUM2DBL(get_from_array(try_mult, 2));
-                cur->pen.color_mult.alpha = NUM2DBL(get_from_array(try_mult, 3));
+                cur->pen.color_mult = convert_rb_color_to_rgba(try_mult);
+
+                /* cur->pen.color_mult.red = NUM2DBL(get_from_array(try_mult, 0)); */
+                /* cur->pen.color_mult.green = NUM2DBL(get_from_array(try_mult, 1)); */
+                /* cur->pen.color_mult.blue = NUM2DBL(get_from_array(try_mult, 2)); */
+                /* cur->pen.color_mult.alpha = NUM2DBL(get_from_array(try_mult, 3)); */
 
                 cur->pen.has_color_control_transform = true;
             }
@@ -574,6 +617,39 @@ prepare_fill_texture(action_struct * payload)
             payload->pen.has_source_texture = true;
         }
     }
+}
+
+static void
+prepare_color_select(action_struct * payload)
+{
+  VALUE try_color = get_from_hash(payload->hash_arg,
+                                        "source_select");
+  if (!NIL_P(try_color)) {
+    payload->pen.source_select = convert_rb_color_to_rgba(try_color);
+    payload->pen.has_color_select = true;
+  }
+
+  try_color = get_from_hash(payload->hash_arg,
+                                        "source_ignore");
+  if (!NIL_P(try_color)) {
+    payload->pen.source_ignore = convert_rb_color_to_rgba(try_color);
+    payload->pen.has_color_select = true;
+  }
+
+  try_color = get_from_hash(payload->hash_arg,
+                                        "dest_select");
+  if (!NIL_P(try_color)) {
+    payload->pen.dest_select = convert_rb_color_to_rgba(try_color);
+    payload->pen.has_color_select = true;
+  }
+  
+  try_color = get_from_hash(payload->hash_arg,
+                                        "dest_ignore");
+  if (!NIL_P(try_color)) {
+    payload->pen.dest_ignore = convert_rb_color_to_rgba(try_color);
+    payload->pen.has_color_select = true;
+  }
+
 }
 
 /***********************************/
@@ -809,7 +885,6 @@ apply_drawing_mode(action_struct * payload, texture_info * tex, int x, int y)
       finished_pixel = mode_hardlight(source_pixel, dest_pixel);
 
       break;
-
     case darken:
       finished_pixel = (rgba) { MIN(source_pixel.red, dest_pixel.red),
                                 MIN(source_pixel.green, dest_pixel.green),
@@ -822,24 +897,24 @@ apply_drawing_mode(action_struct * payload, texture_info * tex, int x, int y)
                                 MAX(source_pixel.blue, dest_pixel.blue),
                                 MAX(source_pixel.alpha, dest_pixel.alpha) };
       break;
-    case colordodge:
+    case color_dodge:
       finished_pixel = (rgba) { mode_colordodge_channel(dest_pixel.red, source_pixel.red),
                                 mode_colordodge_channel(dest_pixel.green, source_pixel.green),
                                 mode_colordodge_channel(dest_pixel.blue, source_pixel.blue),
                                 mode_colordodge_channel(dest_pixel.alpha, source_pixel.alpha) };
                                 
       break;
-    case colorburn:
+    case color_burn:
       finished_pixel = (rgba) { mode_colorburn_channel(dest_pixel.red, source_pixel.red),
                                 mode_colorburn_channel(dest_pixel.green, source_pixel.green),
                                 mode_colorburn_channel(dest_pixel.blue, source_pixel.blue),
                                 mode_colorburn_channel(dest_pixel.alpha, source_pixel.alpha) };
       break;
-    case hardlight:
+    case hard_light:
       finished_pixel = mode_hardlight(dest_pixel, source_pixel);
 
       break;
-    case softlight:
+    case soft_light:
       finished_pixel = mode_softlight(dest_pixel, source_pixel);
 
       break;
@@ -948,7 +1023,6 @@ allocate_texture(int width, int height)
     int mval;
     
     mval = 4 * width * height * sizeof(float);
-    //    assert(mval > 0); 
         
     new_texture = malloc(mval);
     

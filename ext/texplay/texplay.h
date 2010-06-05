@@ -48,8 +48,8 @@ typedef enum {
   equiv, and_inverted,
   or_inverted, additive,
   multiply, screen, overlay,
-  darken, lighten, colordodge,
-  colorburn, hardlight, softlight,
+  darken, lighten, color_dodge,
+  color_burn, hard_light, soft_light,
   difference, exclusion
 } draw_mode;
 
@@ -121,6 +121,13 @@ typedef struct action_struct {
         /* drawing mode */
         bool has_drawing_mode;
         draw_mode drawing_mode;
+
+        /* color selection */
+        bool has_color_select;
+        rgba source_select;
+        rgba source_ignore;
+        rgba dest_select;
+        rgba dest_ignore;
       
     } pen;
 

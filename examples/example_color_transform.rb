@@ -13,31 +13,28 @@ class W < Gosu::Window
         
         @x2 = 400
         @y2 = 100
-        @rad = 50
+        @rad = 70
         @s = true
 
-        @copy = TexPlay.create_blank_image(self, @rad * 2 + 1, @rad * 2 + 1)
-        @copy2 = TexPlay.create_blank_image(self, @rad * 2 + 1, @rad * 2 + 1)
+        @copy = TexPlay.create_image(self, @rad * 2 + 1, @rad * 2 + 1)
+        @copy2 = TexPlay.create_image(self, @rad * 2 + 1, @rad * 2 + 1)
     end
     
     def draw
 
 
-        @x += 1
-        @y += 1
+        @x += 3
+        @y += 3
 
-        @x2 -= 1
-        @y2 += 1
+        @x2 -= 3
+        @y2 += 3
 
 
         @copy2.splice @img, 0, 0, :crop => [@x2 - @rad, @y2 - @rad, @x2 + @rad, @y2 + @rad], :sync_mode => :no_sync
         @copy.splice @img, 0, 0, :crop => [@x - @rad, @y - @rad, @x + @rad, @y + @rad], :sync_mode => :no_sync
-        @img.
-            circle @x, @y, @rad, :fill => true, :lerp => 0.3, :color => :red
+        @img.rect @x - @rad, @y - @rad, @x + @rad, @y + @rad, :fill => true, :mode => :overlay, :color => :red
 
-         @img.circle @x2, @y2, @rad, :fill => true, :lerp => 0.3, :color => :blue
-#             :color_control => { :mult => [0.3, 0.9, 0.3, 1] }
-        
+      @img.rect @x2 - @rad, @y2 - @rad, @x2 + @rad, @y2 + @rad, :fill => true, :mode => :overlay, :color => :blue
 
 #        @img.force_sync [0,0, @img.width, @img.height]
 

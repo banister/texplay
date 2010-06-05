@@ -23,6 +23,8 @@ bool not_a_color(rgba color1);
 bool is_a_color(rgba color1);
 VALUE convert_rgba_to_rb_color(rgba * pix);
 rgba convert_rb_color_to_rgba(VALUE cval);
+bool is_gosu_color(VALUE try_color);
+rgba convert_gosu_to_rgba_color(VALUE gcolor);
 
 VALUE save_rgba_to_image_local_color(VALUE image, rgba color);
 rgba convert_image_local_color_to_rgba(VALUE image);

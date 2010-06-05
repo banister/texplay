@@ -371,6 +371,19 @@ find_color_from_string(char * try_color)
     return cur_color;
 }
 
+rgba
+convert_gosu_to_rgba_color(VALUE gcolor)
+{
+
+  return (rgba) { 
+          FIX2INT(rb_funcall(gcolor, rb_intern("red"), 0)) / 255.0,
+          FIX2INT(rb_funcall(gcolor, rb_intern("green"), 0)) / 255.0,
+          FIX2INT(rb_funcall(gcolor, rb_intern("blue"), 0)) / 255.0,
+          FIX2INT(rb_funcall(gcolor, rb_intern("alpha"), 0)) / 255.0
+            };
+}
+
+
 /* convert C color to Ruby color */
 VALUE
 convert_rgba_to_rb_color(rgba * pix)
@@ -392,6 +405,8 @@ rgba
 convert_rb_color_to_rgba(VALUE cval)
 {
     rgba my_color;
+
+    if (is_gosu_color(cval)) return convert_gosu_to_rgba_color(cval);
     
     /* current color for actions */
     switch(TYPE(cval)) {
@@ -464,6 +479,16 @@ is_gosu_image(VALUE try_image)
 
     return false;
 }
+
+bool
+is_gosu_color(VALUE try_color)
+{
+    if(rb_respond_to(try_color, rb_intern("red")))
+        return true;
+
+    return false;
+}
+
 
 
 /** cohen-sutherland line clipper **/
@@ -626,10 +651,9 @@ calc_pixel_offset(texture_info * tex, int x, int y)
     return offset;
 }
 
-/* NEWEST version that solves segfault on linux, temporarily
-   out of action due to unavailability of MAX_TEXTURE_SIZE constant
+/* NEWEST version that solves segfault on linux, back
+   in  action due to availability of MAX_TEXTURE_SIZE constant
    in ruby 1.8 */
-/*
 unsigned
 max_quad_size(void)
 {
@@ -645,32 +669,31 @@ max_quad_size(void)
     
     return size;
 }
-*/
 
- /* old version for quick update */
-unsigned
-max_quad_size(void)
-{
-#ifdef __APPLE__
-  return 1024;
-#else
-  static unsigned MIN_SIZE = 256, MAX_SIZE = 1024;
+ /* old version for quick update, OUT OF ACTIONN */
+/* unsigned */
+/* max_quad_size(void) */
+/* { */
+/* #ifdef __APPLE__ */
+/*   return 1024; */
+/* #else */
+/*   static unsigned MIN_SIZE = 256, MAX_SIZE = 1024; */
  
-  static unsigned size = 0;
-  if (size == 0)
-    {
-      GLint width = 1;
-      size = MIN_SIZE / 2;
-      do {
-        size *= 2;
-        glTexImage2D(GL_PROXY_TEXTURE_2D, 0, 4, size * 2, size * 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-        glGetTexLevelParameteriv(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width); 
-      } while (width != 0 && size < MAX_SIZE);
-    }
+/*   static unsigned size = 0; */
+/*   if (size == 0) */
+/*     { */
+/*       GLint width = 1; */
+/*       size = MIN_SIZE / 2; */
+/*       do { */
+/*         size *= 2; */
+/*         glTexImage2D(GL_PROXY_TEXTURE_2D, 0, 4, size * 2, size * 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0); */
+/*         glGetTexLevelParameteriv(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);  */
+/*       } while (width != 0 && size < MAX_SIZE); */
+/*     } */
     
-  return size;
-#endif
-}
+/*   return size; */
+/* #endif */
+/* } */
 
 /* point format utilities */
 bool

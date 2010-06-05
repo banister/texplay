@@ -5,7 +5,7 @@ require 'texplay'
 
 class W < Gosu::Window
   def initialize
-    super(1024, 768, false, 20)
+    super(500, 500, false, 20)
 
     @x1 = 10
     @x2 = 200
@@ -13,7 +13,7 @@ class W < Gosu::Window
     @y2 = 10
 
     @radius = 100.0
-    @inner = 60.0
+    @inner = 20.0
     @max_opacity = 0.5
     @max_opacity2 = 0.5
 
