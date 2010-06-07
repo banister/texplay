@@ -418,6 +418,28 @@ convert_rgba_to_rb_color(rgba * pix)
     return pix_array;
 }
 
+/* convert C color to gosu color */
+VALUE
+convert_rgba_to_gosu_color(rgba * pix)
+{
+    VALUE gosu_color_class = 0;
+
+    if (gosu_color_class == 0) {
+        VALUE gosu_class = rb_const_get(rb_cObject, rb_intern("Gosu"));
+        gosu_color_class = rb_const_get(gosu_class, rb_intern("Color"));
+    }
+    
+    VALUE gosu_color = rb_funcall(gosu_color_class, rb_intern("new"), 0);
+
+    rb_funcall(gosu_color, rb_intern("red="), 1, INT2FIX(pix->red * 255));
+    rb_funcall(gosu_color, rb_intern("green="), 1, INT2FIX(pix->green * 255));
+    rb_funcall(gosu_color, rb_intern("blue="), 1, INT2FIX(pix->blue * 255));
+    rb_funcall(gosu_color, rb_intern("alpha="), 1, INT2FIX(pix->alpha * 255));
+
+    return gosu_color;
+}
+
+
 
 /* convert Ruby color to C color */
 rgba

@@ -27,6 +27,8 @@ bool is_gosu_color(VALUE try_color);
 bool is_rb_raw_color(VALUE cval);
 bool not_rb_raw_color(VALUE cval);
 rgba convert_gosu_to_rgba_color(VALUE gcolor);
+VALUE convert_rgba_to_gosu_color(rgba * pix);
+
 
 VALUE save_rgba_to_image_local_color(VALUE image, rgba color);
 rgba convert_image_local_color_to_rgba(VALUE image);

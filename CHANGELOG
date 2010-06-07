@@ -1,3 +1,16 @@
+7/6/10
+version 0.2.900
+* added source_select, source_ignore, dest_select, dest_ignore
+* :chroma_key now deprecated (by above functionality)
+* using Gosu::MAX_TEXTURE_SIZE, hopefully fixes crashes on some linux
+	distros
+* Gosu::Color objects now accepted (and optionally returned by get_pixel)
+* Monkey patched Gosu::Image.from_text() for auto-caching
+* bitwise drawing modes no longer affect alpha
+* rows and columns methods added to Gosu::Image, allowed Gosu::Image to be
+	reopened by Gosu::Image.new (works with Gosu::Image#to_blob)
+
+
 23/03/10
 version 0.2.800
 * added 28 drawing modes (using :mode option)

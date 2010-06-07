@@ -16,7 +16,7 @@ class W < Gosu::Window
         # perform some simple drawing actions 
         @img.line 0,0, @img.width - 1, @img.height - 1, :color => Gosu::Color::AQUA
         @img.circle 400, 100, 40, :fill => true, :color => [rand, rand, rand, 1]
-      @img.rect 200, 300, 300, 400, :fill => true, :color => :red, :source_ignore => :green,
+      @img.rect 200, 300, 300, 400, :fill => true, :color => :red, :source_ignore => [:green],
       :color_control => proc {
         rand(2) == 1 ? :red : :blue
       }
@@ -26,8 +26,14 @@ class W < Gosu::Window
 
         # NOTE: chroma_key means NOT to splice in that color (pixels with that color are skipped)
         # (chroma_key_not does the opposite, it skips pixels that do NOT have that color)
-        @img.splice @gosu, 210, 330, :chroma_key => :green,
-      :source_ignore => []
+        @img.splice @gosu, 210, 330,
+      :dest_select => [:blue], :source_ignore => [:alpha, :green]
+
+      @img.line 200, 300, 300, 400, :thickness => 5,
+      :dest_select => :blue, :dest_ignore => :red
+
+      puts @img.get_pixel 200, 310
+      puts @img.get_pixel 200, 310, :color_mode => :gosu
     end
     
     def draw

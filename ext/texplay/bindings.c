@@ -387,8 +387,12 @@ VALUE
 m_getpixel(int argc, VALUE * argv, VALUE self) 
 {
     int x1, y1;
+    int last = argc - 1;
     texture_info tex;
     rgba pix;
+    bool gosu_color_mode = false;
+    VALUE options;
+    
 
     /* change self to hidden self if using gen_eval */
     ADJUST_SELF(self);
@@ -398,13 +402,22 @@ m_getpixel(int argc, VALUE * argv, VALUE self)
     /* get texture info */
     get_texture_info(self, &tex);
 
+    options = argv[last];
+
+    if (hash_value_is(options, "color_mode", string2sym("gosu")))
+      gosu_color_mode = true;
+
     /* locate the desired pixel; */
     pix = get_pixel_color(&tex, x1, y1);
 
     if(not_a_color(pix))
         return Qnil;
-    else
+    else {
+      if (gosu_color_mode)
+        return convert_rgba_to_gosu_color(&pix);
+      else
         return convert_rgba_to_rb_color(&pix);
+    }
 }
 
 /* circle action */

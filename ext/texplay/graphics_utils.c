@@ -150,30 +150,48 @@ set_pixel_color(rgba * pixel_color, texture_info * tex, int x, int y)
 static bool
 skip_pixel(rgba source_color, action_struct * payload, texture_info * tex, int x, int y)
 {
+  
   if (!payload->pen.has_color_select) return false;
   
   rgba dest_color = get_pixel_color(tex, x, y);
+  bool color_match = false;
   
-  if (payload->pen.source_select.size > 0) 
-      for (int i = 0; i < payload->pen.source_select.size; i++)
-          if (!cmp_color(source_color, payload->pen.source_select.colors[i]))
-              return true;
+  if (payload->pen.source_select.size > 0) {
+    for (int i = 0; i < payload->pen.source_select.size; i++) {
+      if (cmp_color(source_color, payload->pen.source_select.colors[i])) {
+              color_match = true;
+              break;
+      }
+    }
+    if (!color_match) return true;
+  }
+  
 
-  if (payload->pen.source_ignore.size > 0) 
-      for (int i = 0; i < payload->pen.source_ignore.size; i++)
+  if (payload->pen.source_ignore.size > 0) {
+    for (int i = 0; i < payload->pen.source_ignore.size; i++) {
           if (cmp_color(source_color, payload->pen.source_ignore.colors[i]))
               return true;
+    }
+  }
 
-  if (payload->pen.dest_select.size > 0) 
-      for (int i = 0; i < payload->pen.dest_select.size; i++)
-          if (!cmp_color(dest_color, payload->pen.dest_select.colors[i]))
-              return true;
+  color_match = false;
+  if (payload->pen.dest_select.size > 0) {
+    for (int i = 0; i < payload->pen.dest_select.size; i++) {
+        if (cmp_color(dest_color, payload->pen.dest_select.colors[i])) {
+            color_match = true;
+            break;
+        }
+    }
+    if (!color_match) return true;
+  }
 
-  if (payload->pen.dest_ignore.size > 0) 
-      for (int i = 0; i < payload->pen.dest_ignore.size; i++)
+  if (payload->pen.dest_ignore.size > 0) {
+    for (int i = 0; i < payload->pen.dest_ignore.size; i++) {
           if (cmp_color(dest_color, payload->pen.dest_ignore.colors[i]))
               return true;
-  
+    }
+  }
+
   return false;
 }
 
