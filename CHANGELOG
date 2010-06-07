@@ -1,4 +1,8 @@
 7/6/10
+version 0.2.910
+* 1.8.7 incompatibility fixed
+	
+7/6/10
 version 0.2.900
 * added source_select, source_ignore, dest_select, dest_ignore
 * :chroma_key now deprecated (by above functionality)

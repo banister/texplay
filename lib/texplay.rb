@@ -112,7 +112,7 @@ module Gosu
                 # invoke old behaviour
                 obj = original_new(*args, &block)
 
-                prepare_image(*args, obj)
+                prepare_image(obj, *args)
             end
             
             alias_method :original_from_text, :from_text
@@ -122,10 +122,10 @@ module Gosu
                 # invoke old behaviour
                 obj = original_from_text(*args, &block)
 
-                prepare_image(*args, obj)
+                prepare_image(obj, *args)
             end
 
-            def prepare_image(*args, obj)
+            def prepare_image(obj, *args)
 
                 # refresh the TexPlay image cache
                 if obj.width <= (TexPlay::TP_MAX_QUAD_SIZE) &&
