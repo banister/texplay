@@ -15,7 +15,7 @@
 #define YMAX_OOB OOB_VAL
 #define XMIN_OOB -OOB_VAL
 #define YMIN_OOB -OOB_VAL
-
+#define RGBA_LIST_SIZE 100
 #define PI 3.14159265358979
 
 /* macros */
@@ -40,6 +40,7 @@ typedef enum e_sync_mode {
     lazy_sync, eager_sync, no_sync
 } sync;
 
+
 typedef enum {
   clear, copy, noop,
   set, copy_inverted,
@@ -57,6 +58,12 @@ typedef enum {
 typedef struct s_rgba {
     float red, green, blue, alpha;
 } rgba;
+
+typedef struct {
+  rgba colors[RGBA_LIST_SIZE];
+  int size;
+} rgba_list;  
+
 
 /* stores image data */
 typedef struct {
@@ -122,12 +129,15 @@ typedef struct action_struct {
         bool has_drawing_mode;
         draw_mode drawing_mode;
 
+        
+
         /* color selection */
+      
         bool has_color_select;
-        rgba source_select;
-        rgba source_ignore;
-        rgba dest_select;
-        rgba dest_ignore;
+        rgba_list source_select;
+        rgba_list source_ignore;
+        rgba_list dest_select;
+        rgba_list dest_ignore;
       
     } pen;
 

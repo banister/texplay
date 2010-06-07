@@ -82,7 +82,7 @@ Init_texplay() {
     rb_define_singleton_method(jm_Module, "create_macro", M_create_macro, 1);
     rb_define_singleton_method(jm_Module, "remove_macro", M_remove_macro, 1);
     rb_define_singleton_method(jm_Module, "refresh_cache_all", M_refresh_cache_all, 0);
-    rb_define_singleton_method(jm_Module, "create_blank_image", M_create_blank, 3);
+    /* rb_define_singleton_method(jm_Module, "create_blank_image", M_create_blank, 3); */
 
     /** aliases; must be made on singleton class because we're using class methods **/
     rb_define_method(jm_Module, "box", m_rect, -1);

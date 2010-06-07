@@ -31,22 +31,23 @@ update_lazy_bounds(action_struct * cur, texture_info * tex)
 {
     
     /* only update global bounds if we're doing a lazy_sync */
-    if(cur->sync_mode == lazy_sync) {
-        int xmin, ymin, xmax, ymax;
-        VALUE lazy_bounds;
+    if (cur->sync_mode != lazy_sync)
+      return;
+    
+    VALUE lazy_bounds;
+    int xmin, ymin, xmax, ymax;
 
-        lazy_bounds = get_image_local(tex->image, LAZY_BOUNDS);
-
-        xmin = INT2FIX(MIN(cur->xmin, FIX2INT(get_from_array(lazy_bounds, 0))));
-        ymin = INT2FIX(MIN(cur->ymin, FIX2INT(get_from_array(lazy_bounds, 1))));
-        xmax = INT2FIX(MAX(cur->xmax, FIX2INT(get_from_array(lazy_bounds, 2))));
-        ymax = INT2FIX(MAX(cur->ymax, FIX2INT(get_from_array(lazy_bounds, 3))));
-
-        set_array_value(lazy_bounds, 0, xmin);
-        set_array_value(lazy_bounds, 1, ymin);
-        set_array_value(lazy_bounds, 2, xmax);
-        set_array_value(lazy_bounds, 3, ymax);
-    }
+    lazy_bounds = get_image_local(tex->image, LAZY_BOUNDS);
+    
+    xmin = INT2FIX(MIN(cur->xmin, FIX2INT(get_from_array(lazy_bounds, 0))));
+    ymin = INT2FIX(MIN(cur->ymin, FIX2INT(get_from_array(lazy_bounds, 1))));
+    xmax = INT2FIX(MAX(cur->xmax, FIX2INT(get_from_array(lazy_bounds, 2))));
+    ymax = INT2FIX(MAX(cur->ymax, FIX2INT(get_from_array(lazy_bounds, 3))));
+    
+    set_array_value(lazy_bounds, 0, xmin);
+    set_array_value(lazy_bounds, 1, ymin);
+    set_array_value(lazy_bounds, 2, xmax);
+    set_array_value(lazy_bounds, 3, ymax);
 }
 
 void
@@ -64,11 +65,11 @@ update_bounds(action_struct * cur, int xmin, int ymin, int xmax, int ymax)
 void
 set_local_bounds(action_struct * cur, int xmin, int ymin, int xmax, int ymax, texture_info * tex)
 {
-    if(cur->sync_mode == no_sync)
-        return;
 
     /* local bounds used by both eager_sync and lazy_sync: */
-    
+    if(cur->sync_mode == no_sync)
+        return;
+            
     /* eager sync: to demarcate precise area to sync to opengl */
     /* lazy sync: to update global bounds */
     cur->xmin = xmin;
@@ -147,26 +148,32 @@ set_pixel_color(rgba * pixel_color, texture_info * tex, int x, int y)
 }
 
 static bool
-skip_pixel(action_struct * payload, texture_info * tex, int x, int y)
+skip_pixel(rgba source_color, action_struct * payload, texture_info * tex, int x, int y)
 {
   if (!payload->pen.has_color_select) return false;
   
-  rgba source_color = payload->color;
   rgba dest_color = get_pixel_color(tex, x, y);
   
-  if (is_a_color(payload->pen.source_select) &&
-      !cmp_color(source_color, payload->pen.source_select))
-    return true;
-  if (is_a_color(payload->pen.source_ignore) &&
-      cmp_color(source_color, payload->pen.source_ignore))
-    return true;
-  if (is_a_color(payload->pen.dest_select) &&
-      !cmp_color(dest_color, payload->pen.dest_select))
-    return true;
-  if (is_a_color(payload->pen.dest_ignore) &&
-      cmp_color(dest_color, payload->pen.dest_ignore))
-    return true;
+  if (payload->pen.source_select.size > 0) 
+      for (int i = 0; i < payload->pen.source_select.size; i++)
+          if (!cmp_color(source_color, payload->pen.source_select.colors[i]))
+              return true;
 
+  if (payload->pen.source_ignore.size > 0) 
+      for (int i = 0; i < payload->pen.source_ignore.size; i++)
+          if (cmp_color(source_color, payload->pen.source_ignore.colors[i]))
+              return true;
+
+  if (payload->pen.dest_select.size > 0) 
+      for (int i = 0; i < payload->pen.dest_select.size; i++)
+          if (!cmp_color(dest_color, payload->pen.dest_select.colors[i]))
+              return true;
+
+  if (payload->pen.dest_ignore.size > 0) 
+      for (int i = 0; i < payload->pen.dest_ignore.size; i++)
+          if (cmp_color(dest_color, payload->pen.dest_ignore.colors[i]))
+              return true;
+  
   return false;
 }
 
@@ -179,9 +186,6 @@ set_pixel_color_with_style(action_struct * payload, texture_info * tex, int x, i
 
     blended_pixel = payload->color;
 
-    /* should skip this pixel? */
-    if (skip_pixel(payload, tex, x, y))
-      return;
 
     /* for linear interpolation */
     if(payload->pen.has_lerp) {
@@ -201,7 +205,10 @@ set_pixel_color_with_style(action_struct * payload, texture_info * tex, int x, i
     /* for color_control proc */
     if(payload->pen.has_color_control_proc)
         blended_pixel = exec_color_control_proc(payload, tex, x,  y, blended_pixel);
-    
+
+    /* should skip this pixel? */
+    if (skip_pixel(blended_pixel, payload, tex, x, y))
+      return;
 
     /* drawing modes */
     if(payload->pen.has_drawing_mode) {
@@ -275,12 +282,16 @@ get_pixel_data(texture_info * tex, int x, int y)
 VALUE
 create_image(VALUE window, int width, int height)
 {
-    VALUE gosu = rb_const_get(rb_cObject, rb_intern("Gosu"));
-    VALUE image = rb_const_get(gosu, rb_intern("Image"));
+    static VALUE empty_image_stub = 0;
+    static VALUE image = 0;
 
-    VALUE tp = rb_const_get(rb_cObject, rb_intern("TexPlay"));
-    VALUE empty_image_stub = rb_const_get(tp, rb_intern("EmptyImageStub"));
-    
+    if (empty_image_stub == 0) {
+        VALUE gosu = rb_const_get(rb_cObject, rb_intern("Gosu"));
+        VALUE tp = rb_const_get(rb_cObject, rb_intern("TexPlay"));
+        empty_image_stub = rb_const_get(tp, rb_intern("EmptyImageStub"));
+        image = rb_const_get(gosu, rb_intern("Image"));
+    }
+
     VALUE rmagick_img;
     VALUE new_image;
 
@@ -326,10 +337,10 @@ initialize_action_struct(action_struct * cur, VALUE hash_arg, sync sync_mode)
 
     /* color selection */
     cur->pen.has_color_select = false;
-    cur->pen.source_select = not_a_color_v;
-    cur->pen.source_ignore = not_a_color_v;
-    cur->pen.dest_select = not_a_color_v;
-    cur->pen.dest_select = not_a_color_v;
+    cur->pen.source_select.size = 0;
+    cur->pen.source_ignore.size = 0;
+    cur->pen.dest_select.size = 0;
+    cur->pen.dest_ignore.size = 0;
 }
     
 /* TODO: fix this function below, it's too ugly and bulky and weird **/
@@ -528,8 +539,6 @@ prepare_color_control(action_struct * cur)
             VALUE try_mult = get_from_hash(try_val, "mult");
 
             if(is_an_array(try_add)) {
-                if(RARRAY_LEN(try_add) < 4)
-                    rb_raise(rb_eArgError, ":color_control transform :add needs 4 parameters");
                 
                 cur->pen.color_add = convert_rb_color_to_rgba(try_add);
                 /* cur->pen.color_add.red = NUM2DBL(get_from_array(try_add, 0)); */
@@ -540,8 +549,6 @@ prepare_color_control(action_struct * cur)
                 cur->pen.has_color_control_transform = true;
             }
             if(is_an_array(try_mult)) {
-                if(RARRAY_LEN(try_mult) < 4)
-                    rb_raise(rb_eArgError, ":color_control transform :mult needs 4 parameters");
 
                 cur->pen.color_mult = convert_rb_color_to_rgba(try_mult);
 
@@ -620,33 +627,59 @@ prepare_fill_texture(action_struct * payload)
 }
 
 static void
+process_select_color_list(rgba_list * clist, VALUE try_color)
+{
+    /* is a general array of colors? i.e [:red, Gosu::Color::RED, [1,1,1,1] ] */
+    if (TYPE(try_color) == T_ARRAY && not_rb_raw_color(try_color)) {
+      int num_colors = RARRAY_LEN(try_color);
+
+      if (num_colors > RGBA_LIST_SIZE)
+        rb_raise(rb_eArgError, "Too many colors given in array. Maximum is %d\n. Got %d\n",
+                 RGBA_LIST_SIZE, num_colors);
+
+      for (int i = 0; i < RARRAY_LEN(try_color); ++i) {
+        clist->colors[i] = convert_rb_color_to_rgba(get_from_array(try_color, i));
+      }
+      
+      clist->size = num_colors;
+    }
+
+    /* is a single color value? i.e :red, [1,1,1,1], Gosu::Color::GREEN */
+    else {
+        clist->colors[0] = convert_rb_color_to_rgba(try_color);
+        clist->size = 1;
+    }
+}  
+  
+
+static void
 prepare_color_select(action_struct * payload)
 {
   VALUE try_color = get_from_hash(payload->hash_arg,
                                         "source_select");
   if (!NIL_P(try_color)) {
-    payload->pen.source_select = convert_rb_color_to_rgba(try_color);
+    process_select_color_list(&payload->pen.source_select, try_color);
     payload->pen.has_color_select = true;
   }
 
   try_color = get_from_hash(payload->hash_arg,
                                         "source_ignore");
   if (!NIL_P(try_color)) {
-    payload->pen.source_ignore = convert_rb_color_to_rgba(try_color);
+    process_select_color_list(&payload->pen.source_ignore, try_color);
     payload->pen.has_color_select = true;
   }
 
   try_color = get_from_hash(payload->hash_arg,
                                         "dest_select");
   if (!NIL_P(try_color)) {
-    payload->pen.dest_select = convert_rb_color_to_rgba(try_color);
+    process_select_color_list(&payload->pen.dest_select, try_color);
     payload->pen.has_color_select = true;
   }
   
   try_color = get_from_hash(payload->hash_arg,
                                         "dest_ignore");
   if (!NIL_P(try_color)) {
-    payload->pen.dest_ignore = convert_rb_color_to_rgba(try_color);
+    process_select_color_list(&payload->pen.dest_ignore, try_color);
     payload->pen.has_color_select = true;
   }
 
@@ -796,32 +829,32 @@ apply_drawing_mode(action_struct * payload, texture_info * tex, int x, int y)
       finished_pixel = color_int_vals_to_float_format(~source_pixel_char.red,
                                                ~source_pixel_char.green,
                                                ~source_pixel_char.blue,
-                                               ~source_pixel_char.alpha);
+                                               source_pixel_char.alpha);
       break;
     case invert:
       finished_pixel = color_int_vals_to_float_format(~dest_pixel_char.red,
                                                ~dest_pixel_char.green,
                                                ~dest_pixel_char.blue,
-                                               ~dest_pixel_char.alpha);
+                                               dest_pixel_char.alpha);
                                                
       break;
     case and_reverse:
       finished_pixel = color_int_vals_to_float_format(source_pixel_char.red | ~dest_pixel_char.red,
                                                source_pixel_char.green | ~dest_pixel_char.green,
                                                source_pixel_char.blue | ~dest_pixel_char.blue,
-                                               source_pixel_char.alpha | ~dest_pixel_char.alpha);
+                                               source_pixel_char.alpha);
       break;
     case and:
       finished_pixel = color_int_vals_to_float_format(source_pixel_char.red & dest_pixel_char.red,
                                                source_pixel_char.green & dest_pixel_char.green,
                                                source_pixel_char.blue & dest_pixel_char.blue,
-                                               source_pixel_char.alpha & dest_pixel_char.alpha);
+                                               source_pixel_char.alpha);
       break;
     case or:
       finished_pixel = color_int_vals_to_float_format(source_pixel_char.red | dest_pixel_char.red,
                                                source_pixel_char.green | dest_pixel_char.green,
                                                source_pixel_char.blue | dest_pixel_char.blue,
-                                               source_pixel_char.alpha | dest_pixel_char.alpha);
+                                               source_pixel_char.alpha);
       
       break;
     case nand:
@@ -835,34 +868,34 @@ apply_drawing_mode(action_struct * payload, texture_info * tex, int x, int y)
       finished_pixel = color_int_vals_to_float_format(~(source_pixel_char.red | dest_pixel_char.red),
                                                ~(source_pixel_char.green | dest_pixel_char.green),
                                                ~(source_pixel_char.blue | dest_pixel_char.blue),
-                                               ~(source_pixel_char.alpha | dest_pixel_char.alpha));
+                                               source_pixel_char.alpha);
       
       break;
     case xor:
       finished_pixel = color_int_vals_to_float_format(source_pixel_char.red ^ dest_pixel_char.red,
                                                source_pixel_char.green ^ dest_pixel_char.green,
                                                source_pixel_char.blue ^ dest_pixel_char.blue,
-                                               source_pixel_char.alpha ^ dest_pixel_char.alpha);
+                                               source_pixel_char.alpha);
       
       break;
     case equiv:
       finished_pixel = color_int_vals_to_float_format(~(source_pixel_char.red ^ dest_pixel_char.red),
                                                ~(source_pixel_char.green ^ dest_pixel_char.green),
                                                ~(source_pixel_char.blue ^ dest_pixel_char.blue),
-                                               ~(source_pixel_char.alpha ^ dest_pixel_char.alpha));
+                                               source_pixel_char.alpha);
       
       break;
     case and_inverted:
       finished_pixel = color_int_vals_to_float_format(~source_pixel_char.red & dest_pixel_char.red,
                                                ~source_pixel_char.green & dest_pixel_char.green,
                                                ~source_pixel_char.blue & dest_pixel_char.blue,
-                                               ~source_pixel_char.alpha & dest_pixel_char.alpha);      
+                                               source_pixel_char.alpha);      
       break;
     case or_inverted:
       finished_pixel = color_int_vals_to_float_format(~source_pixel_char.red | dest_pixel_char.red,
                                                ~source_pixel_char.green | dest_pixel_char.green,
                                                ~source_pixel_char.blue | dest_pixel_char.blue,
-                                               ~source_pixel_char.alpha | dest_pixel_char.alpha);
+                                               source_pixel_char.alpha);
       
       break;
 
@@ -990,7 +1023,7 @@ apply_alpha_blend(action_struct * payload, texture_info * tex, int x, int y, rgb
     rgba finished_pixel;
 
 
-    if(not_a_color(blended_pixel))
+    if (not_a_color(blended_pixel))
         return blended_pixel;
     
     /* alpha blending is nothing more than a weighted average of src and dest pixels

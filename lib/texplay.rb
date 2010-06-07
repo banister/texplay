@@ -30,8 +30,13 @@ module TexPlay
             end
         end
 
-        def create_blank_image(window, width, height)
-            Gosu::Image.new(window, EmptyImageStub.new(width, height))
+        def create_blank_image(window, width, height, options={})
+          options = { :color => [0, 0, 0, 0] }.merge!(options)
+          
+          img = Gosu::Image.new(window, EmptyImageStub.new(width, height))
+          img.rect 0, 0, img.width - 1, img.height - 1, :color => options[:color], :fill => true
+
+          img
         end
 
         alias_method :create_image, :create_blank_image
@@ -107,6 +112,21 @@ module Gosu
                 # invoke old behaviour
                 obj = original_new(*args, &block)
 
+                prepare_image(*args, obj)
+            end
+            
+            alias_method :original_from_text, :from_text
+
+            def from_text(*args, &block)
+
+                # invoke old behaviour
+                obj = original_from_text(*args, &block)
+
+                prepare_image(*args, obj)
+            end
+
+            def prepare_image(*args, obj)
+
                 # refresh the TexPlay image cache
                 if obj.width <= (TexPlay::TP_MAX_QUAD_SIZE) &&
                         obj.height <= (TexPlay::TP_MAX_QUAD_SIZE) && obj.quad_cached? then
@@ -119,26 +139,10 @@ module Gosu
 
                 obj.instance_variable_set(:@__window__, args.first)
 
-                # return the new image
                 obj
             end
             
-            alias_method :original_from_text, :from_text
-
-            def from_text(*args, &block)
-
-                # invoke old behaviour
-                obj = original_from_text(*args, &block)
-
-                # refresh the TexPlay image cache
-                if obj.width <= (TexPlay::TP_MAX_QUAD_SIZE) &&
-                        obj.height <= (TexPlay::TP_MAX_QUAD_SIZE) && obj.quad_cached? then
-                    
-                    obj.refresh_cache
-                end
-
-                obj
-            end
+            private :prepare_image
         end
 
         alias_method :rows, :height

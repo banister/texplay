@@ -291,6 +291,24 @@ is_a_color(rgba color1)
 }
 
 bool
+is_rb_raw_color(VALUE cval)
+{
+  return TYPE(cval) == T_ARRAY &&
+    is_a_num(get_from_array(cval, 0)) &&
+    is_a_num(get_from_array(cval, 1)) &&
+    is_a_num(get_from_array(cval, 2)) &&
+    is_a_num(get_from_array(cval, 3));
+}
+
+bool
+not_rb_raw_color(VALUE cval)
+{
+  return TYPE(cval) != T_ARRAY ||
+    !is_a_num(get_from_array(cval, 0));
+}
+
+
+bool
 cmp_color(rgba color1, rgba color2) 
 {
 
@@ -399,6 +417,7 @@ convert_rgba_to_rb_color(rgba * pix)
 
     return pix_array;
 }
+
 
 /* convert Ruby color to C color */
 rgba

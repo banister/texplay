@@ -113,15 +113,15 @@ M_refresh_cache_all(VALUE self)
 }
 
 /* creates a blank image */
-VALUE
-M_create_blank(VALUE self, VALUE window, VALUE width, VALUE height)
-{
-    VALUE fresh_image;
+/* VALUE */
+/* M_create_blank(VALUE self, VALUE window, VALUE width, VALUE height) */
+/* { */
+/*     VALUE fresh_image; */
 
-    fresh_image = create_image(window, NUM2INT(width), NUM2INT(height));
+/*     fresh_image = create_image(window, NUM2INT(width), NUM2INT(height)); */
     
-    return fresh_image;
-}
+/*     return fresh_image; */
+/* } */
 /** end singleton methods **/
 
 /* some helper methods */
