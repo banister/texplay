@@ -5,7 +5,7 @@ require 'texplay'
 
 class W < Gosu::Window
     def initialize
-        super(1024, 768, false, 20)
+        super(500, 500, false, 20)
         @img = TexPlay::create_blank_image(self, 1022, 800)
         @tp = Gosu::Image.new(self, "#{Common::MEDIA}/texplay.png")
         @gosu = Gosu::Image.new(self, "#{Common::MEDIA}/sand1.png")
@@ -33,7 +33,7 @@ class W < Gosu::Window
     end
     
     def draw
-        @img.draw 10, 10,1
+        @img.draw 0, 0,1
     end
     
 end

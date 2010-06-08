@@ -6,7 +6,7 @@ require 'texplay'
 
 class W < Gosu::Window
     def initialize
-        super(1024, 768, false, 20)
+        super(500, 500, false, 20)
         @img = Gosu::Image.new(self, "#{Common::MEDIA}/sunset.png")
     end
     
@@ -16,7 +16,7 @@ class W < Gosu::Window
 
         @img.splice @img, x, y + 1, :crop => [x, y, x + 100, y + 100]
 
-        @img.draw 100, 50,1
+        @img.draw 0, 0,1
     end
     
 end

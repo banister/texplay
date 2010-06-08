@@ -5,8 +5,8 @@ require 'texplay'
 
 class W < Gosu::Window
     def initialize
-        super(1024, 768, false, 20)
-        @img = TexPlay::create_blank_image(self, 500, 500)
+        super(500, 500, false, 20)
+        @img = TexPlay.create_image(self, 500, 500)
 
         # put a border on the image
         @img.rect 0,0, @img.width - 1, @img.height - 1

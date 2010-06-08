@@ -6,7 +6,7 @@ require 'texplay'
 
 class W < Gosu::Window
     def initialize
-        super(1024, 768, false, 20)
+        super(500, 500, false, 20)
         @img = Gosu::Image.new(self, "#{Common::MEDIA}/logo.png")
         @img2 = TexPlay::create_blank_image(self, 500, 500)
 

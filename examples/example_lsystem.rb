@@ -45,15 +45,15 @@ end
 
 class W < Gosu::Window
     def initialize
-        super(1024, 768, false, 20)
+        super(500, 500, false, 20)
         @img = TexPlay::create_blank_image(self, 500, 500)
         @img.set_options :color => :rand
-        @img.lsystem(400, 150, Koch, :order => 8, :line_length => 6)
+        @img.lsystem(0, 250, Bush3, :order => 6, :line_length => 4)
         #@img.save("dragon.jpg")
     end
 
     def draw
-        @img.draw(100,0,1)
+        @img.draw(0,0,1)
     end
 end
 

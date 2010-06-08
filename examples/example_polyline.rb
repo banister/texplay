@@ -5,7 +5,7 @@ require 'texplay'
 
 class W < Gosu::Window
     def initialize
-        super(1024, 768, false, 20)
+        super(500, 500, false, 20)
         @img = Gosu::Image.new(self, "#{Common::MEDIA}/empty2.png")
 
         # put a border on the image
@@ -32,7 +32,7 @@ class W < Gosu::Window
 
         # NOTE: (when viewing) the blue line is the extra line added to close the polygon,
         # red lines are original polyline
-        @img.draw 100, 50,1
+        @img.draw 0, 0,1
     end
     
 end

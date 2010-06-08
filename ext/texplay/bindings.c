@@ -520,13 +520,17 @@ m_flood_fill(int argc, VALUE * argv, VALUE self)
 }
 
 static inline VALUE
-convert_trace_match_to_ruby_array(trace_match match)
+convert_trace_match_to_ruby_array(trace_match match, bool gosu_color_mode)
 {
   VALUE ary = rb_ary_new();
 
   rb_ary_store(ary, 0, INT2FIX(match.x));
   rb_ary_store(ary, 1, INT2FIX(match.y));
-  rb_ary_store(ary, 2, convert_rgba_to_rb_color(&match.color));
+
+  if (gosu_color_mode)
+    rb_ary_store(ary, 2, convert_rgba_to_gosu_color(&match.color));
+  else
+    rb_ary_store(ary, 2, convert_rgba_to_rb_color(&match.color));
 
   return ary;
 }
@@ -537,6 +541,7 @@ m_line(int argc, VALUE * argv, VALUE self)
 {
     int x1, y1, x2, y2;
     int last = argc - 1;
+    bool gosu_color_mode = false;
     VALUE options;
     texture_info tex;
     trace_match match;
@@ -549,6 +554,9 @@ m_line(int argc, VALUE * argv, VALUE self)
 
     options = argv[last];
 
+    if (hash_value_is(options, "color_mode", string2sym("gosu")))
+      gosu_color_mode = true;
+
     get_texture_info(self, &tex);
 
     match = line_do_action(x1, y1, x2, y2, &tex, options, sync_mode, true, NULL);
@@ -557,7 +565,7 @@ m_line(int argc, VALUE * argv, VALUE self)
       if (match.x == -1)
         return Qnil;
       else
-        return convert_trace_match_to_ruby_array(match);
+        return convert_trace_match_to_ruby_array(match, gosu_color_mode);
     }
 
     return self;

@@ -1,3 +1,7 @@
+8/6/10
+version 0.2.920
+* :trace now supports :color_mode => :gosu
+
 7/6/10
 version 0.2.910
 * 1.8.7 incompatibility fixed

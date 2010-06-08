@@ -6,7 +6,7 @@ require 'texplay'
 
 class W < Gosu::Window
     def initialize
-        super(1024, 768, false, 20)
+        super(500, 500, false, 20)
         @img = Gosu::Image.new(self, "#{Common::MEDIA}/sunset.png")
 
         # each can accept a block of two types of arity:
@@ -31,7 +31,7 @@ class W < Gosu::Window
     
     def draw
     
-        @img.draw 100, 50,1
+        @img.draw 0, 0,1
     end
     
 end

@@ -5,7 +5,7 @@ require 'texplay'
 
 class W < Gosu::Window
     def initialize
-        super(1024, 768, false, 20)
+        super(500, 500, false, 20)
         @img = Gosu::Image.new(self, "#{Common::MEDIA}/empty2.png")
 
         @width = @img.width
@@ -14,7 +14,6 @@ class W < Gosu::Window
         # turn alpha blending and filling on
         @img.set_options :alpha_blend => true, :fill => true
     end
-    
     def draw
         
         # Gen_eval lets us use local instance vars within the block
@@ -25,7 +24,7 @@ class W < Gosu::Window
             :color => [rand, rand ,rand, rand]
         }  
         
-        @img.draw 100, 50,1
+        @img.draw 0, 0,1
     end
 end
 
