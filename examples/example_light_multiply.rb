@@ -7,7 +7,7 @@ class W < Gosu::Window
     def initialize
       super(500, 500, false, 20)
       @img = Gosu::Image.new(self, "#{Common::MEDIA}/sunset.png")
-      @cover = TexPlay.create_image(self, @img.width, @img.height, :color => Gosu::Color.new(1, 1, 1, 1))
+      @cover = TexPlay.create_image(self, @img.width, @img.height, :color => Gosu::Color.new(127, 127, 127, 127))
     end
     
     def draw
