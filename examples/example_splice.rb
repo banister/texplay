@@ -1,3 +1,4 @@
+
 require 'rubygems'
 require 'common'
 require 'texplay'
@@ -5,7 +6,7 @@ require 'texplay'
 
 class W < Gosu::Window
     def initialize
-        super(1024, 768, false, 20)
+        super(500, 500, false, 20)
         @img = Gosu::Image.new(self, "#{Common::MEDIA}/texplay.png")
         @gosu = Gosu::Image.new(self, "#{Common::MEDIA}/gosu.png")
 

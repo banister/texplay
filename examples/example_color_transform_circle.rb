@@ -6,7 +6,7 @@ require 'texplay'
 
 class W < Gosu::Window
   def initialize
-    super(1024, 768, false, 20)
+    super(500, 500, false, 20)
     @img = Gosu::Image.new(self, "#{Common::MEDIA}/sunset.png")
     @x = 100
     @y = 100
@@ -29,7 +29,6 @@ class W < Gosu::Window
     @x2 -= 3
     @y2 += 3
 
-
     @copy2.splice @img, 0, 0, :crop => [@x2 - @rad, @y2 - @rad, @x2 + @rad, @y2 + @rad], :sync_mode => :no_sync
     @copy.splice @img, 0, 0, :crop => [@x - @rad, @y - @rad, @x + @rad, @y + @rad], :sync_mode => :no_sync
     
@@ -42,9 +41,6 @@ class W < Gosu::Window
     @img.draw 10, 10,1
 
     if button_down?(Gosu::KbEscape)
-      IL.Enable(IL::ORIGIN_SET)
-      IL.OriginFunc(IL::ORIGIN_UPPER_LEFT)
-      #            screenshot.crop(0,0, 500, 500).save("screenshot.jpg").free
       exit
     end  
     

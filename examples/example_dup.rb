@@ -6,7 +6,7 @@ require 'texplay'
 
 class W < Gosu::Window
     def initialize
-        super(1024, 768, false, 20)
+        super(500, 500, false, 20)
         @img = Gosu::Image.new(self, "#{Common::MEDIA}/sunset.png")
         @img.rect 0,0, @img.width - 1, @img.height - 1
 
@@ -63,8 +63,8 @@ class W < Gosu::Window
         x = @img.width * rand
         y = @img.height * rand
 
-        @img.draw 100, 50,1
-        @bunk.draw 500, 300,1
+        @img.draw 0, 0,1
+        @bunk.draw 0, 0,1
     end
     
 end
