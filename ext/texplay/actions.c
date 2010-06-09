@@ -162,7 +162,7 @@ line_do_action(int x1, int y1, int x2, int y2, texture_info * tex, VALUE hash_ar
     }
     draw_epilogue(&cur, tex, primary);
 
-    return (trace_match) { .x = -1, .y = -1 };
+    return (trace_match) { .x = -9999, .y = -9999, .color = not_a_color_v };
 }
 /** end line **/
 

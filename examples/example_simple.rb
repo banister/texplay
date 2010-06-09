@@ -32,8 +32,8 @@ class W < Gosu::Window
       @img.line 200, 300, 300, 400, :thickness => 5,
       :dest_select => :blue, :dest_ignore => :red
 
-      puts @img.get_pixel 200, 310
-      puts @img.get_pixel 200, 310, :color_mode => :gosu
+      puts (@img.get_pixel 2000, 310).inspect
+      puts @img.get_pixel 2000, 310, :color_mode => :gosu
     end
     
     def draw

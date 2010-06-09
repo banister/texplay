@@ -562,12 +562,12 @@ m_line(int argc, VALUE * argv, VALUE self)
     match = line_do_action(x1, y1, x2, y2, &tex, options, sync_mode, true, NULL);
 
     if (has_optional_hash_arg(options, "trace")) {
-      if (match.x == -1)
+      if (match.x == -9999)
         return Qnil;
       else
         return convert_trace_match_to_ruby_array(match, gosu_color_mode);
     }
-
+    
     return self;
 }
 

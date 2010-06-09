@@ -281,13 +281,14 @@ save_rgba_to_image_local_color(VALUE image, rgba color)
 bool
 not_a_color(rgba color1) 
 {
-    return color1.red == -1;
+    return color1.red < 0 || color1.green < 0 ||
+      color1.blue < 0 || color1.alpha < 0;
 }
 
 bool
 is_a_color(rgba color1)
 {
-    return !not_a_color(color1);
+    return color1.red >= 0 && color1.green >= 0 && color1.blue >= 0 && color1.alpha >= 0;
 }
 
 bool
@@ -406,6 +407,8 @@ convert_gosu_to_rgba_color(VALUE gcolor)
 VALUE
 convert_rgba_to_rb_color(rgba * pix)
 {
+    if (not_a_color(*pix)) return Qnil;
+  
     /* create a new ruby array to store the pixel data */
     VALUE pix_array = rb_ary_new2(4);
 
@@ -422,6 +425,8 @@ convert_rgba_to_rb_color(rgba * pix)
 VALUE
 convert_rgba_to_gosu_color(rgba * pix)
 {
+    if (not_a_color(*pix)) return Qnil;
+
     VALUE gosu_color_class = 0;
 
     if (gosu_color_class == 0) {

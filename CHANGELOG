@@ -1,3 +1,12 @@
+9/6/10
+version 0.2.940
+* hopefully fixed :trace behaviour. Should now return nil for color when
+pixel out of bounds.
+	
+9/6/10
+version 0.2.930
+* not_a_color now returns true when color channel < 0
+
 8/6/10
 version 0.2.920
 * :trace now supports :color_mode => :gosu
