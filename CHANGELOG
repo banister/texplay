@@ -1,6 +1,7 @@
 10/6/10
 version 0.2.950
-* fixed bug in apply_drawing_mode, wasn't using blended_pixel as source_pixel 
+* fixed bug in apply_drawing_mode, wasn't using blended_pixel as source_pixel
+* hex literal colors now accepted, e.g 0xffff0000 (red)	
 	
 9/6/10
 version 0.2.940

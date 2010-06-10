@@ -11,9 +11,9 @@ class W < Gosu::Window
         @gosu = Gosu::Image.new(self, "#{Common::MEDIA}/gosu.png")
 
         # put a border on the image
-        @img.rect 0,0, @img.width - 1, @img.height - 1, :color => Gosu::Color::CYAN
+        @img.rect 0,0, @img.width - 1, @img.height - 1, :color => 0xffff00ff, :fill => true
 
-        # perform some simple drawing actions 
+        # perform some e drawing actions 
         @img.line 0,0, @img.width - 1, @img.height - 1, :color => Gosu::Color::AQUA
         @img.circle 400, 100, 40, :fill => true, :color => [rand, rand, rand, 1]
       @img.rect 200, 300, 300, 400, :fill => true, :color => :red, :source_ignore => [:green],
