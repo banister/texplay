@@ -276,8 +276,6 @@ save_rgba_to_image_local_color(VALUE image, rgba color)
     return ilc;
 }
 
-
-
 bool
 not_a_color(rgba color1) 
 {
@@ -427,14 +425,7 @@ convert_rgba_to_gosu_color(rgba * pix)
 {
     if (not_a_color(*pix)) return Qnil;
 
-    VALUE gosu_color_class = 0;
-
-    if (gosu_color_class == 0) {
-        VALUE gosu_class = rb_const_get(rb_cObject, rb_intern("Gosu"));
-        gosu_color_class = rb_const_get(gosu_class, rb_intern("Color"));
-    }
-    
-    VALUE gosu_color = rb_funcall(gosu_color_class, rb_intern("new"), 0);
+    VALUE gosu_color = rb_funcall(gosu_color_class(), rb_intern("new"), 0);
 
     rb_funcall(gosu_color, rb_intern("red="), 1, INT2FIX(pix->red * 255));
     rb_funcall(gosu_color, rb_intern("green="), 1, INT2FIX(pix->green * 255));
@@ -444,7 +435,18 @@ convert_rgba_to_gosu_color(rgba * pix)
     return gosu_color;
 }
 
+VALUE
+gosu_color_class()
+{
+   VALUE gcolor_class = 0;
 
+   if (gcolor_class == 0) {
+       VALUE gosu_class = rb_const_get(rb_cObject, rb_intern("Gosu"));
+        gcolor_class = rb_const_get(gosu_class, rb_intern("Color"));
+    }
+
+   return gcolor_class;
+}
 
 /* convert Ruby color to C color */
 rgba
@@ -474,6 +476,12 @@ convert_rb_color_to_rgba(VALUE cval)
             my_color.alpha = 1;
 
         break;
+    case T_FIXNUM:
+    case T_BIGNUM:
+      return convert_gosu_to_rgba_color(rb_funcall(gosu_color_class(),
+                                                   rb_intern("new"), 1, cval));
+    break;
+        
     default:
         rb_raise(rb_eArgError, "unsupported argument type for color. Got type 0x%x\n", TYPE(cval) );
     }

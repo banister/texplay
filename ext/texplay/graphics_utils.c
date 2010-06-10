@@ -19,7 +19,7 @@ static void prepare_color_control(action_struct * cur);
 static void prepare_color_select(action_struct * cur);
 static rgba apply_lerp(action_struct * payload, texture_info * tex, int x, int y);
 static rgba apply_alpha_blend(action_struct * payload, texture_info * tex, int x, int y, rgba blended_pixel);
-static rgba apply_drawing_mode(action_struct * payload, texture_info * tex, int x, int y);
+static rgba apply_drawing_mode(action_struct * payload, texture_info * tex, int x, int y, rgba blended_pixel);
 
 static rgba apply_color_control_transform(action_struct * payload, texture_info * tex, int x, int y);
 static rgba exec_color_control_proc(action_struct * cur, texture_info * tex, int x, int y, rgba blended_pixel);
@@ -230,7 +230,7 @@ set_pixel_color_with_style(action_struct * payload, texture_info * tex, int x, i
 
     /* drawing modes */
     if(payload->pen.has_drawing_mode) {
-      blended_pixel = apply_drawing_mode(payload, tex, x, y);
+      blended_pixel = apply_drawing_mode(payload, tex, x, y, blended_pixel);
     }
 
     /*  TO DO: refactor into its own helper function
@@ -817,11 +817,10 @@ mode_colorburn_channel(float b, float s)
 }
   
 static rgba
-apply_drawing_mode(action_struct * payload, texture_info * tex, int x, int y)
+apply_drawing_mode(action_struct * payload, texture_info * tex, int x, int y, rgba source_pixel)
 {
   rgba finished_pixel;
   
-  rgba source_pixel = payload->color;  
   rgba dest_pixel = get_pixel_color(tex, x, y);
 
   rgba_char dest_pixel_char = color_float_to_int_format(dest_pixel);

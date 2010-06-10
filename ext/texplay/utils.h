@@ -23,6 +23,7 @@ bool not_a_color(rgba color1);
 bool is_a_color(rgba color1);
 VALUE convert_rgba_to_rb_color(rgba * pix);
 rgba convert_rb_color_to_rgba(VALUE cval);
+VALUE gosu_color_class();
 bool is_gosu_color(VALUE try_color);
 bool is_rb_raw_color(VALUE cval);
 bool not_rb_raw_color(VALUE cval);
