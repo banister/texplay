@@ -337,10 +337,8 @@ m_get_options(VALUE self)
 static void
 get_image_chunk_with_size(char * data, texture_info * tex, char * blob)
 {
-    int x, y;
-
-    for(y = 0; y < tex->height; y++)
-        for(x = 0; x < tex->width; x++) {
+    for(int y = 0; y < tex->height; y++)
+        for(int x = 0; x < tex->width; x++) {
             int buf_index = 4 * (x + y * tex->width);
                 
             int offset = calc_pixel_offset(tex, x, y);
@@ -354,8 +352,6 @@ m_to_blob(VALUE self)
 {
     texture_info tex;
     int sidelength;
-    VALUE blob;
-    void * new_array = NULL;
     
     ADJUST_SELF(self);
 
@@ -368,12 +364,12 @@ m_to_blob(VALUE self)
     glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &sidelength);
 
     /* initialize texture data array, mult. by 4 because {rgba} */
-    new_array = malloc(sidelength * sidelength * 4);
+    char new_array[sidelength * sidelength * 4];
 
     /* get texture data from video memory */
     glGetTexImage(GL_TEXTURE_2D,  0, GL_RGBA, GL_UNSIGNED_BYTE,(void*)(new_array));
 
-    blob = rb_str_new(NULL, 4 * tex.width * tex.height);
+    VALUE blob = rb_str_new(NULL, 4 * tex.width * tex.height);
     
     get_image_chunk_with_size(new_array, &tex, RSTRING_PTR(blob));
 

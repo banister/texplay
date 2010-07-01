@@ -14,16 +14,23 @@
 /** line_do_action, bresenham's algorithm **/
 typedef enum { no_mode, until_color, while_color} trace_mode_type;
 
+/* utility func to manage both kinds of color comparions */
+static bool
+cmp_color_with_or_without_tolerance(rgba c1, rgba c2, action_struct * payload)
+{
+  return payload->pen.has_tolerance ? cmp_color_with_tolerance(c1, c2, payload->pen.tolerance) : cmp_color(c1, c2);
+}
+
 static inline bool
-is_trace_match(rgba c, rgba trace_color, trace_mode_type trace_mode)
+is_trace_match(action_struct * cur, rgba c, rgba trace_color, trace_mode_type trace_mode)
 {
   if(trace_mode == while_color) {
-    if(!cmp_color(c, trace_color))
-      return true;
+      if(!cmp_color_with_or_without_tolerance(c, trace_color, cur))
+        return true;
   }
   else if(trace_mode == until_color) {
-    if(cmp_color(c, trace_color))
-      return true;
+      if(cmp_color_with_or_without_tolerance(c, trace_color, cur))
+        return true;
   }
 
   return false;
@@ -98,7 +105,7 @@ line_do_action(int x1, int y1, int x2, int y2, texture_info * tex, VALUE hash_ar
              else {
                rgba c = get_pixel_color(tex, x, y);
 
-               if (is_trace_match(c, trace_color, trace_mode)) 
+               if (is_trace_match(payload, c, trace_color, trace_mode)) 
                  return (trace_match) { x, y, c };
              }
             }
@@ -126,7 +133,7 @@ line_do_action(int x1, int y1, int x2, int y2, texture_info * tex, VALUE hash_ar
              else {
                rgba c = get_pixel_color(tex, x, y);
 
-               if (is_trace_match(c, trace_color, trace_mode)) 
+               if (is_trace_match(payload, c, trace_color, trace_mode)) 
                  return (trace_match) { x, y, c };
              }                
             }
@@ -151,7 +158,7 @@ line_do_action(int x1, int y1, int x2, int y2, texture_info * tex, VALUE hash_ar
         else {
           rgba c = get_pixel_color(tex, x, y);
           
-          if (is_trace_match(c, trace_color, trace_mode)) 
+          if (is_trace_match(payload, c, trace_color, trace_mode)) 
             return (trace_match) { x, y, c };
         }        
     }

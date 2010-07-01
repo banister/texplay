@@ -306,15 +306,64 @@ not_rb_raw_color(VALUE cval)
     !is_a_num(get_from_array(cval, 0));
 }
 
+/** cmp_color related functions **/
+static bool
+is_transparent_color(rgba color1)
+{
+    return color1.red == -666 && color1.green == -666 && color1.blue == -666 &&
+      color1.alpha == -666;
+}
+
+static bool
+special_cmp_color(rgba color1, rgba color2)
+{
+    if (is_transparent_color(color1))
+        return color2.alpha == 0;
+    else if (is_transparent_color(color2))
+        return color1.alpha == 0;
+}
+
+static bool
+special_cmp_color_with_tolerance(rgba color1, rgba color2, float tolerance)
+{
+    if (is_transparent_color(color1))
+      return (color1.alpha) <= tolerance;
+    else if (is_transparent_color(color2))
+        return color2.alpha <= tolerance;
+}
+
+
+static float
+color_distance_squared(rgba c1, rgba c2)
+{
+  return (c1.red - c2.red) * (c1.red - c2.red) +
+    (c1.green - c2.green) * (c1.green - c2.green) +
+    (c1.blue - c2.blue) * (c1.blue - c2.blue) +
+    (c1.alpha - c2.alpha) * (c1.alpha - c2.alpha);
+}
+      
+
+bool
+cmp_color_with_tolerance(rgba color1, rgba color2, float tolerance)
+{
+  if (color1.red < 0 || color2.red < 0)
+    return special_cmp_color_with_tolerance(color1, color2, tolerance);
+  
+  return color_distance_squared(color1, color2) <= (tolerance * tolerance);
+}
 
 bool
 cmp_color(rgba color1, rgba color2) 
 {
-
+    if (color1.red < 0 || color2.red < 0)
+      return special_cmp_color(color1, color2);
+    
     return (color1.red == color2.red) && (color1.green == color2.green) && (color1.blue == color2.blue)
         && (color1.alpha == color2.alpha);
 }
+        
 
+/*** these functions are UNSAFE ***/
 void
 color_copy(float * source, float * dest) 
 {
@@ -327,6 +376,7 @@ zero_color(float * tex)
 {
     memset(tex, 0, 4 * sizeof(float));
 }
+/***                           ***/
 
 rgba
 find_color_from_string(char * try_color) 
@@ -371,6 +421,9 @@ find_color_from_string(char * try_color)
     }
     else if(!strcmp("alpha", try_color)) {
         cur_color.red = 0.0; cur_color.green = 0.0; cur_color.blue = 0.0; cur_color.alpha = 0.0;
+    }
+    else if(!strcmp("transparent", try_color)) {
+        cur_color.red = -666; cur_color.green = -666; cur_color.blue = -666; cur_color.alpha = -666;
     }
     else if(!strcmp("none", try_color)) {
         cur_color = not_a_color_v;
@@ -438,7 +491,7 @@ convert_rgba_to_gosu_color(rgba * pix)
 VALUE
 gosu_color_class()
 {
-   VALUE gcolor_class = 0;
+   static VALUE gcolor_class = 0;
 
    if (gcolor_class == 0) {
        VALUE gosu_class = rb_const_get(rb_cObject, rb_intern("Gosu"));
@@ -476,6 +529,8 @@ convert_rb_color_to_rgba(VALUE cval)
             my_color.alpha = 1;
 
         break;
+
+    /* hex literals */
     case T_FIXNUM:
     case T_BIGNUM:
       return convert_gosu_to_rgba_color(rb_funcall(gosu_color_class(),

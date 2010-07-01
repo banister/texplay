@@ -14,6 +14,7 @@ extern const rgba not_a_color_v;
 /* color and pixel related functions */
 rgba find_color_from_string(char * try_color);
 bool cmp_color(rgba color1, rgba color2);
+bool cmp_color_with_tolerance(rgba color1, rgba color2, float tolerance);
 void color_copy(float * source, float * dest);
 rgba get_pixel_color(texture_info * tex, int x, int y) ;
 float* get_pixel_data(texture_info * tex, int x, int y);

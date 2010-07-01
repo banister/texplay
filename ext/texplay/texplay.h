@@ -56,7 +56,8 @@ typedef enum {
 
 /* structs */
 typedef struct s_rgba {
-    float red, green, blue, alpha;
+  float red, green, blue, alpha;
+  float tolerance;
 } rgba;
 
 typedef struct {
@@ -129,10 +130,11 @@ typedef struct action_struct {
         bool has_drawing_mode;
         draw_mode drawing_mode;
 
-        
+        /* tolerance */
+        bool has_tolerance;
+        float tolerance;
 
         /* color selection */
-      
         bool has_color_select;
         rgba_list source_select;
         rgba_list source_ignore;

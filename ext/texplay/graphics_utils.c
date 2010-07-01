@@ -147,6 +147,13 @@ set_pixel_color(rgba * pixel_color, texture_info * tex, int x, int y)
     tex_data[alpha] = pixel_color->alpha;    
 }
 
+/* utility func to manage both kinds of color comparions */
+static bool
+cmp_color_with_or_without_tolerance(rgba c1, rgba c2, action_struct * payload)
+{
+  return payload->pen.has_tolerance ? cmp_color_with_tolerance(c1, c2, payload->pen.tolerance) : cmp_color(c1, c2);
+}
+
 static bool
 skip_pixel(rgba source_color, action_struct * payload, texture_info * tex, int x, int y)
 {
@@ -158,18 +165,17 @@ skip_pixel(rgba source_color, action_struct * payload, texture_info * tex, int x
   
   if (payload->pen.source_select.size > 0) {
     for (int i = 0; i < payload->pen.source_select.size; i++) {
-      if (cmp_color(source_color, payload->pen.source_select.colors[i])) {
-              color_match = true;
-              break;
-      }
-    }
+        if (cmp_color_with_or_without_tolerance(source_color, payload->pen.source_select.colors[i], payload)) {
+            color_match = true;
+            break;
+        }
     if (!color_match) return true;
+    }
   }
-  
 
   if (payload->pen.source_ignore.size > 0) {
     for (int i = 0; i < payload->pen.source_ignore.size; i++) {
-          if (cmp_color(source_color, payload->pen.source_ignore.colors[i]))
+      if (cmp_color_with_or_without_tolerance(source_color, payload->pen.source_ignore.colors[i], payload))
               return true;
     }
   }
@@ -177,7 +183,7 @@ skip_pixel(rgba source_color, action_struct * payload, texture_info * tex, int x
   color_match = false;
   if (payload->pen.dest_select.size > 0) {
     for (int i = 0; i < payload->pen.dest_select.size; i++) {
-        if (cmp_color(dest_color, payload->pen.dest_select.colors[i])) {
+      if (cmp_color_with_or_without_tolerance(dest_color, payload->pen.dest_select.colors[i], payload)) {
             color_match = true;
             break;
         }
@@ -187,7 +193,7 @@ skip_pixel(rgba source_color, action_struct * payload, texture_info * tex, int x
 
   if (payload->pen.dest_ignore.size > 0) {
     for (int i = 0; i < payload->pen.dest_ignore.size; i++) {
-          if (cmp_color(dest_color, payload->pen.dest_ignore.colors[i]))
+      if (cmp_color_with_or_without_tolerance(dest_color, payload->pen.dest_ignore.colors[i], payload))
               return true;
     }
   }
@@ -359,6 +365,10 @@ initialize_action_struct(action_struct * cur, VALUE hash_arg, sync sync_mode)
     cur->pen.source_ignore.size = 0;
     cur->pen.dest_select.size = 0;
     cur->pen.dest_ignore.size = 0;
+
+    /* tolerance */
+    cur->pen.has_tolerance = false;
+    cur->pen.tolerance = 0.0;
 }
     
 /* TODO: fix this function below, it's too ugly and bulky and weird **/
@@ -400,6 +410,20 @@ process_common_hash_args(action_struct * cur, VALUE * hash_arg, sync sync_mode, 
         cur->pen.has_color_control_transform = true;
     }
 
+    /* tolerance */
+    if(RTEST(get_from_hash(*hash_arg, "tolerance"))) {
+      cur->pen.tolerance = NUM2DBL(get_from_hash(*hash_arg, "tolerance"));
+
+      /* maximum length of hypotonese extended in 4-space (color space) is sqrt(4) */
+      if (cur->pen.tolerance >= 2)
+        cur->pen.tolerance = 2;
+
+      if (cur->pen.tolerance < 0)
+        cur->pen.tolerance = 0;
+      
+      cur->pen.has_tolerance = true;
+    }
+       
     /* lerp */
     if(RTEST(get_from_hash(*hash_arg, "lerp"))) {
       cur->pen.lerp = NUM2DBL(get_from_hash(*hash_arg, "lerp"));

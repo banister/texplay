@@ -32,9 +32,9 @@ class W < Gosu::Window
 
         @copy2.splice @img, 0, 0, :crop => [@x2 - @rad, @y2 - @rad, @x2 + @rad, @y2 + @rad], :sync_mode => :no_sync
         @copy.splice @img, 0, 0, :crop => [@x - @rad, @y - @rad, @x + @rad, @y + @rad], :sync_mode => :no_sync
-        @img.rect @x - @rad, @y - @rad, @x + @rad, @y + @rad, :fill => true, :mode => :overlay, :color => :tyrian
+        @img.rect @x - @rad, @y - @rad, @x + @rad, @y + @rad, :fill => true, :mode => :color_dodge, :color => 0xff888888, :alpha_blend => true
 
-      @img.rect @x2 - @rad, @y2 - @rad, @x2 + @rad, @y2 + @rad, :fill => true, :mode => :invert, :color => :blue
+      @img.rect @x2 - @rad, @y2 - @rad, @x2 + @rad, @y2 + @rad, :fill => true, :mode => :color_dodge, :color => 0xff888888
 
 #        @img.force_sync [0,0, @img.width, @img.height]
 
