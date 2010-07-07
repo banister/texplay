@@ -42,25 +42,25 @@ end
 #comment this when want to build normal gems.
 #only have this code uncommented when building mswin32 and mingw32
 #binary gems
-specification = Gem::Specification.new do |s|
-  s.name = "texplay"
-  s.summary = "TexPlay is a light-weight image manipulation framework for Ruby and Gosu"
-  s.version = TexPlay::VERSION
-  s.date = Time.now.strftime '%Y-%m-%d'
-  s.author = "John Mair (banisterfiend)"
-  s.email = 'jrmair@gmail.com'
-  s.description = s.summary
-  s.require_path = 'lib'
-  s.add_dependency("gosu",">=0.7.20")
-  s.platform = 'i386-mingw32'
-  s.homepage = "http://banisterfiend.wordpress.com/2008/08/23/texplay-an-image-manipulation-tool-for-ruby-and-gosu/"
-  s.has_rdoc = false
+# specification = Gem::Specification.new do |s|
+#   s.name = "texplay"
+#   s.summary = "TexPlay is a light-weight image manipulation framework for Ruby and Gosu"
+#   s.version = TexPlay::VERSION
+#   s.date = Time.now.strftime '%Y-%m-%d'
+#   s.author = "John Mair (banisterfiend)"
+#   s.email = 'jrmair@gmail.com'
+#   s.description = s.summary
+#   s.require_path = 'lib'
+#   s.add_dependency("gosu",">=0.7.20")
+#   s.platform = 'i386-mswin32'
+#   s.homepage = "http://banisterfiend.wordpress.com/2008/08/23/texplay-an-image-manipulation-tool-for-ruby-and-gosu/"
+#   s.has_rdoc = false
 
-  s.files =  ["Rakefile", "README.markdown", "CHANGELOG", 
-              "lib/texplay.rb", "lib/texplay-contrib.rb", "lib/texplay/version.rb", "lib/1.8/texplay.so",
-              "lib/1.9/texplay.so"] +
-    FileList["examples/*.rb", "examples/media/*"].to_a
-end
+#   s.files =  ["Rakefile", "README.markdown", "CHANGELOG", 
+#               "lib/texplay.rb", "lib/texplay-contrib.rb", "lib/texplay/version.rb", "lib/1.8/texplay.so",
+#               "lib/1.9/texplay.so"] +
+#     FileList["examples/*.rb", "examples/media/*"].to_a
+# end
 
 Rake::GemPackageTask.new(specification) do |package|
   package.need_zip = false

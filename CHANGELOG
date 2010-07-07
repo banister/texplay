@@ -1,3 +1,10 @@
+4/7/10
+version 0.2.960
+* added :transparent pseudo-color
+* added :tolerance option (applies to :trace and :source_select etc
+	family)
+* fixed memleak in to_blob
+
 10/6/10
 version 0.2.950
 * fixed bug in apply_drawing_mode, wasn't using blended_pixel as source_pixel
