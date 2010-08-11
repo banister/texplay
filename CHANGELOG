@@ -1,3 +1,7 @@
+16/7/10 
+version 0.2.965
+* fixed MAX_TEXTURE_SIZE at 1024 for linux (to avoid segfault)
+
 4/7/10
 version 0.2.960
 * added :transparent pseudo-color
