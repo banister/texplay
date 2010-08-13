@@ -279,14 +279,14 @@ save_rgba_to_image_local_color(VALUE image, rgba color)
 bool
 not_a_color(rgba color1) 
 {
-    return color1.red < 0 || color1.green < 0 ||
-      color1.blue < 0 || color1.alpha < 0;
+    return color1.red == -1 || color1.green == -1 ||
+      color1.blue == -1 || color1.alpha == -1;
 }
 
 bool
 is_a_color(rgba color1)
 {
-    return color1.red >= 0 && color1.green >= 0 && color1.blue >= 0 && color1.alpha >= 0;
+    return !not_a_color(color1);
 }
 
 bool
@@ -321,6 +321,8 @@ special_cmp_color(rgba color1, rgba color2)
         return color2.alpha == 0;
     else if (is_transparent_color(color2))
         return color1.alpha == 0;
+    else
+        return false;
 }
 
 static bool
@@ -330,6 +332,8 @@ special_cmp_color_with_tolerance(rgba color1, rgba color2, float tolerance)
       return (color1.alpha) <= tolerance;
     else if (is_transparent_color(color2))
         return color2.alpha <= tolerance;
+    else
+        return false;
 }
 
 

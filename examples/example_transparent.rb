@@ -13,7 +13,7 @@ class W < Gosu::Window
     @img.rect 200, 100, 300, 200, :color => [1, 1, 1, 0], :fill => true
     @img.rect 200, 100, 300, 200
 
-    @img.line 0, 120, 500, 120, :dest_select => [1,1,1,0], :color => :green
+    @img.line 0, 120, 500, 120, :dest_select => :transparent, :color => :green
     # @img.line 0, 140, 500, 140, :dest_select => :alpha  
     # @img.line 0, 160, 500, 160, :dest_select => :transparent # Should draw everywhere except the red block.
     # @img.line 0, 180, 500, 180, :dest_ignore => :transparent # Should draw only on the red block.       

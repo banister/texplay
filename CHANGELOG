@@ -1,3 +1,10 @@
+14/8/10
+version 0.2.970
+* fixed :transparent bug (bug was in rb_convert_rb_color_to_rgba(), :transparent was being matched as
+  not_a_color)
+* limited not_a_color() to match just color.red == -1 && color.green == -1, etc rather than color.red < 0
+* Now we can use negative values to define other pseudo-colors (in similar vein to :transparent)
+
 16/7/10 
 version 0.2.965
 * fixed MAX_TEXTURE_SIZE at 1024 for linux (to avoid segfault)
