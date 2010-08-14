@@ -1,4 +1,9 @@
 14/8/10
+version 0.2.975
+* fixed :tolerance bug (was in special_cmp_color_with_tolerance, was checking color1.alpha <= tolerance instead of color2.alpha <= tolerance)
+* modified TexPlay.create_image() so it only draws a colored, filled rect if a :color parameter is specified
+
+14/8/10
 version 0.2.970
 * fixed :transparent bug (bug was in rb_convert_rb_color_to_rgba(), :transparent was being matched as
   not_a_color)

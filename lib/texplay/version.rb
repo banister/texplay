@@ -1,3 +1,3 @@
 module TexPlay
-    VERSION = "0.2.970"
+    VERSION = "0.2.975"
 end

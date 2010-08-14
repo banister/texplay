@@ -329,9 +329,9 @@ static bool
 special_cmp_color_with_tolerance(rgba color1, rgba color2, float tolerance)
 {
     if (is_transparent_color(color1))
-      return (color1.alpha) <= tolerance;
+      return (color2.alpha) <= tolerance;
     else if (is_transparent_color(color2))
-        return color2.alpha <= tolerance;
+        return color1.alpha <= tolerance;
     else
         return false;
 }
