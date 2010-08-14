@@ -31,10 +31,9 @@ module TexPlay
         end
 
         def create_blank_image(window, width, height, options={})
-          options = { :color => [0, 0, 0, 0] }.merge!(options)
           
           img = Gosu::Image.new(window, EmptyImageStub.new(width, height))
-          img.rect 0, 0, img.width - 1, img.height - 1, :color => options[:color], :fill => true
+          img.rect 0, 0, img.width - 1, img.height - 1, :color => options[:color], :fill => true if options[:color]
 
           img
         end
