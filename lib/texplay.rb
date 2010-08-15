@@ -39,6 +39,25 @@ module TexPlay
         end
 
         alias_method :create_image, :create_blank_image
+
+        def set_options(options = {})
+            @options.merge!(options)
+        end
+
+        def get_options
+            @options
+        end
+
+        # default values defined here
+        def set_defaults
+          @options = {
+              :caching => true
+          }
+        end
+
+        def init
+            set_defaults
+        end
     end
 
     module Colors
@@ -108,35 +127,39 @@ module Gosu
             
             def new(*args, &block)
 
+                options = args.last.is_a?(Hash) ? args.pop : {}
                 # invoke old behaviour
                 obj = original_new(*args, &block)
 
-                prepare_image(obj, *args)
+                prepare_image(obj, args.first, options)
             end
             
             alias_method :original_from_text, :from_text
 
             def from_text(*args, &block)
 
+                options = args.last.is_a?(Hash) ? args.pop : {}
                 # invoke old behaviour
                 obj = original_from_text(*args, &block)
 
-                prepare_image(obj, *args)
+                prepare_image(obj, args.first, options)
             end
 
-            def prepare_image(obj, *args)
-
+            def prepare_image(obj, window, options={})
+                options = {
+                  :caching => TexPlay.get_options[:caching]
+                }.merge!(options)
+                
                 # refresh the TexPlay image cache
                 if obj.width <= (TexPlay::TP_MAX_QUAD_SIZE) &&
-                        obj.height <= (TexPlay::TP_MAX_QUAD_SIZE) && obj.quad_cached? then
-                    
-                    obj.refresh_cache
+                    obj.height <= (TexPlay::TP_MAX_QUAD_SIZE) && obj.quad_cached? then
+                    obj.refresh_cache if options[:caching]
                 end
-
+                
                 # run custom setup
                 TexPlay.setup(obj)
-
-                obj.instance_variable_set(:@__window__, args.first)
+              
+                obj.instance_variable_set(:@__window__, window)
 
                 obj
             end
@@ -157,5 +180,6 @@ class Proc
 end
 
 
-
+# initialize TP (at the moment just setting some default settings)
+TexPlay.init
 

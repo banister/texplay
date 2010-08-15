@@ -729,7 +729,7 @@ m_clear(int argc, VALUE * argv, VALUE self)
     parms[2] = INT2NUM(XMAX_OOB);
     parms[3] = INT2NUM(YMAX_OOB);
 
-    //  m_box(ARY_SIZE(parms), parms, self);
+    //    m_box(ARY_SIZE(parms), parms, self);
 
     return self;
 }

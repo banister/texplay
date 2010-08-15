@@ -89,7 +89,8 @@ Init_texplay() {
     rb_define_method(jm_Module, "colour", m_color, -1);
     rb_define_method(jm_Module, "composite", m_splice, -1);
     rb_define_method(jm_Module, "set_pixel", m_pixel, -1);
-    rb_define_method(jm_Module, "[]", m_getpixel, 2);
+    rb_define_method(jm_Module, "[]", m_getpixel, -1);
+    rb_define_method(jm_Module, "cache", m_cache_refresh, 0);
     /** end of aliases **/
 
     /** associated with gen_eval **/
