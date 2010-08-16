@@ -9,7 +9,7 @@ class W < Gosu::Window
     TexPlay.set_options :caching => true
     @img = Gosu::Image.new(self, "#{Common::MEDIA}/object.png", :caching => false)
 
-    @img.rect 0, 0, 200, 100, :color => :green, :fill => true, :dest_select => :transparent, :tolerance => 0.5
+    @img.clear :color => :red, :dest_select => :transparent, :tolerance => 0.9 
   end
   
   def draw

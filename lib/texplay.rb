@@ -30,15 +30,19 @@ module TexPlay
             end
         end
 
-        def create_blank_image(window, width, height, options={})
+        def create_image(window, width, height, options={})
+          options = {
+            :color => :alpha,
+            :caching => false,
+          }.merge!(options)
           
-          img = Gosu::Image.new(window, EmptyImageStub.new(width, height))
-          img.rect 0, 0, img.width - 1, img.height - 1, :color => options[:color], :fill => true if options[:color]
+          img = Gosu::Image.new(window, EmptyImageStub.new(width, height), :caching => options[:caching])
+          img.rect 0, 0, img.width - 1, img.height - 1, :color => options[:color], :fill => true 
 
           img
         end
 
-        alias_method :create_image, :create_blank_image
+        alias_method :create_blank_image, :create_image
 
         def set_options(options = {})
             @options.merge!(options)
@@ -77,6 +81,23 @@ module TexPlay
         Tyrian = [0.4, 0.007, 0.235, 1]
     end
     include Colors
+
+    # extra instance methods defined in Ruby
+
+    # clear an image (with an optional clear color)
+    def clear(options = {})
+      options = {
+        :color => :alpha,
+        :fill => true
+      }.merge!(options)
+
+      capture {
+        rect 0, 0, width - 1, height - 1, options
+      }
+      
+      self
+    end
+      
 end
 
 # credit to philomory for this class

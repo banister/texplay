@@ -43,7 +43,6 @@ Init_texplay() {
     rb_define_method(jm_Module, "circle", m_circle, -1);
     rb_define_method(jm_Module, "line", m_line, -1);
     rb_define_method(jm_Module, "rect", m_rect, -1);
-    rb_define_method(jm_Module, "clear", m_clear, -1);
     rb_define_method(jm_Module, "pixel", m_pixel, -1);
     rb_define_method(jm_Module, "fill", m_flood_fill, -1);
     rb_define_method(jm_Module, "bezier", m_bezier, -1);
