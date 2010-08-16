@@ -169,7 +169,7 @@ skip_pixel(rgba source_color, action_struct * payload, texture_info * tex, int x
             color_match = true;
             break;
         }
-    if (!color_match) return true;
+        if (!color_match) return true;
     }
   }
 
@@ -230,7 +230,7 @@ set_pixel_color_with_style(action_struct * payload, texture_info * tex, int x, i
     if(payload->pen.has_color_control_proc)
         blended_pixel = exec_color_control_proc(payload, tex, x,  y, blended_pixel);
 
-    /* should skip this pixel? */
+    /* should skip this pixel? color selection */
     if (skip_pixel(blended_pixel, payload, tex, x, y))
       return;
 
