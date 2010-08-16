@@ -1,4 +1,12 @@
 16/8/10
+version 0.2.981
+* oops, added :caching => false to TexPlay#dup
+* oops, put 'self' inside the capture block for TexPlay#clear
+* got rid of tolerance member from rgba struct, as tolerance is now stored
+	separately
+	
+	
+16/8/10
 version 0.2.980
 * added :caching option to TexPlay.set_options, and Gosu::Image.new. For
 	control over whether images are cached or not. (accepts true and

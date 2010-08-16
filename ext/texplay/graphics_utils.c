@@ -318,10 +318,13 @@ create_image(VALUE window, int width, int height)
 
     VALUE rmagick_img;
     VALUE new_image;
+    VALUE options = rb_hash_new();
+
+    set_hash_value(options, "caching", Qfalse);
 
     rmagick_img = rb_funcall(empty_image_stub, rb_intern("new"), 2, INT2FIX(width), INT2FIX(height));
 
-    new_image = rb_funcall(image, rb_intern("new"), 2, window, rmagick_img);
+    new_image = rb_funcall(image, rb_intern("new"), 3, window, rmagick_img, options);
 
     return new_image;
 }

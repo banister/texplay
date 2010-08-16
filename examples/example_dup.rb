@@ -1,3 +1,4 @@
+
 require 'rubygems'
 require 'common'
 require 'gosu'
@@ -34,7 +35,7 @@ class W < Gosu::Window
         # add a red line to the copy to identify it
         #@bunk.line 0, 0, 1024, 1024, :color => :red
 
-        @bunk.each(:region =>[200,200,350,350]) { |c,x,y|
+        @bunk.each(:region =>[200,200,350,350]) { |c,x,y| # 
 
             num_pixels = 0
             total = [0, 0, 0, 0]

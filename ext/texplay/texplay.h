@@ -57,7 +57,6 @@ typedef enum {
 /* structs */
 typedef struct s_rgba {
   float red, green, blue, alpha;
-  float tolerance;
 } rgba;
 
 typedef struct {
