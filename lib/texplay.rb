@@ -93,9 +93,9 @@ module TexPlay
 
       capture {
         rect 0, 0, width - 1, height - 1, options
-      }
       
-      self
+        self
+      }
     end
       
 end
