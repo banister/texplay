@@ -1,3 +1,4 @@
+$LOAD_PATH.unshift File.join(File.expand_path(__FILE__), '..')
 
 require 'rake/clean'
 require 'rake/gempackagetask'
@@ -65,4 +66,9 @@ end
 Rake::GemPackageTask.new(specification) do |package|
   package.need_zip = false
   package.need_tar = false
+end
+
+desc "Run rspec 2.0"
+task :rspec do
+  system "rspec spec/**/*_spec.rb"
 end

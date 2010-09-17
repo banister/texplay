@@ -35,6 +35,8 @@ module TexPlay
             :color => :alpha,
             :caching => false,
           }.merge!(options)
+
+          raise ArgumentError, "Height and width must be positive" if height <= 0 or width <= 0
           
           img = Gosu::Image.new(window, EmptyImageStub.new(width, height), :caching => options[:caching])
           img.rect 0, 0, img.width - 1, img.height - 1, :color => options[:color], :fill => true 
@@ -43,6 +45,23 @@ module TexPlay
         end
 
         alias_method :create_blank_image, :create_image
+
+        # Image can be :tileable, but it will break if it is tileable AND gets modified after creation.
+        def from_blob(window, blob_data, width, height, options={})
+          options = {
+            :caching => @options[:caching],
+            :tileable => false,
+          }.merge!(options)
+
+          raise ArgumentError, "Height and width must be positive (received #{width}x#{height})" if height <= 0 or width <= 0
+
+          expected_size = height * width * 4
+          if blob_data.size != expected_size
+            raise ArgumentError, "Blob data is not of the correct size (expected #{expected_size} but received #{blob_data.size} bytes)"
+          end
+
+          Gosu::Image.new(window, ImageStub.new(blob_data, width, height), options[:tileable], :caching => options[:caching])
+        end
 
         def set_options(options = {})
             @options.merge!(options)
@@ -100,22 +119,24 @@ module TexPlay
       
 end
 
-# credit to philomory for this class
-class EmptyImageStub
-    def initialize(w, h)
-        @w, @h = w, h
+# Used to create images from blob data.
+class ImageStub
+    attr_reader :rows, :columns
+    
+    def initialize(blob_data, width, height)
+        @data, @columns, @rows = blob_data, width, height
     end
     
     def to_blob
-        "\0" * @w * @h * 4
+        @data
     end
-    
-    def rows
-        @h
-    end
-    
-    def columns
-        @w
+end
+
+# Used to create blank images.
+# credit to philomory for this class
+class EmptyImageStub < ImageStub
+    def initialize(width, height)
+        super("\0" * (width * height * 4), width, height)
     end
 end
 
