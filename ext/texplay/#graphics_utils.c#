@@ -489,12 +489,7 @@ prepare_drawing_mode(action_struct * cur)
 
       Check_Type(draw_mode, T_SYMBOL);
         
-      if(draw_mode == string2sym("default")) {
-        cur->pen.has_drawing_mode = false;
-
-        return;
-      }
-      else if(draw_mode == string2sym("clear"))
+      if(draw_mode == string2sym("clear"))
         cur->pen.drawing_mode = clear;
 
       else if(draw_mode == string2sym("copy"))

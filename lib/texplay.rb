@@ -12,6 +12,7 @@ direc = File.dirname(__FILE__)
 require 'rbconfig'
 require 'gosu'
 require "#{direc}/texplay/version"
+require "#{direc}/texplay/patches"
 
 module TexPlay
     class << self

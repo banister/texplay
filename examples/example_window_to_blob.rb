@@ -1,4 +1,3 @@
-require 'rubygems'
 require 'common'
 require 'gosu'
 require 'texplay'

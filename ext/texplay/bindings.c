@@ -112,6 +112,24 @@ M_refresh_cache_all(VALUE self)
     return Qnil;
 }
 
+/* VALUE */
+/* M_screenshot(VALUE self, VALUE x, VALUE y, VALUE width, VALUE width) */
+/* { */
+/*     texture_info tex; */
+/*     int sidelength; */
+/*     int rb_x = FIX2INT(x); */
+/*     int rb_y = FIX2INT(y); */
+/*     int rb_width = FIX2INT(width); */
+/*     int rb_height = FIX2INT(height); */
+    
+/*     VALUE blob = rb_str_new(NULL, 4 * rb_width * rb_height); */
+
+/*     glReadPixels(rb_x, rb_y, rb_width, rb_height, GL_RGBA, GL_UNSIGNED_BYTE, RSTRING_PTR(blob)); */
+
+/*     return blob; */
+/* } */
+
+
 /* creates a blank image */
 /* VALUE */
 /* M_create_blank(VALUE self, VALUE window, VALUE width, VALUE height) */
@@ -346,6 +364,8 @@ get_image_chunk_with_size(char * data, texture_info * tex, char * blob)
             memcpy(blob + buf_index, data + offset, 4);
         }
 }
+
+
 
 VALUE
 m_to_blob(VALUE self)

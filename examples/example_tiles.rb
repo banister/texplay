@@ -5,7 +5,7 @@ require 'texplay'
 
 class Gosu::Image
   # so we can use the old TexPlay to_blob -- appears to segfault?!
-  remove_method :to_blob
+  undef_method :to_blob
 end
 
 class W < Gosu::Window
