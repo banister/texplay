@@ -772,7 +772,7 @@ max_quad_size(void)
 {
   
 #if defined(__APPLE__) || defined(__linux__)
-  return 1024;
+  return 512;
 #endif
   
     static unsigned size = 0;

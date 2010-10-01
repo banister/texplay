@@ -1,3 +1,17 @@
+*1/10/10
+version 0.2.983pre2
+* added Window#to_texture(...)  seems to be broken! releasing pre2 so
+* others can test it :)
+	
+*27/9/10
+version 0.2.983pre1
+* added Window#to_blob(x,y,width,height), grab a screenshot region
+	
+*24/9/10
+version 0.2.982pre1
+* added :default drawing mode (equivalent to :mode => nil)
+* changed Linux texture size to 512
+	
 16/8/10
 version 0.2.981
 * oops, added :caching => false to TexPlay#dup
