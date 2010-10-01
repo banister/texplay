@@ -221,7 +221,7 @@ module Gosu
         # window itself. Larger images can be rendered to only in separate sections using :clip_to areas, each no larger
         # than the window).
         #
-        # @note *Warning!* This operation will corrupt an area of the screen, at the top left corner, equal in size to the image rendered to (or the clipped area), so should be performed in #draw _before_ any other rendering.
+        # @note *Warning!* This operation will corrupt an area of the screen, at the bottom left corner, equal in size to the image rendered to (or the clipped area), so should be performed in #draw _before_ any other rendering.
         #
         # @note The final alpha of the image will be 255, regardless of what it started with or what is drawn onto it.
         #
@@ -284,7 +284,8 @@ module Gosu
             # Since to_texture copies an inverted copy of the screen, what the user renders needs to be inverted first.
             scale(1, -1) do
                 translate(-left, -top - self.height) do
-                    clip_to(left, top, width, height) do
+                    # TODO: Once Gosu is fixed, we can just pass width/height to clip_to
+                    clip_to(left, top, width - 1, height - 1) do
                         # Draw over the background (which is assumed to be blank) with the original image texture,
                         # to get us to the base image.
                         image.draw(0, 0, 0)
@@ -300,10 +301,10 @@ module Gosu
                     # Clear the clipped zone to black again, ready for the regular screen drawing.
                     if options[:clear]
                         clear = Gosu::Color.new(255, 0, 0, 0)
-                        draw_quad(0, 0, clear,
-                                  width - 1, 0, clear,
-                                  width - 1, height - 1, clear,
-                                  0, height - 1, clear)
+                        draw_quad(left, top, clear,
+                                  right, top, clear,
+                                  right, bottom, clear,
+                                  left, bottom, clear)
                     end
                 end
             end
