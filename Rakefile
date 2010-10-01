@@ -75,3 +75,8 @@ desc "Run rspec 2.0"
 task :rspec do
   system "rspec spec/**/*_spec.rb"
 end
+
+desc "Create yard docs"
+task :doc do
+  system "yard doc lib --output doc/yard --files doc/texplay_manual"
+end  
