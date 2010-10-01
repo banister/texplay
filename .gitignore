@@ -1,2 +1,4 @@
 lib/**/*.so
 .idea/
+.yardoc
+doc/yard
