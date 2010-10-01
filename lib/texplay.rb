@@ -221,11 +221,9 @@ module Gosu
         # window itself. Larger images can be rendered to only in separate sections using :clip_to areas, each no larger
         # than the window).
         #
-        # *Warning:* This operation will corrupt an area of the screen, at the top left corner,
-        # equal in size to the image rendered to (or the clipped area), so should be performed in #draw _before_ any
-        # other rendering.
+        # @note *Warning!* This operation will corrupt an area of the screen, at the top left corner, equal in size to the image rendered to (or the clipped area), so should be performed in #draw _before_ any other rendering.
         #
-        # *Note:* The final alpha of the image will be 255, regardless of what it started with or what is drawn onto it.
+        # @note The final alpha of the image will be 255, regardless of what it started with or what is drawn onto it.
         #
         # @example
         #   class Gosu
@@ -250,7 +248,7 @@ module Gosu
         #
         #
         # @param [Gosu::Image] image Existing image to render onto.
-        # @option options [Array<Integer>] :clip_to ([0, 0, image.width, image.height])
+        # @option options [Array<Integer>] :clip_to ([0, 0, image.width, image.height]) Area of the image to render into. This area cannot be larger than the window, though the image may be.
         # @option options [Boolean] :clear (true) Whether to clear the screen again after rendering has occurred.
         # @return [Gosu::Image] The image that has been rendered to.
         # @yield to a block that renders to the image.
