@@ -1,5 +1,5 @@
+$LOAD_PATH.unshift File.dirname(File.expand_path(__FILE__))
 require 'common'
-require 'gosu'
 
 Dragon = TexPlay::LSystem.new do
     rule "F" => "F"

@@ -1,7 +1,5 @@
+$LOAD_PATH.unshift File.dirname(File.expand_path(__FILE__))
 require 'common'
-require 'gosu'
-require 'texplay'
-
 
 class W < Gosu::Window
     def initialize
@@ -16,10 +14,9 @@ class W < Gosu::Window
     end
     
     def draw
-        @img.draw 0, 0,1
+      @img.draw 0, 0,1
       @img2.draw 100, 100,1
       if button_down?(Gosu::KbEscape)
-#        self.flush
         @blob = self.to_blob(0,self.height - 70, 50, 50)
         if @blob
           @img3 = TexPlay.from_blob(self, @blob,50, 50 ) 

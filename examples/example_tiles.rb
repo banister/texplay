@@ -1,7 +1,5 @@
-require 'rubygems'
+$LOAD_PATH.unshift File.dirname(File.expand_path(__FILE__))
 require 'common'
-require 'gosu'
-require 'texplay'
 
 class Gosu::Image
   # so we can use the old TexPlay to_blob -- appears to segfault?!

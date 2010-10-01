@@ -1,7 +1,5 @@
-
-require 'rubygems'
-require './common'
-require 'texplay'
+$LOAD_PATH.unshift File.dirname(File.expand_path(__FILE__))
+require 'common'
 
 
 class W < Gosu::Window
