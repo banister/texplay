@@ -1,12 +1,7 @@
 
 # (C) John Mair 2009, under the MIT licence
 
-begin
-    require 'rubygems'
-rescue LoadError
-end
-
-direc = File.dirname(__FILE__)
+direc = File.expand_path(File.dirname(__FILE__))
 
 # include gosu first
 require 'rbconfig'
@@ -15,6 +10,8 @@ require "#{direc}/texplay/version"
 require "#{direc}/texplay/patches"
 
 module TexPlay
+    RENDER_CLEAR_COLOR = Gosu::Color.new(255, 0, 0, 0)
+
     class << self
         def on_setup(&block)
             raise "need a block" if !block
@@ -157,7 +154,6 @@ module TexPlay
 end
 
 # bring in user-defined extensions to TexPlay
-direc = File.dirname(__FILE__)
 dlext = Config::CONFIG['DLEXT']
 begin
     if RUBY_VERSION && RUBY_VERSION =~ /1.9/
@@ -265,7 +261,6 @@ module Gosu
         #
         # @param [Gosu::Image] image Existing image to render onto.
         # @option options [Array<Integer>] :clip_to ([0, 0, image.width, image.height]) Area of the image to render into. This area cannot be larger than the window, though the image may be.
-        # @option options [Boolean] :clear (true) Whether to clear the screen again after rendering has occurred.
         # @return [Gosu::Image] The image that has been rendered to.
         # @yield to a block that renders to the image.
         def render_to_image(image, options = {})
@@ -274,8 +269,7 @@ module Gosu
 
             options = {
                 :clip_to => [0, 0, image.width, image.height],
-                :clear => true
-            }.merge options
+            }.merge! options
 
             texture_info = image.gl_tex_info
             tex_name = texture_info.tex_name
@@ -301,7 +295,7 @@ module Gosu
             scale(1, -1) do
                 translate(-left, -top - self.height) do
                     # TODO: Once Gosu is fixed, we can just pass width/height to clip_to
-                    clip_to(left, top, width - 1, height - 1) do
+                    clip_to(left, top, width, height) do
                         # Draw over the background (which is assumed to be blank) with the original image texture,
                         # to get us to the base image.
                         image.draw(0, 0, 0)
@@ -315,13 +309,11 @@ module Gosu
                     to_texture(tex_name, x_offset + left, y_offset + top, 0, 0, width, height)
 
                     # Clear the clipped zone to black again, ready for the regular screen drawing.
-                    if options[:clear]
-                        clear = Gosu::Color.new(255, 0, 0, 0)
-                        draw_quad(left, top, clear,
-                                  right, top, clear,
-                                  right, bottom, clear,
-                                  left, bottom, clear)
-                    end
+                    # Quad can be a pixel out, so just make sure with a slightly larger shape.
+                    draw_quad(left - 2, top - 2, TexPlay::RENDER_CLEAR_COLOR,
+                              right + 2, top - 2, TexPlay::RENDER_CLEAR_COLOR,
+                              right + 2, bottom + 2, TexPlay::RENDER_CLEAR_COLOR,
+                              left - 2, bottom + 2, TexPlay::RENDER_CLEAR_COLOR)
                 end
             end
 
