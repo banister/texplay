@@ -2,75 +2,61 @@ $LOAD_PATH.unshift File.join(File.expand_path(__FILE__), '..')
 
 require 'rake/clean'
 require 'rake/gempackagetask'
-#require 'rake/extensiontask'
 
 # get the texplay version
-require 'lib/texplay/version'
+require './lib/texplay/version'
 
-$dlext = Config::CONFIG['DLEXT']
+dlext = Config::CONFIG['DLEXT']
 
-CLEAN.include("ext/**/*.#{$dlext}", "ext/**/*.log", "ext/**/*.o", "ext/**/*~", "ext/**/*#*", "ext/**/*.obj", "ext/**/*.def", "ext/**/*.pdb")
-CLOBBER.include("**/*.#{$dlext}", "**/*~", "**/*#*", "**/*.log", "**/*.o")
+CLEAN.include("ext/**/*.#{dlext}", "ext/**/*.log", "ext/**/*.o", "ext/**/*~", "ext/**/*#*", "ext/**/*.obj", "ext/**/*.def", "ext/**/*.pdb")
+CLOBBER.include("**/*.#{dlext}", "**/*~", "**/*#*", "**/*.log", "**/*.o")
 
-specification = Gem::Specification.new do |s|
-    s.name = "texplay"
-    s.summary = "TexPlay is a light-weight image manipulation framework for Ruby and Gosu"
-    s.version = TexPlay::VERSION
-    s.date = Time.now.strftime '%Y-%m-%d'
-    s.author = "John Mair (banisterfiend)"
-    s.email = 'jrmair@gmail.com'
-    s.description = s.summary
-    s.require_path = 'lib'
-    s.add_dependency("gosu",">=0.7.20")
+def apply_spec_defaults(s)
+  s.name = "texplay"
+  s.summary = "TexPlay is a light-weight image manipulation framework for Ruby and Gosu"
+  s.version = TexPlay::VERSION
+  s.date = Time.now.strftime '%Y-%m-%d'
+  s.author = "John Mair (banisterfiend)"
+  s.email = 'jrmair@gmail.com'
+  s.description = s.summary
+  s.require_path = 'lib'
+  s.add_dependency("gosu",">=0.7.20")
+  s.homepage = "http://banisterfiend.wordpress.com/2008/08/23/texplay-an-image-manipulation-tool-for-ruby-and-gosu/"
+  s.has_rdoc = 'yard'
+  s.files =  FileList["Rakefile", "README.markdown", "CHANGELOG", 
+                      "lib/**/*.rb", "ext/**/extconf.rb", "ext/**/*.h", "ext/**/*.c",
+                      "examples/*.rb", "examples/media/*", "spec/*.rb"].to_a 
+end
+
+
+[:mingw32, :mswin32].each do |v|
+  namespace v do
+    spec = Gem::Specification.new do |s|
+      apply_spec_defaults(s)        
+      s.platform = "i386-#{v}"
+      s.files += FileList["lib/**/*.#{dlext}"].to_a
+    end
+
+    Rake::GemPackageTask.new(spec) do |pkg|
+      pkg.need_zip = false
+      pkg.need_tar = false
+    end
+  end
+end
+
+namespace :ruby do
+  spec = Gem::Specification.new do |s|
+    apply_spec_defaults(s)        
     s.platform = Gem::Platform::RUBY
-    s.homepage = "http://banisterfiend.wordpress.com/2008/08/23/texplay-an-image-manipulation-tool-for-ruby-and-gosu/"
-    s.has_rdoc = false
-
     s.extensions = ["ext/texplay/extconf.rb"]
-    s.files =  ["Rakefile", "README.markdown", "CHANGELOG", 
-                "lib/texplay.rb", "lib/texplay-contrib.rb", "lib/texplay/version.rb", "lib/texplay/patches.rb"] +
-        FileList["ext/**/extconf.rb", "ext/**/*.h", "ext/**/*.c", "examples/*.rb", "examples/media/*", "spec/*.rb"].to_a 
+  end
+
+  Rake::GemPackageTask.new(spec) do |pkg|
+    pkg.need_zip = false
+    pkg.need_tar = false
+  end
 end
-
-# Rake::ExtensionTask.new('texplay', specification)  do |ext|
-#   ext.config_script = 'extconf.rb' 
-#   ext.cross_compile = true                
-#   ext.cross_platform = 'i386-mswin32'
-#  ext.platform = 'i386-mswin32'
-# end
-
-
-#comment this when want to build normal gems.
-#only have this code uncommented when building mswin32 and mingw32
-#binary gems
-# specification = Gem::Specification.new do |s|
-#   s.name = "texplay"
-#   s.summary = "TexPlay is a light-weight image manipulation framework for Ruby and Gosu"
-#   s.version = TexPlay::VERSION
-#   s.date = Time.now.strftime '%Y-%m-%d'
-#   s.author = "John Mair (banisterfiend)"
-#   s.email = 'jrmair@gmail.com'
-#   s.description = s.summary
-#   s.require_path = 'lib'
-#   s.add_dependency("gosu",">=0.7.20")
-#   s.platform = 'i386-mingw32'
-#   s.homepage = "http://banisterfiend.wordpress.com/2008/08/23/texplay-an-image-manipulation-tool-for-ruby-and-gosu/"
-#   s.has_rdoc = false
-
-#   s.files =  ["Rakefile", "README.markdown", "CHANGELOG", 
-#               "lib/texplay.rb", "lib/texplay-contrib.rb",
-#               "lib/texplay/version.rb",
-#               "lib/texplay/patches.rb",
-#               "lib/1.8/texplay.so",
-#               "lib/1.9/texplay.so"] +
-#     FileList["examples/*.rb", "examples/media/*", "spec/*.rb"].to_a
-# end
-
-Rake::GemPackageTask.new(specification) do |package|
-  package.need_zip = false
-  package.need_tar = false
-end
-
+  
 desc "Run rspec 2.0"
 task :rspec do
   system "rspec spec/**/*_spec.rb"

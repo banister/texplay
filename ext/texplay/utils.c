@@ -770,11 +770,6 @@ calc_pixel_offset(texture_info * tex, int x, int y)
 unsigned
 max_quad_size(void)
 {
-  
-#if defined(__APPLE__) || defined(__linux__)
-  return 512;
-#endif
-  
     static unsigned size = 0;
     
     if (size == 0) {
