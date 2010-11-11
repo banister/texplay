@@ -1,3 +1,6 @@
+*1/11/10 version 0.3.0
+* pushed gems
+* tested
 *1/10/10
 version 0.2.983pre2
 * added Window#to_texture(...)  seems to be broken! releasing pre2 so
