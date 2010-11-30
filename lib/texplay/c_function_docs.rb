@@ -1,3 +1,4 @@
+# -*- coding: iso-8859-1 -*-
 # This code is never run; it is just here so we can document the C functions.
 
 
@@ -44,7 +45,7 @@ module TexPlay
   def each(&block)
   end
 
-  # Fill at a given position.
+  # Perform a Flood Fill at a given position.
   #
   # @param [Number] x
   # @param [Number] y
