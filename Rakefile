@@ -1,11 +1,13 @@
 $LOAD_PATH.unshift File.join(File.expand_path(__FILE__), '..')
 
+
 require 'rake/clean'
 require 'rake/gempackagetask'
 
 # get the texplay version
 require './lib/texplay/version'
 
+direc = File.dirname(__FILE__)
 dlext = Config::CONFIG['DLEXT']
 
 CLEAN.include("ext/**/*.#{dlext}", "ext/**/*.log", "ext/**/*.o", "ext/**/*~", "ext/**/*#*", "ext/**/*.obj", "ext/**/*.def", "ext/**/*.pdb")
@@ -20,7 +22,7 @@ def apply_spec_defaults(s)
   s.email = 'jrmair@gmail.com'
   s.description = s.summary
   s.require_path = 'lib'
-  s.add_dependency("gosu",">=0.7.20")
+  s.add_dependency("gosu",">=0.7.25")
   s.homepage = "http://banisterfiend.wordpress.com/2008/08/23/texplay-an-image-manipulation-tool-for-ruby-and-gosu/"
   s.has_rdoc = 'yard'
   s.files =  FileList["Rakefile", "README.markdown", "CHANGELOG", 
@@ -57,12 +59,17 @@ namespace :ruby do
   end
 end
   
-desc "Run rspec 2.0"
-task :rspec do
-  system "rspec spec/**/*_spec.rb"
-end
+desc "build all platform gems at once"
+task :gems => ["mingw32:gem", "mswin32:gem", "ruby:gem"]
 
-desc "Create yard docs"
-task :doc do
-  system "yard doc lib --output doc/yard --files doc/texplay_manual"
-end  
+desc "remove all platform gems"
+task :rmgems => ["ruby:clobber_package"]
+
+desc "build and push latest gems"
+task :pushgems => :gems do
+  chdir("#{direc}/pkg") do
+    Dir["*.gem"].each do |gemfile|
+      sh "gem push #{gemfile}"
+    end
+  end
+end
