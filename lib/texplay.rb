@@ -4,7 +4,6 @@
 direc = File.expand_path(File.dirname(__FILE__))
 
 # include gosu first
-require 'rbconfig'
 require 'gosu'
 require "#{direc}/texplay/version"
 
@@ -14,13 +13,12 @@ module TexPlay
   class << self
     def on_setup(&block)
       raise "need a block" if !block
-      
       @__init_procs__ ||= []
       @__init_procs__.push(block)
     end
 
     def setup(receiver)
-      if @__init_procs__ then
+      if @__init_procs__ 
         @__init_procs__.each do |init_proc|
           receiver.instance_eval(&init_proc)
         end
@@ -36,7 +34,12 @@ module TexPlay
       raise ArgumentError, "Height and width must be positive" if height <= 0 or width <= 0
       
       img = Gosu::Image.new(window, EmptyImageStub.new(width, height), :caching => options[:caching])
-      img.rect 0, 0, img.width - 1, img.height - 1, :color => options[:color], :fill => true 
+
+      # this should be a major speedup (avoids both a cache and a sync
+      # if color is alpha (default)
+      if options[:color] != :alpha
+        img.rect 0, 0, img.width - 1, img.height - 1, :color => options[:color], :fill => true
+      end
 
       img
     end
@@ -46,7 +49,7 @@ module TexPlay
     # Image can be :tileable, but it will break if it is tileable AND gets modified after creation.
     def from_blob(window, blob_data, width, height, options={})
       options = {
-        :caching => @options[:caching],
+        :caching => false,
         :tileable => false,
       }.merge!(options)
 
@@ -71,7 +74,7 @@ module TexPlay
     # default values defined here
     def set_defaults
       @options = {
-        :caching => true
+        :caching => :lazy
       }
     end
 
@@ -121,6 +124,7 @@ module TexPlay
   #
   # This object duck-types an RMagick image (#rows, #columns, #to_blob), so that Gosu will import it.
   class ImageStub
+
     # @return [Integer]
     attr_reader :rows, :columns
 
@@ -153,14 +157,15 @@ module TexPlay
 end
 
 # bring in user-defined extensions to TexPlay
-dlext = Config::CONFIG['DLEXT']
 begin
   if RUBY_VERSION && RUBY_VERSION =~ /1.9/
-    require "#{direc}/1.9/texplay.#{dlext}"
+    require "#{direc}/1.9/texplay"
   else
-    require "#{direc}/1.8/texplay.#{dlext}"
+    require "#{direc}/1.8/texplay"
   end
 rescue LoadError => e
+  require 'rbconfig'
+  dlext = Config::CONFIG['DLEXT']
   require "#{direc}/texplay.#{dlext}"
 end
 
@@ -203,16 +208,33 @@ module Gosu
         options = {
           :caching => TexPlay.get_options[:caching]
         }.merge!(options)
-        
-        # refresh the TexPlay image cache
+
+        caching_mode = options[:caching]
+
+        # we can't manipulate large images, so skip them.
         if obj.width <= (TexPlay::TP_MAX_QUAD_SIZE) &&
-            obj.height <= (TexPlay::TP_MAX_QUAD_SIZE) && obj.quad_cached? then
-          obj.refresh_cache if options[:caching]
+            obj.height <= (TexPlay::TP_MAX_QUAD_SIZE)
+          
+          if caching_mode
+            if caching_mode == :lazy
+
+              # only cache if quad already cached (to refresh old data)
+              # otherwise cache lazily at point of first TexPlay call
+              obj.refresh_cache if obj.quad_cached?
+
+            else
+              
+              # force a cache - this obviates the need for a
+              # potentialy expensive runtime cache of the image by
+              # moving the cache to load-time
+              obj.refresh_cache
+            end
+          end
         end
         
         # run custom setup
         TexPlay.setup(obj)
-        
+
         obj.instance_variable_set(:@__window__, window)
 
         obj

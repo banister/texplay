@@ -1,17 +1,14 @@
-$LOAD_PATH.unshift File.join(File.expand_path(__FILE__), '..')
-
+direc = File.dirname(__FILE__)
+dlext = Config::CONFIG['DLEXT']
+project_name = "texplay"
 
 require 'rake/clean'
 require 'rake/gempackagetask'
+require "#{direc}/lib/#{project_name}/version"
 
-# get the texplay version
-require './lib/texplay/version'
-
-direc = File.dirname(__FILE__)
-dlext = Config::CONFIG['DLEXT']
-
-CLEAN.include("ext/**/*.#{dlext}", "ext/**/*.log", "ext/**/*.o", "ext/**/*~", "ext/**/*#*", "ext/**/*.obj", "ext/**/*.def", "ext/**/*.pdb")
 CLOBBER.include("**/*.#{dlext}", "**/*~", "**/*#*", "**/*.log", "**/*.o")
+CLEAN.include("ext/**/*.#{dlext}", "ext/**/*.log", "ext/**/*.o", "ext/**/*~",
+              "ext/**/*#*", "ext/**/*.obj", "ext/**/*.def", "ext/**/*.pdb")
 
 def apply_spec_defaults(s)
   s.name = "texplay"
@@ -29,7 +26,6 @@ def apply_spec_defaults(s)
                       "lib/**/*.rb", "ext/**/extconf.rb", "ext/**/*.h", "ext/**/*.c",
                       "examples/*.rb", "examples/media/*", "spec/*.rb"].to_a 
 end
-
 
 [:mingw32, :mswin32].each do |v|
   namespace v do
@@ -50,7 +46,7 @@ namespace :ruby do
   spec = Gem::Specification.new do |s|
     apply_spec_defaults(s)        
     s.platform = Gem::Platform::RUBY
-    s.extensions = ["ext/texplay/extconf.rb"]
+    s.extensions = ["ext/#{project_name}/extconf.rb"]
   end
 
   Rake::GemPackageTask.new(spec) do |pkg|
@@ -58,9 +54,31 @@ namespace :ruby do
     pkg.need_tar = false
   end
 end
+
+directories = ["#{direc}/lib/1.8", "#{direc}/lib/1.9"]
+directories.each { |d| directory d }
+
+desc "build the 1.8 and 1.9 binaries from source and copy to lib/"
+task :compile => directories do
+  build_for = proc do |pik_ver, ver|
+    sh %{ \
+          c:\\devkit\\devkitvars.bat && \
+          pik #{pik_ver} && \
+          ruby extconf.rb && \
+          make clean && \
+          make && \
+          cp *.so #{direc}/lib/#{ver} \
+        }
+  end
   
+  chdir("#{direc}/ext/#{project_name}") do
+    build_for.call("187", "1.8")
+    build_for.call("192", "1.9")
+  end
+end
+
 desc "build all platform gems at once"
-task :gems => ["mingw32:gem", "mswin32:gem", "ruby:gem"]
+task :gems => [:clean, :rmgems, "mingw32:gem", "mswin32:gem", "ruby:gem"]
 
 desc "remove all platform gems"
 task :rmgems => ["ruby:clobber_package"]
@@ -73,3 +91,4 @@ task :pushgems => :gems do
     end
   end
 end
+
