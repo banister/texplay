@@ -1,7 +1,6 @@
 direc = File.dirname(__FILE__)
-# require 'rubygems'
-# require "gosu"
-require "#{direc}/../lib/texplay.rb"
+
+require "#{direc}/../lib/texplay"
 
 class Module
   public :remove_const
