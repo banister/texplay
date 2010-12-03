@@ -11,24 +11,25 @@ context TexPlay, :repeat => 0 do
       @win = Window.new(640, 480, false)
   end
   
-  context "TexPlay#create_image", :repeat => 10 do
+  context "TexPlay#create_image", :repeat => 2 do
     before do
       @img = TexPlay.create_image(@win, 100, 100)
     end
 
-    show bench("caching :false", :repeat => 2) {
+    show bench :caching_false do
       Image.new(@win, @img, :caching => false)
-    }
+    end
 
-    show bench "caching: true", :repeat => 3 do
+    show bench :caching_true do
       Image.new(@win, @img, :caching => true)
     end
 
-    rank "caching: true", "caching :false"
+    rank :caching_true, :caching_false
+    compare :caching_true, :caching_false
   end
 
   bench "caching: :lazy" do
       Image.new(@win, @img, :caching => :lazy)
-    end
+  end
 end
 

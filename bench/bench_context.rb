@@ -10,7 +10,7 @@ module Baseline
   end
   
   class BenchContext
-    attr_reader :total_time
+    attr_reader :total_time, :bench_count, :subcontext_count
     
     def initialize(repeat, indent_level, before, after)
       @repeat = repeat
@@ -19,6 +19,7 @@ module Baseline
       @before = Array(before)
       @after =  Array(after)
       @results = {}
+      @bench_count = @subcontext_count = 0
     end
 
     def before(&block)
@@ -58,6 +59,8 @@ module Baseline
       end
 
       @results[name] = time
+      @bench_count += 1
+      
       [name, time, repeat_text, :with_own_block]
     end
 
@@ -68,14 +71,14 @@ module Baseline
         show exec_bench(name, repeat, &block)
       when :with_own_block
         name, time, repeat_text = bench_data
-        puts "#{indenter}#{name}: %0.2f #{repeat_text}" % time
+        puts "#{indenter}#{name}: %0.2f #{repeat_text} seconds." % time
       end
     end
     
     def bench(name, options={},  &block)
       
-      # if no block then assume block is provided by 'show' method and
-      # pass along requisite data so 'show' can do its thing
+      # if no block then assume block is provided by show method and
+      # pass along requisite data so show can do its thing
       if !block_given?
         [name, options[:repeat], :without_own_block]
       else
@@ -94,19 +97,36 @@ module Baseline
       puts "#{indenter}--"
       puts "#{indenter}Benching #{name}: #{repeat_text}"
 
-      @total_time +=
-        time = BenchContext.new(repeat, @indent_level + 1, @before, @after).
-        tap { |v| v.instance_eval(&block) }.
-        total_time
+      bc = BenchContext.new(repeat, @indent_level + 1, @before, @after)
+
+      bench_count = subcontext_count = 0
       
-      puts "#{indenter}total time: %0.2f seconds for #{name}" % time
+      @total_time += time = bc.tap do |v|
+        v.instance_eval(&block)
+        bench_count = v.bench_count
+        subcontext_count = v.subcontext_count
+      end.
+      total_time
+
+      puts "#{indenter}total time: %0.2f seconds for #{name} " \
+      "[#{bench_count} benches and #{subcontext_count} subcontexts]" % time
       puts "#{indenter}--"
 
       @results[name] = time
+      @subcontext_count += 1
 
       @total_time
     end
 
+    def compare(bench1, bench2)
+      benches = [bench1, bench2]
+      winner, loser = benches.minmax_by { |v| @results[v] }
+      time_diff = @results[loser] - @results[winner]
+      time_ratio = @results[loser] / @results[winner].to_f
+      puts "#{indenter}Comparison: \"#{winner}\" is faster than \"#{loser}\"" \
+      " by %0.2f seconds (%0.2f times faster)" % [time_diff, time_ratio]
+    end
+    
     def rank(*names)
       ranking = names.sort_by! { |v| @results[v] }
       quoted_ranking = names.map.with_index { |v, i| "#{i + 1}. \"#{v}\"" }.join(", ")
@@ -124,11 +144,18 @@ module Baseline
       puts "--"
       puts "Benching #{name}: (repeat: #{repeat}) #{time_mode_text}"
       
+      bench_count = subcontext_count = 0
+      
       top_level_context_time = Baseline::BenchContext.new(repeat, 1, nil, nil).
-        tap { |v| v.instance_eval(&block) }.
+        tap do |v|
+          v.instance_eval(&block)
+          bench_count = v.bench_count
+          subcontext_count = v.subcontext_count
+        end.
         total_time
 
-      puts "total time: %0.2f seconds for #{name}" % top_level_context_time
+      puts "total time: %0.2f seconds for #{name} " \
+      "[#{bench_count} benches and #{subcontext_count} subcontexts]" % top_level_context_time
       puts "--"
 
       top_level_context_time
