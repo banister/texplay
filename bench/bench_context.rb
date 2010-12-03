@@ -12,10 +12,10 @@ module Baseline
   class BenchContext
     attr_reader :total_time
     
-    def initialize(repeat, dots, before, after)
+    def initialize(repeat, indent_level, before, after)
       @repeat = repeat
       @total_time = 0
-      @dots = dots
+      @indent_level = indent_level
       @before = Array(before)
       @after =  Array(after)
       @results = {}
@@ -64,7 +64,7 @@ module Baseline
     end
 
     def indenter
-      " " * @dots
+      " " * @indent_level
     end
 
     def context(name, options={}, &block)
@@ -75,7 +75,7 @@ module Baseline
       puts "#{indenter}Benching #{name}: #{repeat_text}"
 
       @total_time +=
-        time = BenchContext.new(repeat, @dots + 1, @before, @after).
+        time = BenchContext.new(repeat, @indent_level + 1, @before, @after).
         tap { |v| v.instance_eval(&block) }.
         total_time
       
@@ -98,9 +98,11 @@ module Baseline
     private
     def context(name, options={}, &block)
       repeat = options[:repeat] || 1
+      time_mode = Baseline.time_mode
+      time_mode_text = time_mode != Baseline::TIME_MODE_DEFAULT ? "(time mode: #{time_mode})" : ""
 
       puts "--"
-      puts "Benching #{name}: (repeat: #{repeat})"
+      puts "Benching #{name}: (repeat: #{repeat}) #{time_mode_text}"
       
       top_level_context_time = Baseline::BenchContext.new(repeat, 1, nil, nil).
         tap { |v| v.instance_eval(&block) }.

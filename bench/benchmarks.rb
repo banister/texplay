@@ -7,9 +7,12 @@ include Gosu
 
 context TexPlay, :repeat => 0 do
 
+  before do
+      @win = Window.new(640, 480, false)
+  end
+  
   context "TexPlay#create_image", :repeat => 10 do
     before do
-      @win = Window.new(640, 480, false)
       @img = TexPlay.create_image(@win, 100, 100)
     end
 
