@@ -35,11 +35,7 @@ class BenchContext
     repeat = options[:repeat] || @repeat
     repeat_text = options[:repeat] ? "(repeat: #{repeat})" : ""
     
-    if repeat
-      bm_block = proc { repeat.times { yield } }
-    else
-      bm_block = block
-    end
+    bm_block = proc { repeat.times { yield } }
 
     wrap_with_hooks(:before => @before, :after => @after) do
       time = Benchmark.measure(&bm_block).total
