@@ -44,23 +44,43 @@ module Baseline
     def time_mode
       Module.nesting[1].time_mode
     end
-    
-    def bench(name, options={},  &block)
-      repeat = options[:repeat] || @repeat
-      repeat_text = options[:repeat] ? "(repeat: #{repeat})" : ""
-      
-      bm_block = proc { repeat.times { yield } }
 
+    def exec_bench(name, orig_repeat, &block)
+      repeat = orig_repeat || @repeat
+      repeat_text = orig_repeat ? "(repeat: #{repeat})" : ""
+
+      bm_block = proc { repeat.times { yield } }
+        
       time = 0
       wrap_with_hooks(:before => @before, :after => @after) do
         time = Benchmark.measure(&bm_block).send(time_mode)
-        puts "#{indenter}#{name}: %0.2f #{repeat_text}" % time
         @total_time += time
       end
 
       @results[name] = time
+      [name, time, repeat_text, :with_own_block]
+    end
 
-      time
+    def show(bench_data, &block)
+      case bench_data.last
+      when :without_own_block
+        name, repeat  = bench_data
+        show exec_bench(name, repeat, &block)
+      when :with_own_block
+        name, time, repeat_text = bench_data
+        puts "#{indenter}#{name}: %0.2f #{repeat_text}" % time
+      end
+    end
+    
+    def bench(name, options={},  &block)
+      
+      # if no block then assume block is provided by 'show' method and
+      # pass along requisite data so 'show' can do its thing
+      if !block_given?
+        [name, options[:repeat], :without_own_block]
+      else
+        exec_bench(name, options[:repeat], &block)
+      end
     end
 
     def indenter

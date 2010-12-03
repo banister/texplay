@@ -16,11 +16,11 @@ context TexPlay, :repeat => 0 do
       @img = TexPlay.create_image(@win, 100, 100)
     end
 
-    bench "caching :false", :repeat => 4 do
+    show bench("caching :false", :repeat => 2) {
       Image.new(@win, @img, :caching => false)
-    end
+    }
 
-    bench "caching: true" do
+    show bench "caching: true", :repeat => 3 do
       Image.new(@win, @img, :caching => true)
     end
 
