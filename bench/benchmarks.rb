@@ -20,6 +20,8 @@ context TexPlay, :repeat => 0 do
     bench "caching: true" do
       Image.new(@win, @img, :caching => true)
     end
+
+    rank "caching: true", "caching :false"
   end
 
   bench "caching: :lazy" do
