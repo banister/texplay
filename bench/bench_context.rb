@@ -8,6 +8,24 @@ module Baseline
   class << self
     attr_accessor :time_mode
   end
+
+  module Outputter
+    def bench_output_header() "" end
+    def bench_outout_footer(name, repeat_text, nest_level)
+      puts "#{indenter}#{name}: %0.2f seconds #{repeat_text}." % time
+    end
+    
+    def context_output_header(name, repeat_text, nest_level)
+      puts "#{indenter}--"
+      puts "#{indenter}Benching #{name}: #{repeat_text}"
+    end
+    
+    def context_output_footer(name, time, repeat_text, bench_count, subcontext_count, nest_level)
+      puts "#{indenter}Total time: %0.2f seconds for #{name} " \
+      "[#{bench_count} benches and #{subcontext_count} subcontexts]" % time
+      puts "#{indenter}--"
+    end
+  end
   
   class BenchContext
     attr_reader :total_time, :bench_count, :subcontext_count
@@ -16,8 +34,8 @@ module Baseline
       @repeat = repeat
       @total_time = 0
       @indent_level = indent_level
-      @before = Array(before)
-      @after =  Array(after)
+      @before = Array(before).dup
+      @after =  Array(after).dup
       @results = {}
       @bench_count = @subcontext_count = 0
     end
@@ -46,6 +64,10 @@ module Baseline
       Module.nesting[1].time_mode
     end
 
+    def indenter
+      " " * @indent_level
+    end
+
     def exec_bench(name, orig_repeat, &block)
       repeat = orig_repeat || @repeat
       repeat_text = orig_repeat ? "(repeat: #{repeat})" : ""
@@ -71,7 +93,7 @@ module Baseline
         show exec_bench(name, repeat, &block)
       when :with_own_block
         name, time, repeat_text = bench_data
-        puts "#{indenter}#{name}: %0.2f #{repeat_text} seconds." % time
+        puts "#{indenter}#{name}: %0.2f seconds #{repeat_text}." % time
       end
     end
     
@@ -86,36 +108,36 @@ module Baseline
       end
     end
 
-    def indenter
-      " " * @indent_level
-    end
-
     def context(name, options={}, &block)
       repeat = options[:repeat] || @repeat
       repeat_text = options[:repeat] ? "(repeat: #{repeat})" : ""
       
-      puts "#{indenter}--"
-      puts "#{indenter}Benching #{name}: #{repeat_text}"
-
       bc = BenchContext.new(repeat, @indent_level + 1, @before, @after)
-
       bench_count = subcontext_count = 0
+      context_output_header(name, repeat_text)
       
       @total_time += time = bc.tap do |v|
         v.instance_eval(&block)
         bench_count = v.bench_count
         subcontext_count = v.subcontext_count
       end.
-      total_time
+        total_time
 
-      puts "#{indenter}total time: %0.2f seconds for #{name} " \
-      "[#{bench_count} benches and #{subcontext_count} subcontexts]" % time
-      puts "#{indenter}--"
-
+      context_output_footer(name, time, repeat_text, bench_count, subcontext_count)
       @results[name] = time
       @subcontext_count += 1
-
       @total_time
+    end
+
+    def context_output_header(name, repeat_text)
+      puts "#{indenter}--"
+      puts "#{indenter}Benching #{name}: #{repeat_text}"
+    end
+
+    def context_output_footer(name, time, repeat_text, bench_count, subcontext_count)
+      puts "#{indenter}Total time: %0.2f seconds for #{name} " \
+      "[#{bench_count} benches and #{subcontext_count} subcontexts]" % time
+      puts "#{indenter}--"
     end
 
     def compare(bench1, bench2)
@@ -154,7 +176,7 @@ module Baseline
         end.
         total_time
 
-      puts "total time: %0.2f seconds for #{name} " \
+      puts "Total time: %0.2f seconds for #{name} " \
       "[#{bench_count} benches and #{subcontext_count} subcontexts]" % top_level_context_time
       puts "--"
 
