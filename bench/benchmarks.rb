@@ -7,13 +7,13 @@ include Gosu
 
 Win = Window.new(640, 480, false)
 
-context TexPlay, :repeat => 0, :skip => false do
-  context "Image.new", :repeat => 0 do
+context TexPlay, :repeat => 3 do
+  context "Image.new", :skip => true do
     before do
       @img = TexPlay.create_image(Win, 100, 100)
     end
 
-    bench "caching false" do
+    show bench "caching false", :repeat => 5 do
       Image.new(Win, @img, :caching => false)
     end
 
@@ -21,10 +21,10 @@ context TexPlay, :repeat => 0, :skip => false do
       Image.new(Win, @img, :caching => true)
     end
     
-    compare "caching false", "caching true"
+    rank "caching false", "caching true"
   end
 
-  context "clear vs filled rec", :repeat => 10, :skip => false do
+  context "clear vs filled rec", :repeat => 0, :skip => false do
     before do
       @img = TexPlay.create_image(Win, 500, 500)
     end
