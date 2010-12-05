@@ -1,34 +1,24 @@
+direc = File.dirname(__FILE__)
+
 require 'benchmark'
+require "#{direc}/output_format"
+
 
 module Baseline
   TIME_MODE_DEFAULT = :total
   
   @time_mode = TIME_MODE_DEFAULT
+  @output_format = OutputFormat.new
+  @repeat_default = 1
   
   class << self
-    attr_accessor :time_mode
+    attr_accessor :time_mode, :output_format, :repeat_default
   end
 
-  module OutputFormat
-    def bench_output_header() "" end
-    def bench_outout_footer(name, repeat_text, nest_level)
-      puts "#{indenter}#{name}: %0.2f seconds #{repeat_text}." % time
-    end
-    
-    def context_output_header(name, repeat_text, nest_level)
-      puts "#{indenter}"
-      puts "#{indenter}Benching #{name}: #{repeat_text}"
-    end
-    
-    def context_output_footer(name, time, repeat_text, bench_count, subcontext_count, nest_level)
-      puts "#{indenter}Total time: %0.2f seconds for #{name} " \
-      "[#{bench_count} benches and #{subcontext_count} subcontexts]" % time
-      puts "#{indenter}"
-    end
-  end
   
   class BenchContext
-    attr_reader :total_time, :bench_count, :subcontext_count
+    attr_reader :total_time, :bench_count,
+    :subcontext_count, :repeat
     
     def initialize(repeat, indent_level, before, after)
       @repeat = repeat
@@ -64,6 +54,10 @@ module Baseline
       Module.nesting[1].time_mode
     end
 
+    def output_format
+      Module.nesting[1].output_format
+    end
+
     def indenter
       " " * @indent_level * 2
     end
@@ -93,7 +87,8 @@ module Baseline
         show exec_bench(name, repeat, &block)
       when :with_own_block
         name, time, repeat_text = bench_data
-        puts "#{indenter}#{name}: %0.2f seconds #{repeat_text}" % time
+        #puts "#{indenter}#{name}: %0.2f seconds #{repeat_text}" % time
+        output_format.bench_output(name, time, repeat, @indent_level)
       end
     end
     
@@ -109,14 +104,14 @@ module Baseline
     end
 
     def context(name, options={}, &block)
-      return puts "[Skipping #{name}]" if options[:skip]
+      return output_format.context_skip(name) if options[:skip]
       
-      repeat = options[:repeat] || @repeat
-      repeat_text = options[:repeat] ? "(repeat: #{repeat})" : ""
+      # repeat = options[:repeat] || @repeat
+      # repeat_text = options[:repeat] ? "(repeat: #{repeat})" : ""
       
       bc = BenchContext.new(repeat, @indent_level + 1, @before, @after)
       bench_count = subcontext_count = 0
-      context_output_header(name, repeat_text)
+      output_format.context_output_header(name, options[:repeat], @repeat, @indent_level)
       
       @total_time += time = bc.tap do |v|
         v.instance_eval(&block)
@@ -125,7 +120,7 @@ module Baseline
       end.
         total_time
 
-      context_output_footer(name, time, repeat_text, bench_count, subcontext_count)
+      output_format.context_output_footer(name, time, bench_count, subcontext_count, @indent_level)
       @results[name] = time
       @subcontext_count += 1
       @total_time
@@ -136,7 +131,7 @@ module Baseline
       puts "#{indenter}Benching #{name}: #{repeat_text}"
     end
 
-    def context_output_footer(name, time, repeat_text, bench_count, subcontext_count)
+    def context_output_footer(name, time, bench_count, subcontext_count)
       puts "#{indenter}Total time: %0.2f seconds for #{name} " \
       "[#{bench_count} benches and #{subcontext_count} subcontexts]" % time
       puts "#{indenter}"
@@ -168,13 +163,12 @@ module Baseline
     def context(name, options={}, &block)
       return puts "All Benchmarks disabled." if options[:skip]
       
-      repeat = options[:repeat] || 1
+       repeat = options[:repeat] || Baseline.repeat_default
       time_mode = Baseline.time_mode
+      output_format = Baseline.output_format
       time_mode_text = time_mode != Baseline::TIME_MODE_DEFAULT ? "(time mode: #{time_mode})" : ""
 
-      puts " "
-      puts "Benching #{name}: (repeat: #{repeat}) #{time_mode_text}"
-      
+      output_format.context_output_header(name, options[:repeat], Baseline.repeat_default , 0)
       bench_count = subcontext_count = 0
       
       top_level_context_time = Baseline::BenchContext.new(repeat, 1, nil, nil).
@@ -185,9 +179,10 @@ module Baseline
         end.
         total_time
 
-      puts "Total time: %0.2f seconds for #{name} " \
-      "[#{bench_count} benches and #{subcontext_count} subcontexts]" % top_level_context_time
-      puts " "
+      output_format.context_output_footer(name, top_level_context_time, bench_count, subcontext_count, 0)
+      # puts "Total time: %0.2f seconds for #{name} " \
+      # "[#{bench_count} benches and #{subcontext_count} subcontexts]" % top_level_context_time
+      # puts " "
 
       top_level_context_time
     end
