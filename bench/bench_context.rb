@@ -3,16 +3,16 @@ direc = File.dirname(__FILE__)
 require 'benchmark'
 require "#{direc}/output_format"
 
-
 module Baseline
   TIME_MODE_DEFAULT = :total
+  REPEAT_DEFAULT = 1
   
   @time_mode = TIME_MODE_DEFAULT
+  @repeat = REPEAT_DEFAULT
   @output_format = OutputFormat.new
-  @repeat_default = 1
   
   class << self
-    attr_accessor :time_mode, :output_format, :repeat_default
+    attr_accessor :time_mode, :output_format, :repeat
   end
 
   class BenchContext
@@ -55,10 +55,6 @@ module Baseline
 
     def output_format
       Module.nesting[1].output_format
-    end
-
-    def indenter
-      " " * @nest_level * 2
     end
 
     def exec_bench(name, new_repeat, &block)
@@ -141,11 +137,11 @@ module Baseline
     def context(name, options={}, &block)
       return output_format.top_level_context_skip(name) if options[:skip]
       
-      repeat = options[:repeat] || Baseline.repeat_default
+      repeat = options[:repeat] || Baseline.repeat
       time_mode = Baseline.time_mode
       output_format = Baseline.output_format
 
-      output_format.top_level_context_output_header(name, options[:repeat], Baseline.repeat_default, 0)
+      output_format.top_level_context_output_header(name, options[:repeat], Baseline.repeat, 0)
       bench_count = subcontext_count = 0
       
       top_level_context_time = Baseline::BenchContext.new(repeat, 1, nil, nil).
