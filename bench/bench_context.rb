@@ -125,12 +125,12 @@ module Baseline
 
       output_format.compare_output(winner, loser, time_diff, time_ratio, @nest_level)
     end
-  end
   
-  def rank(*names)
-    ranking = names.sort_by! { |v| @results[v] }
-    output_format.rank_output(ranking, @indent_level)
-  end
+    def rank(*names)
+      ranking = names.sort_by! { |v| @results[v] }
+      output_format.rank_output(ranking, @nest_level)
+    end
+end
 
   module ObjectExtensions
     private

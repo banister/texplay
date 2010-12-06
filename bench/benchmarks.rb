@@ -8,7 +8,7 @@ include Gosu
 Win = Window.new(640, 480, false)
 
 context TexPlay, :repeat => 3 do
-  context "Image.new", :skip => true do
+  context "Image.new", :skip => false do
     before do
       @img = TexPlay.create_image(Win, 100, 100)
     end
@@ -37,7 +37,7 @@ context TexPlay, :repeat => 3 do
       @img.rect 0, 0, @img.width - 1, @img.height - 1, :color => :red, :fill => true
     end
 
-    compare "clear", "filled rect"
+#    rank "clear", "filled rect"
   end
       
   context "TexPlay.create_image", :skip => true do
