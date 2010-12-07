@@ -1,6 +1,19 @@
 direc = File.dirname(__FILE__)
 
 require "#{direc}/../lib/texplay"
+require "open3"
+require 'ruby_parser'
+
+class RubyParser
+  def self.valid?(code)
+    begin
+      new.parse(code)
+    rescue Racc::ParseError
+      return false
+    end
+    true
+  end
+end
 
 WIDTH = 640
 HEIGHT = 480
@@ -76,15 +89,14 @@ class WinClass < Gosu::Window
     while true
       print "> "
       val = gets
-      exit if val.chomp == "exit"
-      exit  if val.chomp == "quit"
-      break if val.chomp == "."
       eval_string += val
+
+      break if RubyParser.valid?(eval_string)
     end
     begin
-      instance_eval eval_string
-    rescue
-      puts "error: re-enter line"
+      puts "=> #{instance_eval(eval_string).inspect}"
+    rescue StandardError => e
+      puts "#{e.message}"
     end
   end
 end
