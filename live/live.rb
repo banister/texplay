@@ -1,8 +1,8 @@
 direc = File.dirname(__FILE__)
 
 require "#{direc}/../lib/texplay"
-require "open3"
 require 'ruby_parser'
+require 'readline'
 
 class RubyParser
   def self.valid?(code)
@@ -87,10 +87,23 @@ class WinClass < Gosu::Window
   def update
     eval_string = ""
     while true
-      print "> "
-      val = gets
+      prompt = ""
+      if eval_string.empty?
+        prompt = "> "
+      else
+        prompt = "* "
+      end
+      
+      val = Readline.readline(prompt, true)
       eval_string += val
 
+      if val == "!"
+        eval_string = ""
+        puts "refreshing REPL state"
+        break
+      end
+
+      exit if val == "quit"
       break if RubyParser.valid?(eval_string)
     end
     begin
