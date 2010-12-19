@@ -591,21 +591,12 @@ prepare_color_control(action_struct * cur)
             if(is_an_array(try_add)) {
                 
                 cur->pen.color_add = convert_rb_color_to_rgba(try_add);
-                /* cur->pen.color_add.red = NUM2DBL(get_from_array(try_add, 0)); */
-                /* cur->pen.color_add.green = NUM2DBL(get_from_array(try_add, 1)); */
-                /* cur->pen.color_add.blue = NUM2DBL(get_from_array(try_add, 2)); */
-                /* cur->pen.color_add.alpha = NUM2DBL(get_from_array(try_add, 3)); */
 
                 cur->pen.has_color_control_transform = true;
             }
             if(is_an_array(try_mult)) {
 
                 cur->pen.color_mult = convert_rb_color_to_rgba(try_mult);
-
-                /* cur->pen.color_mult.red = NUM2DBL(get_from_array(try_mult, 0)); */
-                /* cur->pen.color_mult.green = NUM2DBL(get_from_array(try_mult, 1)); */
-                /* cur->pen.color_mult.blue = NUM2DBL(get_from_array(try_mult, 2)); */
-                /* cur->pen.color_mult.alpha = NUM2DBL(get_from_array(try_mult, 3)); */
 
                 cur->pen.has_color_control_transform = true;
             }

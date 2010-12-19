@@ -53,6 +53,18 @@ describe TexPlay do
     end
   end
 
+  describe "#clear" do
+    it "should clear an image to the correct color" do
+      img = described_class.create_image(@window, 10, 10)
+      img.clear :color => :red
+      (0...img.width).each do |x|
+        (0...img.height).each do |y|
+          img.get_pixel(x,y).should == [1,0,0,1]
+        end
+      end
+    end
+  end
+
   describe "#from_blob" do
     it "should create an image with the requested pixel data and size" do
       # 4 x 3, with columns of red, blue, green, transparent.

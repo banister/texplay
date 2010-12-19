@@ -1,19 +1,8 @@
 direc = File.dirname(__FILE__)
 
+require 'rubygems'
 require "#{direc}/../lib/texplay"
-require 'ruby_parser'
-require 'readline'
-
-class RubyParser
-  def self.valid?(code)
-    begin
-      new.parse(code)
-    rescue Racc::ParseError
-      return false
-    end
-    true
-  end
-end
+require 'pry'
 
 WIDTH = 640
 HEIGHT = 480
@@ -59,6 +48,7 @@ class WinClass < Gosu::Window
     end
     
     images << @img
+    @binding = binding
   end
 
   def create_image(width, height, options={})
@@ -85,32 +75,10 @@ class WinClass < Gosu::Window
   end
 
   def update
-    eval_string = ""
-    while true
-      prompt = ""
-      if eval_string.empty?
-        prompt = "> "
-      else
-        prompt = "* "
-      end
-      
-      val = Readline.readline(prompt, true)
-      eval_string += val
-
-      if val == "!"
-        eval_string = ""
-        puts "refreshing REPL state"
-        break
-      end
-
-      exit if val == "quit"
-      break if RubyParser.valid?(eval_string)
-    end
-    begin
-      puts "=> #{instance_eval(eval_string).inspect}"
-    rescue StandardError => e
-      puts "#{e.message}"
-    end
+    Pry.new.tap do |v|
+      v.default_prompt = Proc.new { "(live)> " }
+      v.wait_prompt = Proc.new { "(live)* " }
+    end.rep(@binding)
   end
 end
 
