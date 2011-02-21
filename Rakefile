@@ -20,11 +20,16 @@ def apply_spec_defaults(s)
   s.description = s.summary
   s.require_path = 'lib'
   s.add_dependency("gosu",">=0.7.25")
+  s.add_development_dependency("bacon",">=1.1.0")
   s.homepage = "http://banisterfiend.wordpress.com/2008/08/23/texplay-an-image-manipulation-tool-for-ruby-and-gosu/"
   s.has_rdoc = 'yard'
-  s.files =  FileList["Rakefile", "README.markdown", "CHANGELOG", 
+  s.files =  Dir["Rakefile", "README.markdown", "CHANGELOG", 
                       "lib/**/*.rb", "ext/**/extconf.rb", "ext/**/*.h", "ext/**/*.c",
-                      "examples/*.rb", "examples/media/*", "spec/*.rb"].to_a 
+                      "examples/*.rb", "examples/media/*", "test/*.rb", "live/*rb", ".gemtest"]
+end
+
+task :test do
+  sh "bacon -k #{direc}/test/texplay_spec.rb"
 end
 
 [:mingw32, :mswin32].each do |v|

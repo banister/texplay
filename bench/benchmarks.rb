@@ -1,6 +1,7 @@
 direc = File.dirname(__FILE__)
 
-require './bench_context'
+require 'rubygems'
+require 'baseline'
 require "#{direc}/../lib/texplay"
 
 include Gosu
@@ -22,6 +23,33 @@ context TexPlay, :repeat => 1 do
     end
     
     rank "caching false", "caching true"
+  end
+
+  context "color_control vs each" do
+    before do
+      @img = TexPlay.create_image(Win, 500, 500)
+    end
+
+    show bench "each" do
+      @img.each do |c|
+        c[0] = 1
+        c[1] *= 0.5
+        c[2] *= 0.5
+        c[3] *= 0.5
+      end
+    end
+
+    show bench "color_control" do
+      @img.clear :color_control => proc { |c|
+        c[0] = 1
+        c[1] *= 0.5
+        c[2] *= 0.5
+        c[3] *= 0.5
+        c
+      }
+    end
+
+    compare "color_control", "each"
   end
 
   context "clear vs filled rec", :repeat => 0, :skip => true do
@@ -66,7 +94,7 @@ context TexPlay, :repeat => 1 do
     end
 
     show bench "img.each" do
-      @img.each { |v| puts v.inspect }
+#      @img.each { |v| puts v.inspect }
     end
     
     show bench "gosu color mode" do

@@ -66,23 +66,23 @@ describe TexPlay do
   end
 
   describe "#from_blob" do
-    it "should create an image with the requested pixel data and size" do
-      # 4 x 3, with columns of red, blue, green, transparent.
-      gosu_colors = [[255, 0, 0, 255], [0, 255, 0, 255], [0, 0, 255, 255], [0, 0, 0, 0]]
-      texplay_colors = gosu_colors.map {|a| a.map {|c| c / 255.0 } }
-      width, height = gosu_colors.size, 3
+    # it "should create an image with the requested pixel data and size" do
+    #   # 4 x 3, with columns of red, blue, green, transparent.
+    #   gosu_colors = [[255, 0, 0, 255], [0, 255, 0, 255], [0, 0, 255, 255], [0, 0, 0, 0]]
+    #   texplay_colors = gosu_colors.map {|a| a.map {|c| c / 255.0 } }
+    #   width, height = gosu_colors.size, 3
       
-      image = described_class.from_blob(@window, (gosu_colors * height).flatten.pack('C*'), width, height)
+    #   image = described_class.from_blob(@window, (gosu_colors * height).flatten.pack('C*'), width, height)
 
-      image.width.should == width
-      image.height.should == height
+    #   image.width.should == width
+    #   image.height.should == height
 
-      texplay_colors.each_with_index do |color, x|
-        3.times do |y|
-          image.get_pixel(x, y).should == color
-        end
-      end
-    end
+    #   texplay_colors.each_with_index do |color, x|
+    #     3.times do |y|
+    #       image.get_pixel(x, y).should == color
+    #     end
+    #   end
+    # end
 
     it "should raise an error if the image size is not correct for the blob data" do
       lambda { described_class.from_blob(@window, [1, 1, 1, 1].pack("C*"), 2, 1) }.should.raise ArgumentError
@@ -90,6 +90,52 @@ describe TexPlay do
 
     it "should raise an error if an image dimension is 0 or less" do
       lambda { described_class.from_blob(@window, '', 0, 0) }.should.raise ArgumentError
+    end
+  end
+
+  describe "alpha_blend" do
+    it "should alpha blend using source alpha and not fixing alpha" do
+      img1 = described_class.create_image(@window, 10, 10).clear :color => [1, 0, 0, 1]
+      img1.clear :color => [0, 0, 1, 0.5], :alpha_blend => :source
+      img1.get_pixel(5, 5).should == [0.5, 0, 0.5, 0.75]
+    end
+
+    it "hash params true and :source should be equivalent" do
+      img1 = described_class.create_image(@window, 10, 10).clear :color => [1, 0, 0, 1]
+      img2 = img1.dup
+      img1.clear :color => [0, 0, 1, 0.5], :alpha_blend => :source
+      img2.clear :color => [0, 0, 1, 0.5], :alpha_blend => true
+      
+      img1.get_pixel(5, 5).should == [0.5, 0, 0.5, 0.75]
+      img2.get_pixel(5, 5).should == [0.5, 0, 0.5, 0.75]
+    end
+
+    it "false or nil should prevent alpha blending" do
+      img1 = described_class.create_image(@window, 10, 10).clear :color => [1, 0, 0, 1]
+      img2 = img1.dup
+      img1.clear :color => [0, 0, 1, 0.5], :alpha_blend => false
+      img2.clear :color => [0, 0, 1, 0.5], :alpha_blend => nil
+      
+      img1.get_pixel(5, 5).should == [0, 0, 1, 0.5]
+      img2.get_pixel(5, 5).should == [0, 0, 1, 0.5]
+    end
+
+    it "should alpha blend using dest alpha and not fixing alpha" do
+      img1 = described_class.create_image(@window, 10, 10).clear :color => [1, 0, 0, 0.5]
+      img1.clear :color => [0, 0, 1, 1], :alpha_blend => :dest
+      img1.get_pixel(5, 5).should == [0.5, 0, 0.5, 0.75]
+    end
+
+    it "should alpha blend using source alpha and fixing alpha" do
+      img1 = described_class.create_image(@window, 10, 10).clear :color => [1, 0, 0, 1]
+      img1.clear :color => [0, 0, 1, 0.5], :alpha_blend => :source_with_fixed_alpha
+      img1.get_pixel(5, 5).should == [0.5, 0, 0.5, 1]
+    end
+
+    it "should alpha blend using dest alpha and fixing alpha" do
+      img1 = described_class.create_image(@window, 10, 10).clear :color => [1, 0, 0, 0.5]
+      img1.clear :color => [0, 0, 1, 1], :alpha_blend => :dest_with_fixed_alpha
+      img1.get_pixel(5, 5).should == [0.5, 0, 0.5, 0.5]
     end
   end
 end

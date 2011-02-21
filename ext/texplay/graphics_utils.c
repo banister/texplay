@@ -14,6 +14,7 @@
 static void initialize_action_struct(action_struct * cur, VALUE hash_arg, sync sync_mode);
 static void process_common_hash_args(action_struct * cur, VALUE * hash_arg, sync sync_mode, bool primary);
 static void prepare_drawing_mode(action_struct * cur);
+static void prepare_alpha_blend(action_struct * cur);
 static void prepare_fill_texture(action_struct * cur);
 static void prepare_color_control(action_struct * cur);
 static void prepare_color_select(action_struct * cur);
@@ -343,6 +344,8 @@ initialize_action_struct(action_struct * cur, VALUE hash_arg, sync sync_mode)
     cur->pen.has_color_control_proc = false;
     cur->pen.has_color_control_transform = false;
     cur->pen.has_source_texture = false;
+
+    /* alpha blending */
     cur->pen.alpha_blend = false;
 
     /* set static color control transformations to defaults */
@@ -471,8 +474,48 @@ process_common_hash_args(action_struct * cur, VALUE * hash_arg, sync sync_mode, 
     prepare_fill_texture(cur);
 
     /* does the user want to blend alpha values ? */
-    if(get_from_hash(*hash_arg, "alpha_blend") == Qtrue)
-        cur->pen.alpha_blend = true;
+    prepare_alpha_blend(cur);
+}
+
+static void
+prepare_alpha_blend(action_struct * cur)
+{
+  if(has_optional_hash_arg(cur->hash_arg, "alpha_blend")) {
+
+    VALUE blend_mode = get_from_hash(cur->hash_arg, "alpha_blend");
+
+    /* true is equivalent to default blend mode, 'source' */
+    if(blend_mode == Qtrue)
+      blend_mode = string2sym("source");
+
+    /* where false or nil is passed */
+    if(!RTEST(blend_mode)) {
+      cur->pen.alpha_blend = false;
+      return;
+    }
+
+    cur->pen.alpha_blend = true;
+
+    Check_Type(blend_mode, T_SYMBOL);
+    
+    if(blend_mode == string2sym("source")) {
+      cur->pen.alpha_blend_mode = source;
+    }      
+    else if(blend_mode == string2sym("dest")) {
+      cur->pen.alpha_blend_mode = dest;
+    }
+    else if(blend_mode == string2sym("source_with_fixed_alpha")) {
+      cur->pen.alpha_blend_mode = source_with_fixed_alpha;
+    }
+    else if(blend_mode == string2sym("dest_with_fixed_alpha")) {
+      cur->pen.alpha_blend_mode = dest_with_fixed_alpha;
+    }
+    else
+      rb_raise(rb_eArgError, "unrecognized blend mode: %s\n.",
+               sym2string(blend_mode));
+
+  }
+
 
 }
 
@@ -1059,33 +1102,68 @@ apply_color_control_transform(action_struct * payload, texture_info * tex, int x
 static rgba
 apply_alpha_blend(action_struct * payload, texture_info * tex, int x, int y, rgba blended_pixel)
 {
-    rgba dest_pixel = get_pixel_color(tex, x, y);
-    rgba finished_pixel;
+  rgba dest_pixel = get_pixel_color(tex, x, y);
+  rgba finished_pixel;
 
-
-    if (not_a_color(blended_pixel))
-        return blended_pixel;
+  if (not_a_color(blended_pixel))
+    return blended_pixel;
     
-    /* alpha blending is nothing more than a weighted average of src and dest pixels
-       based on source alpha value */
-    /* NB: destination alpha value is ignored */
-
-    /** TO DO: rewrite this using sse2 instructions **/
-    finished_pixel.red = blended_pixel.alpha * blended_pixel.red + (1 - blended_pixel.alpha)
+  alpha_blend_mode_t blend_mode = payload->pen.alpha_blend_mode;
+    
+  switch(blend_mode)
+    {
+    case source:
+    case source_with_fixed_alpha:
+      /** TO DO: rewrite this using sse2 instructions **/
+      finished_pixel.red = blended_pixel.alpha * blended_pixel.red + (1 - blended_pixel.alpha)
         * dest_pixel.red;
 
-    finished_pixel.green = blended_pixel.alpha * blended_pixel.green + (1 - blended_pixel.alpha)
+      finished_pixel.green = blended_pixel.alpha * blended_pixel.green + (1 - blended_pixel.alpha)
         * dest_pixel.green;
 
-    finished_pixel.blue = blended_pixel.alpha * blended_pixel.blue + (1 - blended_pixel.alpha)
+      finished_pixel.blue = blended_pixel.alpha * blended_pixel.blue + (1 - blended_pixel.alpha)
         * dest_pixel.blue;
 
+      if(blend_mode == source) {
+        finished_pixel.alpha = blended_pixel.alpha * blended_pixel.alpha + (1 - blended_pixel.alpha)
+          * dest_pixel.alpha;
+      }
+      else {
 
-    finished_pixel.alpha = blended_pixel.alpha * blended_pixel.alpha + (1 - blended_pixel.alpha)
-      * dest_pixel.alpha;
+        // fixed alpha
+        finished_pixel.alpha = dest_pixel.alpha;
+      }
+        
+      break;
+    case dest:
+    case dest_with_fixed_alpha:
+      finished_pixel.red = dest_pixel.alpha * blended_pixel.red + (1 - dest_pixel.alpha)
+        * dest_pixel.red;
 
+      finished_pixel.green = dest_pixel.alpha * blended_pixel.green + (1 - dest_pixel.alpha)
+        * dest_pixel.green;
 
-    return finished_pixel;
+      finished_pixel.blue = dest_pixel.alpha * blended_pixel.blue + (1 - dest_pixel.alpha)
+        * dest_pixel.blue;
+
+      if(blend_mode == dest) {
+        finished_pixel.alpha = dest_pixel.alpha * blended_pixel.alpha + (1 - dest_pixel.alpha)
+          * dest_pixel.alpha;
+      }
+      else {
+
+        // fixed alpha
+        finished_pixel.alpha = dest_pixel.alpha;
+      }
+            
+      break;
+    default:
+      rb_raise(rb_eRuntimeError,
+               "apply_alpha_blend() impossible error. got %d\n", blend_mode);
+
+    }
+
+  return finished_pixel;
 }
 
 /* NEW from utils.c */

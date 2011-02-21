@@ -38,14 +38,14 @@ class WinClass < Gosu::Window
   
   def initialize
     super(WIDTH, HEIGHT, false)
-    Gosu::enable_undocumented_retrofication
+    Gosu.enable_undocumented_retrofication
 
     @images = []
     @view = View.new
+    @pry_instance = Pry.new :prompt => [Proc.new { "(live)> " }, Proc.new { "(live)* " }]
     
-    @img = TexPlay.create_image(self, 200, 200).tap do |v|
-      v.rect 0, 0, v.width - 1, v.height - 1
-    end
+    @img = TexPlay.create_image(self, 200, 200)
+    @img.rect 0, 0, @img.width - 1, @img.height - 1
     
     images << @img
     @binding = binding
@@ -75,12 +75,11 @@ class WinClass < Gosu::Window
   end
 
   def update
-    Pry.new.tap do |v|
-      v.default_prompt = Proc.new { "(live)> " }
-      v.wait_prompt = Proc.new { "(live)* " }
-    end.rep(@binding)
+    @pry_instance.rep(@binding)
   end
 end
 
-WinClass.new.show
+w = WinClass.new
+
+w.show
 
