@@ -3,7 +3,7 @@ direc = File.dirname(__FILE__)
 require "#{direc}/../texplay"
 
 module TexPlay
-  Win = Gosu::Window.new(0, 0, false)
+  Win = Gosu::Window.new(100, 100, false)
 
   set_options :sync_mode => :no_sync
 
