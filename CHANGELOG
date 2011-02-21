@@ -1,3 +1,9 @@
+*22/2/11 version 0.3.5
+* added :source, :dest, :source_with_alpha, :dest_with_alpha options to
+	:alpha_blend
+* added live.rb (repl image editor)
+* added alone.rb (run texplay image manip independent from gosu)
+	
 *1/11/10 version 0.3.0
 * pushed gems
 * tested
