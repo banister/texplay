@@ -10,8 +10,6 @@
 #include "actions.h"
 #include "utils.h"
 #include "bindings.h"
-#include "object2module.h"
-#include "gen_eval.h"
 #ifdef __APPLE__
 # include <glut.h>
 #else
@@ -92,19 +90,6 @@ Init_texplay() {
   rb_define_method(jm_Module, "[]", m_getpixel, -1);
   rb_define_method(jm_Module, "cache", m_cache_refresh, 0);
   /** end of aliases **/
-
-  /** associated with gen_eval **/
-  rb_define_method(rb_cObject, "gen_eval", rb_gen_eval, -1);
-  rb_define_method(rb_cObject, "capture", rb_capture, 0);
-    
-  rb_define_method(rb_cObject, "to_module", rb_to_module , 0);
-  rb_define_method(rb_cObject, "reset_tbls", rb_reset_tbls , 0);
-  rb_define_method(rb_cObject, "gen_extend", rb_gen_extend, -1);
-  rb_define_method(rb_cModule, "gen_include", rb_gen_include, -1);
-
-  rb_define_alias(rb_cObject, "gen_eval_with", "gen_eval");
-  /** end of gen_eval defs **/
-
 
   /** basic setup **/
 

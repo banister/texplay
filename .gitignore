@@ -3,3 +3,5 @@ lib/**/*.so
 .yardoc
 doc/yard
 .rvmrc
+*.o
+*.bundle

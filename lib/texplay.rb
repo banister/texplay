@@ -113,11 +113,7 @@ module TexPlay
       :fill => true
     }.merge!(options)
 
-    capture {
-      rect 0, 0, width - 1, height - 1, options
-      
-      self
-    }
+    rect 0, 0, width - 1, height - 1, options
   end
 
   # Used internally to create images from raw binary (blob) data (TexPlay::from_blob).
@@ -151,6 +147,7 @@ module TexPlay
     # @param width (see ImageStub#initialize)
     # @param height (see ImageStub#initialize)
     def initialize(width, height)
+      raise ArgumentError if (width > TexPlay::TP_MAX_QUAD_SIZE || height > TexPlay::TP_MAX_QUAD_SIZE)
       super("\0" * (width * height * 4), width, height)
     end
   end

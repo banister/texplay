@@ -21,10 +21,6 @@
 #include "cache.h"
 #include "compat.h"
 
-/* associated with gen_eval */
-#include "object2module.h"
-#include "gen_eval.h"
-
 /* syncing mode */
 /* lazy_sync  = sync at end of paint block */
 /* eager_sync = sync immediately (after action) */
@@ -189,8 +185,6 @@ m_paint(int argc, VALUE * argv, VALUE self)
     image_bounds bounds;
     int arity;
 
-    ADJUST_SELF(self);
-
     rb_scan_args(argc, argv, "01", &options);
 
     /* get texture info from image */
@@ -223,11 +217,11 @@ m_paint(int argc, VALUE * argv, VALUE self)
     /* find arity of block */
     arity = FIX2INT(rb_funcall(rb_block_proc(), rb_intern("arity"), 0));
 
-    /* yield self if the arity is 1, else gen_eval the block */
+    /* yield self if the arity is 1, else instance_eval the block */
     switch(arity) {
     case -1:
     case 0:
-        rb_gen_eval(0, 0, self);
+        rb_instace_eval(0, 0, self);
         break;
     case 1:
         rb_yield(self);
@@ -260,8 +254,6 @@ m_force_sync(VALUE self, VALUE ary)
     image_bounds bounds;
     texture_info tex;
     
-    ADJUST_SELF(self);
-
     Check_Type(ary, T_ARRAY);
 
     get_texture_info(self, &tex);
@@ -282,8 +274,6 @@ m_dup_image(VALUE self)
     texture_info tex, dup_tex;
     VALUE dupped_image;
     VALUE window;
-
-    ADJUST_SELF(self);
 
     get_texture_info(self, &tex);
 
@@ -310,8 +300,6 @@ m_clone_image(VALUE self)
 {
     VALUE cloned_image;
 
-    ADJUST_SELF(self);
-
     cloned_image = m_dup_image(self);
 
     /* the main diff b/w clone and dup is that clone also dups the singleton */
@@ -323,8 +311,6 @@ m_clone_image(VALUE self)
 VALUE
 m_user_set_options(VALUE self, VALUE options)
 {
-    ADJUST_SELF(self);
-    
     if(!is_a_hash(options))
         rb_raise(rb_eArgError, "only a single hash argument is accepted");
 
@@ -337,8 +323,6 @@ VALUE
 m_user_delete_options(VALUE self)
 {
 
-    ADJUST_SELF(self);
-
     set_image_local(self, USER_DEFAULTS, Qnil);
 
     return Qnil;
@@ -347,8 +331,6 @@ m_user_delete_options(VALUE self)
 VALUE
 m_get_options(VALUE self)
 {
-    ADJUST_SELF(self);
-
     return get_image_local(self, USER_DEFAULTS);
 }
 
@@ -373,8 +355,6 @@ m_to_blob(VALUE self)
     texture_info tex;
     int sidelength;
     
-    ADJUST_SELF(self);
-
     get_texture_info(self, &tex);
 
     glEnable(GL_TEXTURE_2D);
@@ -410,9 +390,6 @@ m_getpixel(int argc, VALUE * argv, VALUE self)
     VALUE options;
     
 
-    /* change self to hidden self if using gen_eval */
-    ADJUST_SELF(self);
-
     process_x_y_pairs(self, 1, argv, &x1, &y1);
 
     /* get texture info */
@@ -445,8 +422,6 @@ m_circle(int argc, VALUE * argv, VALUE self)
     VALUE options;
     texture_info tex;    
     
-    ADJUST_SELF(self);
-    
     if(argc < 2) rb_raise(rb_eArgError, "circle action needs at least 2 parameter");
 
     process_x_y_pairs(self, 1, argv, &x1, &y1);
@@ -474,8 +449,6 @@ m_ngon(int argc, VALUE * argv, VALUE self)
     VALUE options;
     texture_info tex;
 
-    ADJUST_SELF(self);
-    
     if(argc < 3) rb_raise(rb_eArgError, "ngon requires at least 3 parameters (x, y, radius, num_sides)");
 
     process_x_y_pairs(self, 1, argv, &x1, &y1);
@@ -503,8 +476,6 @@ m_flood_fill(int argc, VALUE * argv, VALUE self)
     texture_info tex;
     bool iter = false, glow = false;
     
-    ADJUST_SELF(self);
-
     if (argc < 1) rb_raise(rb_eArgError, "flood fill action needs at least 1 parameter");
 
     process_x_y_pairs(self, 1, argv, &x1, &y1);
@@ -562,8 +533,6 @@ m_line(int argc, VALUE * argv, VALUE self)
     texture_info tex;
     trace_match match;
 
-    ADJUST_SELF(self);
-
     if(argc < 2) rb_raise(rb_eArgError, "line action needs at least 2 parameters");
 
     process_x_y_pairs(self, 2, argv, &x1, &y1, &x2, &y2);
@@ -597,8 +566,6 @@ m_rect(int argc, VALUE * argv, VALUE self)
     VALUE options;
     texture_info tex;
 
-    ADJUST_SELF(self);
-
     if(argc < 2) rb_raise(rb_eArgError, "rect action needs at least 2 parameters");
 
     process_x_y_pairs(self, 2, argv, &x1, &y1, &x2, &y2);
@@ -622,8 +589,6 @@ m_pixel(int argc, VALUE * argv, VALUE self)
     VALUE options;
     texture_info tex;
     
-    ADJUST_SELF(self);
-
     if(argc < 1) rb_raise(rb_eArgError, "pixel action needs 1 parameter");
 
     process_x_y_pairs(self, 1, argv, &x1, &y1);
@@ -645,8 +610,6 @@ m_bezier(int argc, VALUE * argv, VALUE self)
     VALUE options = Qnil;
     int last = argc - 1;
     texture_info tex;
-
-    ADJUST_SELF(self);
 
     if(argc < 1) rb_raise(rb_eArgError, "bezier action needs at least 1 parameter");
     
@@ -671,8 +634,6 @@ m_polyline(int argc, VALUE * argv, VALUE self)
     VALUE options = Qnil;
     int last = argc - 1;
     texture_info tex;
-
-    ADJUST_SELF(self);
 
     if(argc < 1) rb_raise(rb_eArgError, "polyline action needs at least 1 parameter");
 
@@ -701,8 +662,6 @@ m_splice(int argc, VALUE * argv, VALUE self)
     int last = argc - 1;
     texture_info tex;
     VALUE options;
-
-    ADJUST_SELF(self);
 
     if(argc < 3) rb_raise(rb_eArgError, "splice action needs at least 3 parameters");
 
@@ -760,8 +719,6 @@ m_offset(int argc, VALUE * argv, VALUE self)
 {    
     char * try_offset;
 
-    ADJUST_SELF(self);
-
     if(argc == 0)
         return get_image_local(self, DRAW_OFFSET);
     
@@ -794,8 +751,6 @@ m_color(int argc, VALUE * argv, VALUE self)
 {
     VALUE first;
     rgba new_color;
-
-    ADJUST_SELF(self);
 
     /* if no params then return action current color */
     if(argc == 0) 
@@ -844,8 +799,6 @@ m_cache_refresh(VALUE self)
 {
     texture_info tex;
 
-    ADJUST_SELF(self);
-
     get_texture_info(self, &tex);
 
     cache_refresh_entry(tex.tname);
@@ -860,8 +813,6 @@ m_quad_cached(VALUE self)
     VALUE info, gc_state_off;
     int tex_name;
     cache_entry * entry;
-
-    ADJUST_SELF(self);
 
     /* prevent weird segfault bug */
     gc_state_off = rb_gc_disable();
@@ -889,8 +840,6 @@ m_each(int argc, VALUE * argv, VALUE self)
     VALUE options = Qnil;
 
     rb_need_block();
-
-    ADJUST_SELF(self);
 
     get_texture_info(self, &tex);
 
@@ -936,8 +885,6 @@ m_each(int argc, VALUE * argv, VALUE self)
 /*     int last = argc - 1; */
 /*     texture_info tex; */
 
-/*     ADJUST_SELF(self); */
-
 /*     if(argc < 1) rb_raise(rb_eArgError, "bezier action needs at least 1 parameter"); */
     
 /*     /\* get array of points *\/ */
@@ -974,8 +921,6 @@ m_each(int argc, VALUE * argv, VALUE self)
 /*     arity = FIX2INT(rb_funcall(rb_block_proc(), rb_intern("arity"), 0)); */
 /*     if(arity != 1 && arity != 3) */
 /*         rb_raise(rb_eRuntimeError, "block arity must be either 1 or 3"); */
-
-/* /\*     ADJUST_SELF(self); *\/ */
 
 /* /\*     rb_scan_args(argc, argv, "01", &options); *\/ */
     
@@ -1054,8 +999,6 @@ m_each(int argc, VALUE * argv, VALUE self)
 /* /\*     texture_info tex; *\/ */
 /* /\*     image_bounds bounds; *\/ */
 
-/* /\*     ADJUST_SELF(self); *\/ */
-
 /* /\*     rb_scan_args(argc, argv, "01", &options); *\/ */
 
 /* /\*     /\\* default values for other params *\\/ *\/ */
@@ -1113,8 +1056,6 @@ m_each(int argc, VALUE * argv, VALUE self)
 /* /\*     texture_info tex; *\/ */
 /* /\*     image_bounds bounds; *\/ */
 
-/* /\*     ADJUST_SELF(self); *\/ */
-
 /* /\*     rb_scan_args(argc, argv, "01", &options); *\/ */
     
 /* /\*     /\\* default values for other params *\\/ *\/ */
@@ -1167,8 +1108,6 @@ m_each(int argc, VALUE * argv, VALUE self)
 /* /\* { *\/ */
 
 /* /\*     rgba old_color; *\/ */
-
-/* /\*     ADJUST_SELF(self); *\/ */
 
 /* /\*     if(argc < 3) rb_raise(rb_eArgError, "[]= action needs 3 parameters"); *\/ */
 

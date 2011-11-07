@@ -11,65 +11,50 @@ end
 
 
 TexPlay::create_macro(:move_to) do |x, y|
-  capture { 
-    @turtle_pos.x = x
-    @turtle_pos.y = y
-  }
+  @turtle_pos.x = x
+  @turtle_pos.y = y
 end
 
 TexPlay::create_macro(:move_rel) do |dx, dy|
-  capture { 
-    @turtle_pos.x += dx
-    @turtle_pos.y += dy
-  }
+  @turtle_pos.x += dx
+  @turtle_pos.y += dy
 end
 
 TexPlay::create_macro(:line_to) do |x, y, *other|
-  capture { 
-    line(@turtle_pos.x, @turtle_pos.y, x, y, *other)
-
-    @turtle_pos.x, @turtle_pos.y = x, y
-  }
+  line(@turtle_pos.x, @turtle_pos.y, x, y, *other)
+  @turtle_pos.x, @turtle_pos.y = x, y
 end
 
 TexPlay::create_macro(:line_rel) do |dx, dy, *other|
-  capture { 
-    x = @turtle_pos.x + dx
-    y = @turtle_pos.y + dy
+  x = @turtle_pos.x + dx
+  y = @turtle_pos.y + dy
 
-    line(@turtle_pos.x, @turtle_pos.y, x, y, *other)
+  line(@turtle_pos.x, @turtle_pos.y, x, y, *other)
 
-    @turtle_pos.x, @turtle_pos.y = x, y
-  }
+  @turtle_pos.x, @turtle_pos.y = x, y
 end
 
 TexPlay::create_macro(:turn_to) do |a|
-  capture {
-    @turtle_angle = a
-  }
+  @turtle_angle = a
 end
 
 TexPlay::create_macro(:turn) do |da|
-  capture { 
-    @turtle_angle += da
-  }
+  @turtle_angle += da
 end
 
 TexPlay::create_macro(:forward) do |dist, *other|
-  capture {
-    visible = other.shift
+  visible = other.shift
 
-    radians_per_degree = 0.0174532925199433
+  radians_per_degree = 0.0174532925199433
 
-    x = @turtle_pos.x + dist * Math::cos(radians_per_degree * @turtle_angle)
-    y = @turtle_pos.y + dist * Math::sin(radians_per_degree * @turtle_angle)
+  x = @turtle_pos.x + dist * Math::cos(radians_per_degree * @turtle_angle)
+  y = @turtle_pos.y + dist * Math::sin(radians_per_degree * @turtle_angle)
 
-    if(visible) then
-      line_to(x, y, *other)
-    else
-      move_to(x, y)
-    end
-  }
+  if(visible) then
+    line_to(x, y, *other)
+  else
+    move_to(x, y)
+  end
 end
 
 # L-System code
@@ -115,28 +100,26 @@ end
 
 # L-System macro
 TexPlay::create_macro(:lsystem) do |x, y, system, options|
-  capture {
-    theta = system.angle
-    turtle_stack = []
-    move_to(x, y)
-    line_length = options[:line_length] || 1
+  theta = system.angle
+  turtle_stack = []
+  move_to(x, y)
+  line_length = options[:line_length] || 1
+  
+  system.produce_string(options).each_char do |v|
     
-    system.produce_string(options).each_char do |v|
-      
-      case v
-      when "F"
-        forward(line_length, true)
-      when "+"
-        turn(theta)
-      when "-"
-        turn(-theta)
-      when "["
-        turtle_stack.push([@turtle_pos.dup, @turtle_angle])
-      when "]"
-        @turtle_pos, @turtle_angle = turtle_stack.pop
-      end
+    case v
+    when "F"
+      forward(line_length, true)
+    when "+"
+      turn(theta)
+    when "-"
+      turn(-theta)
+    when "["
+      turtle_stack.push([@turtle_pos.dup, @turtle_angle])
+    when "]"
+      @turtle_pos, @turtle_angle = turtle_stack.pop
     end
-  }
+  end
 end
 
 # Scaling

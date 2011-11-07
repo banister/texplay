@@ -3,7 +3,7 @@ dlext = Config::CONFIG['DLEXT']
 project_name = "texplay"
 
 require 'rake/clean'
-require 'rake/gempackagetask'
+require 'rubygems/package_task'
 require "#{direc}/lib/#{project_name}/version"
 
 CLOBBER.include("**/*.#{dlext}", "**/*~", "**/*#*", "**/*.log", "**/*.o")

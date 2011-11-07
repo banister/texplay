@@ -104,12 +104,7 @@ module TexPlay
 
   # Perform drawing operations in the context of the image using _lazy_ syncing.
   #
-  # The paint block may look like an ordinary instance_eval, but it is not. The problem that plagues the serious use of
-  # instance_eval: namely the inability to use local instance variables in the block does not affect the Paint Block.
-  # This means that code like the following is possible in TexPlay (but impossible with an instance_eval)
-  #
-  # How does it work? TexPlay uses an alternative to instance_eval known as gen_eval (http://github.com/banister/gen_eval/tree/master)
-  # Another peculiarity of paint blocks is how they sync the drawing actions (syncing will be discussed in greater depth
+  # A peculiarity of paint blocks is how they sync the drawing actions (syncing will be discussed in greater depth
   # later on). The drawing actions in a Paint Block are not sync’d until the very end of the Paint Block and are then
   # sync'd to video memory all in one go (This style of syncing is called _lazy_ syncing in TexPlay)
   #
@@ -117,13 +112,6 @@ module TexPlay
   #   image1.paint do
   #     circle 10, 10, 20, :color => :green
   #     bezier [0, 0, 10, 10, 50, 0], :closed => true
-  #   end
-  #
-  # @example Showing gen_eval behaviour (can access ivars within the paint block)
-  #   @x = 20
-  #   @y = 30
-  #   my_image.paint do
-  #      circle @x, @y, 20
   #   end
   #
   # @option options [Symbol] :sync_mode (:lazy_sync) One of +:lazy_sync+, +:no_sync+ or +:eager_sync+
