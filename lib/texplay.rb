@@ -6,6 +6,7 @@ direc = File.expand_path(File.dirname(__FILE__))
 # include gosu first
 require 'gosu'
 require "#{direc}/texplay/version"
+require 'texplay/texplay'
 
 module TexPlay
   RENDER_CLEAR_COLOR = Gosu::Color.new(255, 0, 0, 0)
@@ -113,11 +114,7 @@ module TexPlay
       :fill => true
     }.merge!(options)
 
-    capture {
-      rect 0, 0, width - 1, height - 1, options
-      
-      self
-    }
+    rect 0, 0, width - 1, height - 1, options
   end
 
   # Used internally to create images from raw binary (blob) data (TexPlay::from_blob).
@@ -151,22 +148,10 @@ module TexPlay
     # @param width (see ImageStub#initialize)
     # @param height (see ImageStub#initialize)
     def initialize(width, height)
+      raise ArgumentError if (width > TexPlay::TP_MAX_QUAD_SIZE || height > TexPlay::TP_MAX_QUAD_SIZE)
       super("\0" * (width * height * 4), width, height)
     end
   end
-end
-
-# bring in user-defined extensions to TexPlay
-begin
-  if RUBY_VERSION && RUBY_VERSION =~ /1.9/
-    require "#{direc}/1.9/texplay"
-  else
-    require "#{direc}/1.8/texplay"
-  end
-rescue LoadError => e
-  require 'rbconfig'
-  dlext = Config::CONFIG['DLEXT']
-  require "#{direc}/texplay.#{dlext}"
 end
 
 require "#{direc}/texplay-contrib"

@@ -41,14 +41,17 @@ describe TexPlay do
     end
 
     it "should raise an error if an image dimension is 0 or less" do
-      lambda { described_class.create_image(@window, 0, 0)}.should.raise ArgumentError
+      lambda { described_class.create_image(@window, 0, 0)}.should raise_error(ArgumentError)
     end
 
     # TODO: Should probably be an ArgumentError.
-    it "should NOT raise an error if the image would be too large (as uses raw blobs, doesnt use TexPlay at all)" do
+    it "should raise an ArgumentError if the image would be too large" do
       too_big = TexPlay::TP_MAX_QUAD_SIZE + 1
       [[too_big, 5], [10, too_big], [too_big, too_big]].each do |width, height|
-        lambda { described_class.create_image(@window, width, height)}.should.not.raise Exception
+        puts "WIDTH: #{width.inspect}, HEIGHT: #{height.inspect}"
+        lambda {
+          described_class.create_image(@window, width, height)
+        }.should raise_error(ArgumentError)
       end
     end
   end
@@ -85,11 +88,11 @@ describe TexPlay do
     # end
 
     it "should raise an error if the image size is not correct for the blob data" do
-      lambda { described_class.from_blob(@window, [1, 1, 1, 1].pack("C*"), 2, 1) }.should.raise ArgumentError
+      lambda { described_class.from_blob(@window, [1, 1, 1, 1].pack("C*"), 2, 1) }.should raise_error(ArgumentError)
     end
 
     it "should raise an error if an image dimension is 0 or less" do
-      lambda { described_class.from_blob(@window, '', 0, 0) }.should.raise ArgumentError
+      lambda { described_class.from_blob(@window, '', 0, 0) }.should raise_error(ArgumentError)
     end
   end
 
