@@ -6,7 +6,7 @@ direc = File.expand_path(File.dirname(__FILE__))
 # include gosu first
 require 'gosu'
 require "#{direc}/texplay/version"
-require 'texplay'
+require 'texplay/texplay'
 
 module TexPlay
   RENDER_CLEAR_COLOR = Gosu::Color.new(255, 0, 0, 0)
@@ -152,19 +152,6 @@ module TexPlay
       super("\0" * (width * height * 4), width, height)
     end
   end
-end
-
-# bring in user-defined extensions to TexPlay
-begin
-  if RUBY_VERSION && RUBY_VERSION =~ /1.9/
-    require "#{direc}/1.9/texplay"
-  else
-    require "#{direc}/1.8/texplay"
-  end
-rescue LoadError => e
-  require 'rbconfig'
-  dlext = Config::CONFIG['DLEXT']
-  require "#{direc}/texplay.#{dlext}"
 end
 
 require "#{direc}/texplay-contrib"
