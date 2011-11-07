@@ -6,6 +6,7 @@ direc = File.expand_path(File.dirname(__FILE__))
 # include gosu first
 require 'gosu'
 require "#{direc}/texplay/version"
+require 'texplay'
 
 module TexPlay
   RENDER_CLEAR_COLOR = Gosu::Color.new(255, 0, 0, 0)
