@@ -67,19 +67,19 @@ process_x_y_pairs(VALUE image, int num_pairs, VALUE * argv, ...)
     va_end(ap);
 }
 
-        
+
 /* singleton methods */
 
 /* responsible for creating macros */
 VALUE
-M_create_macro(VALUE self, VALUE method_name) 
+M_create_macro(VALUE self, VALUE method_name)
 {
     VALUE proc;
 
     rb_need_block();
 
     /* convert the block to a proc */
-    proc = rb_block_proc(); 
+    proc = rb_block_proc();
 
     /* define the method in the TexPlay class so that it is accessible to 'instances' */
     rb_funcall(self, rb_intern("define_method"), 2, method_name, proc);
@@ -90,7 +90,7 @@ M_create_macro(VALUE self, VALUE method_name)
 
 /* responsible for removing macros */
 VALUE
-M_remove_macro(VALUE self, VALUE method_name) 
+M_remove_macro(VALUE self, VALUE method_name)
 {
 
     /* remove the method in the TexPlay class  */
@@ -101,7 +101,7 @@ M_remove_macro(VALUE self, VALUE method_name)
 
 /* responsible for refreshing all entries in cache */
 VALUE
-M_refresh_cache_all(VALUE self) 
+M_refresh_cache_all(VALUE self)
 {
     cache_refresh_all();
 
@@ -117,7 +117,7 @@ M_refresh_cache_all(VALUE self)
 /*     int rb_y = FIX2INT(y); */
 /*     int rb_width = FIX2INT(width); */
 /*     int rb_height = FIX2INT(height); */
-    
+
 /*     VALUE blob = rb_str_new(NULL, 4 * rb_width * rb_height); */
 
 /*     glReadPixels(rb_x, rb_y, rb_width, rb_height, GL_RGBA, GL_UNSIGNED_BYTE, RSTRING_PTR(blob)); */
@@ -133,7 +133,7 @@ M_refresh_cache_all(VALUE self)
 /*     VALUE fresh_image; */
 
 /*     fresh_image = create_image(window, NUM2INT(width), NUM2INT(height)); */
-    
+
 /*     return fresh_image; */
 /* } */
 /** end singleton methods **/
@@ -143,11 +143,11 @@ static void
 rb_lazy_bounds_to_image_bounds(VALUE image, image_bounds * bounds)
 {
     VALUE lazy_bounds;
-    
+
     lazy_bounds = get_image_local(image, LAZY_BOUNDS);
-    
+
     Check_Type(lazy_bounds, T_ARRAY);
-    
+
     bounds->xmin = FIX2INT(get_from_array(lazy_bounds, 0));
     bounds->ymin = FIX2INT(get_from_array(lazy_bounds, 1));
     bounds->xmax = FIX2INT(get_from_array(lazy_bounds, 2));
@@ -158,9 +158,9 @@ static VALUE
 parse_sync_mode(VALUE user_sync_mode)
 {
     sync mode;
-    
+
     Check_Type(user_sync_mode, T_SYMBOL);
-        
+
     if(user_sync_mode == string2sym("lazy_sync"))
         mode = lazy_sync;
     else if(user_sync_mode == string2sym("eager_sync"))
@@ -178,7 +178,7 @@ parse_sync_mode(VALUE user_sync_mode)
 
 /* entry point for TexPlay paint actions */
 VALUE
-m_paint(int argc, VALUE * argv, VALUE self) 
+m_paint(int argc, VALUE * argv, VALUE self)
 {
     texture_info tex;
     VALUE options;
@@ -205,7 +205,7 @@ m_paint(int argc, VALUE * argv, VALUE self)
         rb_lazy_bounds_to_image_bounds(self, &bounds);
 
         create_subtexture_and_sync_to_gl(&bounds, &tex);
-        
+
         /* reset the LAZY_BOUNDS now we've sync'd */
         set_image_local(self, LAZY_BOUNDS, Qnil);
 
@@ -221,18 +221,18 @@ m_paint(int argc, VALUE * argv, VALUE self)
     switch(arity) {
     case -1:
     case 0:
-        rb_instace_eval(0, 0, self);
+        rb_instance_eval(0, 0, self);
         break;
     case 1:
         rb_yield(self);
         break;
-    default:            
+    default:
         rb_raise(rb_eArgError, "block arity must be either 1 or -1 or 0, received arity of: %d", arity);
     }
 
     /* if lazy sync is selected then sync now..as the paint block has finished executing the draw actions*/
     if(sync_mode == lazy_sync) {
-        
+
         rb_lazy_bounds_to_image_bounds(self, &bounds);
 
         create_subtexture_and_sync_to_gl(&bounds, &tex);
@@ -253,7 +253,7 @@ m_force_sync(VALUE self, VALUE ary)
 {
     image_bounds bounds;
     texture_info tex;
-    
+
     Check_Type(ary, T_ARRAY);
 
     get_texture_info(self, &tex);
@@ -307,7 +307,7 @@ m_clone_image(VALUE self)
 
     return cloned_image;
 }
-    
+
 VALUE
 m_user_set_options(VALUE self, VALUE options)
 {
@@ -340,7 +340,7 @@ get_image_chunk_with_size(char * data, texture_info * tex, char * blob)
     for(int y = 0; y < tex->height; y++)
         for(int x = 0; x < tex->width; x++) {
             int buf_index = 4 * (x + y * tex->width);
-                
+
             int offset = calc_pixel_offset(tex, x, y);
 
             memcpy(blob + buf_index, data + offset, 4);
@@ -354,7 +354,7 @@ m_to_blob(VALUE self)
 {
     texture_info tex;
     int sidelength;
-    
+
     get_texture_info(self, &tex);
 
     glEnable(GL_TEXTURE_2D);
@@ -370,7 +370,7 @@ m_to_blob(VALUE self)
     glGetTexImage(GL_TEXTURE_2D,  0, GL_RGBA, GL_UNSIGNED_BYTE,(void*)(new_array));
 
     VALUE blob = rb_str_new(NULL, 4 * tex.width * tex.height);
-    
+
     get_image_chunk_with_size(new_array, &tex, RSTRING_PTR(blob));
 
     glDisable(GL_TEXTURE_2D);
@@ -380,7 +380,7 @@ m_to_blob(VALUE self)
 
 /* return the pixel colour for the given x, y */
 VALUE
-m_getpixel(int argc, VALUE * argv, VALUE self) 
+m_getpixel(int argc, VALUE * argv, VALUE self)
 {
     int x1, y1;
     int last = argc - 1;
@@ -388,7 +388,7 @@ m_getpixel(int argc, VALUE * argv, VALUE self)
     rgba pix;
     bool gosu_color_mode = false;
     VALUE options;
-    
+
 
     process_x_y_pairs(self, 1, argv, &x1, &y1);
 
@@ -415,13 +415,13 @@ m_getpixel(int argc, VALUE * argv, VALUE self)
 
 /* circle action */
 VALUE
-m_circle(int argc, VALUE * argv, VALUE self) 
+m_circle(int argc, VALUE * argv, VALUE self)
 {
     int x1, y1, r;
     int last = argc - 1;
     VALUE options;
-    texture_info tex;    
-    
+    texture_info tex;
+
     if(argc < 2) rb_raise(rb_eArgError, "circle action needs at least 2 parameter");
 
     process_x_y_pairs(self, 1, argv, &x1, &y1);
@@ -464,7 +464,7 @@ m_ngon(int argc, VALUE * argv, VALUE self)
 
     return self;
 }
-    
+
 
 /* flood fill action */
 VALUE
@@ -475,7 +475,7 @@ m_flood_fill(int argc, VALUE * argv, VALUE self)
     VALUE options;
     texture_info tex;
     bool iter = false, glow = false;
-    
+
     if (argc < 1) rb_raise(rb_eArgError, "flood fill action needs at least 1 parameter");
 
     process_x_y_pairs(self, 1, argv, &x1, &y1);
@@ -485,9 +485,9 @@ m_flood_fill(int argc, VALUE * argv, VALUE self)
     get_texture_info(self, &tex);
 
     if(is_a_hash(options)) {
-        if(RTEST(get_from_hash(options, "iter"))) 
+        if(RTEST(get_from_hash(options, "iter")))
             iter = true;
-        if(RTEST(get_from_hash(options, "glow"))) 
+        if(RTEST(get_from_hash(options, "glow")))
             glow = true;
     }
 
@@ -502,7 +502,7 @@ m_flood_fill(int argc, VALUE * argv, VALUE self)
     else {
         scan_fill_do_action(x1, y1, &tex, options, sync_mode, true, NULL);
     }
-    
+
     return self;
 }
 
@@ -524,7 +524,7 @@ convert_trace_match_to_ruby_array(trace_match match, bool gosu_color_mode)
 
 /* line action */
 VALUE
-m_line(int argc, VALUE * argv, VALUE self) 
+m_line(int argc, VALUE * argv, VALUE self)
 {
     int x1, y1, x2, y2;
     int last = argc - 1;
@@ -552,13 +552,13 @@ m_line(int argc, VALUE * argv, VALUE self)
       else
         return convert_trace_match_to_ruby_array(match, gosu_color_mode);
     }
-    
+
     return self;
 }
 
 /* box action */
 VALUE
-m_rect(int argc, VALUE * argv, VALUE self) 
+m_rect(int argc, VALUE * argv, VALUE self)
 {
 
     int x1, y1, x2, y2;
@@ -573,7 +573,7 @@ m_rect(int argc, VALUE * argv, VALUE self)
     options = argv[last];
 
     get_texture_info(self, &tex);
- 
+
     rect_do_action(x1, y1, x2, y2, &tex, options, sync_mode, true, NULL);
 
     return self;
@@ -582,13 +582,13 @@ m_rect(int argc, VALUE * argv, VALUE self)
 
 /* pixel action */
 VALUE
-m_pixel(int argc, VALUE * argv, VALUE self) 
+m_pixel(int argc, VALUE * argv, VALUE self)
 {
     int x1, y1;
     int last = argc - 1;
     VALUE options;
     texture_info tex;
-    
+
     if(argc < 1) rb_raise(rb_eArgError, "pixel action needs 1 parameter");
 
     process_x_y_pairs(self, 1, argv, &x1, &y1);
@@ -596,7 +596,7 @@ m_pixel(int argc, VALUE * argv, VALUE self)
     options = argv[last];
 
     get_texture_info(self, &tex);
-    
+
     pixel_do_action(x1, y1, &tex, options, sync_mode, true, NULL);
 
     return self;
@@ -612,13 +612,13 @@ m_bezier(int argc, VALUE * argv, VALUE self)
     texture_info tex;
 
     if(argc < 1) rb_raise(rb_eArgError, "bezier action needs at least 1 parameter");
-    
+
     /* get array of points */
     points = argv[0];
     Check_Type(points, T_ARRAY);
-    
+
     options = argv[last];
-    
+
     get_texture_info(self, &tex);
 
     bezier_do_action(points, &tex, options, sync_mode, true, NULL);
@@ -654,7 +654,7 @@ m_polyline(int argc, VALUE * argv, VALUE self)
 
 /* splice action */
 VALUE
-m_splice(int argc, VALUE * argv, VALUE self) 
+m_splice(int argc, VALUE * argv, VALUE self)
 {
     int x0, y0;
     int cx1 = 0, cy1 = 0, cx2 = XMAX_OOB, cy2 = YMAX_OOB;
@@ -678,9 +678,9 @@ m_splice(int argc, VALUE * argv, VALUE self)
     options = argv[last];
 
     get_texture_info(self, &tex);
-    
+
     /* get the crop boundaries */
-    if(is_a_hash(options)) 
+    if(is_a_hash(options))
         if(RTEST(get_from_hash(options, "crop"))) {
             VALUE c = get_from_hash(options, "crop");
             Check_Type(c, T_ARRAY);
@@ -692,14 +692,14 @@ m_splice(int argc, VALUE * argv, VALUE self)
 
     splice_do_action(x0, y0, cx1, cy1, cx2, cy2, &splice_tex,
                       &tex, options, sync_mode, true, NULL);
-    
+
     return self;
 }
 
 
 /* clear action - really just an alias for box */
 VALUE
-m_clear(int argc, VALUE * argv, VALUE self) 
+m_clear(int argc, VALUE * argv, VALUE self)
 {
     VALUE parms[4];
 
@@ -715,13 +715,13 @@ m_clear(int argc, VALUE * argv, VALUE self)
 
 /* offset function */
 VALUE
-m_offset(int argc, VALUE * argv, VALUE self) 
-{    
+m_offset(int argc, VALUE * argv, VALUE self)
+{
     char * try_offset;
 
     if(argc == 0)
         return get_image_local(self, DRAW_OFFSET);
-    
+
     switch(TYPE(argv[0])) {
 
     case T_ARRAY:
@@ -730,11 +730,11 @@ m_offset(int argc, VALUE * argv, VALUE self)
         break;
     case T_SYMBOL:
         try_offset = sym2string(argv[0]);
-        
+
         if(!strcmp("default", try_offset)) {
             set_image_local(self, DRAW_OFFSET, Qnil);
         }
-        else {            
+        else {
             rb_raise(rb_eArgError, "no such offset defined: %s\n", try_offset);
         }
 
@@ -747,37 +747,37 @@ m_offset(int argc, VALUE * argv, VALUE self)
 
 /* color change */
 VALUE
-m_color(int argc, VALUE * argv, VALUE self) 
+m_color(int argc, VALUE * argv, VALUE self)
 {
     VALUE first;
     rgba new_color;
 
     /* if no params then return action current color */
-    if(argc == 0) 
+    if(argc == 0)
         return get_image_local(self, IMAGE_COLOR);
-    
+
     /* otherwise set the action color */
     /* NB: we cannot just set image_local_color to 'first' because first may not be an array,
        it could also be a symbol */
 
     first = argv[0];
-    
+
     new_color = convert_rb_color_to_rgba(first);
 
     /* im quite sure i DO want to set the color even if it is not_a_color.
        why ? consistency only
        (NB: not_a_color_v is skipped by the set_pixel_color routine */
-    
+
     /* if(is_a_color(new_color)) */
-    
+
     save_rgba_to_image_local_color(self, new_color);
-    
+
     return Qnil;
 }
 
 /* this function manages all other method calls */
 VALUE
-m_missing(int argc, VALUE * argv, VALUE self) 
+m_missing(int argc, VALUE * argv, VALUE self)
 {
     char * action_name = lowercase(sym2string(argv[0]));
 
@@ -795,7 +795,7 @@ m_missing(int argc, VALUE * argv, VALUE self)
 
 /* refreshes the cache */
 VALUE
-m_cache_refresh(VALUE self) 
+m_cache_refresh(VALUE self)
 {
     texture_info tex;
 
@@ -808,7 +808,7 @@ m_cache_refresh(VALUE self)
 
 /* check whether img quad is already cached */
 VALUE
-m_quad_cached(VALUE self) 
+m_quad_cached(VALUE self)
 {
     VALUE info, gc_state_off;
     int tex_name;
@@ -823,7 +823,7 @@ m_quad_cached(VALUE self)
     tex_name = FIX2INT(rb_funcall(info, rb_intern("tex_name"), 0));
 
     entry = find_in_cache(tex_name);
-    
+
     /* only enable gc if was enabled on function entry */
     if(!gc_state_off) rb_gc_enable();
 
@@ -852,7 +852,7 @@ m_each(int argc, VALUE * argv, VALUE self)
 
             if(RARRAY_LEN(region) < 4)
                 rb_raise(rb_eArgError, "region requires 4 elements");
-            
+
             x1 = NUM2INT(get_from_array(region, 0));
             y1 = NUM2INT(get_from_array(region, 1));
             x2 = NUM2INT(get_from_array(region, 2));
@@ -866,7 +866,7 @@ m_each(int argc, VALUE * argv, VALUE self)
                          &x2, &y2, tex.width, tex.height);
 
     proc = rb_block_proc();
-    
+
     each_pixel_do_action(x1, y1, x2, y2, proc, &tex, options, sync_mode, true, NULL);
 
     return self;
@@ -886,13 +886,13 @@ m_each(int argc, VALUE * argv, VALUE self)
 /*     texture_info tex; */
 
 /*     if(argc < 1) rb_raise(rb_eArgError, "bezier action needs at least 1 parameter"); */
-    
+
 /*     /\* get array of points *\/ */
 /*     points = argv[0]; */
 /*     Check_Type(points, T_ARRAY); */
-    
+
 /*     options = argv[last]; */
-    
+
 /*     get_texture_info(self, &tex); */
 
 /*     bezier_do_action(points, &tex, options, sync_mode, true, NULL); */
@@ -905,8 +905,8 @@ m_each(int argc, VALUE * argv, VALUE self)
 
 /* below is yucky old code that needs to be updated */
 /* each_pixel iterator */
-            
-            
+
+
 /* VALUE */
 /* m_each(int argc, VALUE * argv, VALUE self) */
 /* { */
@@ -923,7 +923,7 @@ m_each(int argc, VALUE * argv, VALUE self)
 /*         rb_raise(rb_eRuntimeError, "block arity must be either 1 or 3"); */
 
 /* /\*     rb_scan_args(argc, argv, "01", &options); *\/ */
-    
+
 /* /\*     /\\* get texture info *\\/ *\/ */
 /* /\*     get_texture_info(self, &tex); *\/ */
 
@@ -937,14 +937,14 @@ m_each(int argc, VALUE * argv, VALUE self)
 /* /\*         y0 = NUM2INT(get_from_array(region, 1)); *\/ */
 /* /\*         x1 = NUM2INT(get_from_array(region, 2)); *\/ */
 /* /\*         y1 = NUM2INT(get_from_array(region, 3)); *\/ */
-        
+
 /* /\*         constrain_boundaries(&x0, &y0, &x1, &y1, tex.width, tex.height); *\/ */
 /* /\*     } *\/ */
 
 /* /\*     /\\* width and height of action *\\/ *\/ */
 /* /\*     xbound = x1 - x0; *\/ */
 /* /\*     ybound = y1 - y0; *\/ */
-    
+
 /* /\*     yield_vals = rb_ary_new(); *\/ */
 
 /* /\*     for(y = 0; y < ybound; y++) *\/ */
@@ -954,10 +954,10 @@ m_each(int argc, VALUE * argv, VALUE self)
 
 /* /\*             /\\* adjusted x and y *\\/ *\/ */
 /* /\*             register int ax = x + x0, ay = y + y0; *\/ */
-            
+
 /* /\*             pixel_data[0] = INT2FIX(ax); *\/ */
 /* /\*             pixel_data[1] = INT2FIX(ay); *\/ */
-            
+
 /* /\*             pixel_color = m_getpixel(self, INT2FIX(ax), INT2FIX(ay)); *\/ */
 
 /* /\*             if(arity == 1) { *\/ */
@@ -967,7 +967,7 @@ m_each(int argc, VALUE * argv, VALUE self)
 /* /\*                 rb_ary_store(yield_vals, 0, pixel_color); *\/ */
 /* /\*                 rb_ary_store(yield_vals, 1, INT2FIX(x)); *\/ */
 /* /\*                 rb_ary_store(yield_vals, 2, INT2FIX(y)); *\/ */
-                
+
 /* /\*                 rb_yield(yield_vals); *\/ */
 /* /\*             } *\/ */
 
@@ -1011,10 +1011,10 @@ m_each(int argc, VALUE * argv, VALUE self)
 /* /\*     else if(options != Qnil) { *\/ */
 /* /\*         rb_raise(rb_eArgError, "argument must be a hash"); *\/ */
 /* /\*     } *\/ */
-    
+
 /* /\*     /\\* get texture info *\\/ *\/ */
 /* /\*     get_texture_info(self, &tex); *\/ */
-    
+
 /* /\*     for(y = 0; y < tex.height; y++) { *\/ */
 /* /\*         for(x = 0; x < tex.width; x++) { *\/ */
 /* /\*             offset = calc_pixel_offset(&tex, x, y); *\/ */
@@ -1057,7 +1057,7 @@ m_each(int argc, VALUE * argv, VALUE self)
 /* /\*     image_bounds bounds; *\/ */
 
 /* /\*     rb_scan_args(argc, argv, "01", &options); *\/ */
-    
+
 /* /\*     /\\* default values for other params *\\/ *\/ */
 /* /\*     step = 1; loop = Qfalse; *\/ */
 
@@ -1068,7 +1068,7 @@ m_each(int argc, VALUE * argv, VALUE self)
 /* /\*     else if(options != Qnil) { *\/ */
 /* /\*         rb_raise(rb_eArgError, "argument must be a hash"); *\/ */
 /* /\*     } *\/ */
-    
+
 /* /\*     /\\* get texture info *\\/ *\/ */
 /* /\*     get_texture_info(self, &tex); *\/ */
 
