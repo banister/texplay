@@ -11,6 +11,10 @@ Gem::Specification.new do |s|
   s.files =  Dir["Rakefile", "README.markdown", "CHANGELOG",
     "lib/**/*.rb", "ext/**/extconf.rb", "ext/**/*.h", "ext/**/*.c",
     "examples/*.rb", "examples/media/*", "test/*.rb", "live/*rb", ".gemtest"]
+
+  # Include the SOs if we want to make a nice fat gem on Windows (OK, this is hacky!)
+  #s.files << Dir["lib/**/*.so"] if Gem.win_platform?
+
   s.has_rdoc = 'yard'
   s.homepage = "http://banisterfiend.wordpress.com/2008/08/23/texplay-an-image-manipulation-tool-for-ruby-and-gosu/"
   s.add_runtime_dependency("gosu",">=0.7.25")

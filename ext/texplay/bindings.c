@@ -221,7 +221,7 @@ m_paint(int argc, VALUE * argv, VALUE self)
     switch(arity) {
     case -1:
     case 0:
-        rb_instance_eval(0, 0, self);
+        rb_obj_instance_eval(0, 0, self);
         break;
     case 1:
         rb_yield(self);
