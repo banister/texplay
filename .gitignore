@@ -1,7 +1,10 @@
-lib/**/*.so
-.idea/
-.yardoc
-doc/yard
+*.so
+/.idea/
+/.yardoc
+/doc/yard
 .rvmrc
 *.o
 *.bundle
+/tmp/
+/pkg/
+/Gemfile.lock
