@@ -12,8 +12,8 @@ Gem::Specification.new do |s|
     "lib/**/*.rb", "ext/**/extconf.rb", "ext/**/*.h", "ext/**/*.c",
     "examples/*.rb", "examples/media/*", "test/*.rb", "live/*rb", ".gemtest"]
 
-  # Include the SOs if we want to make a nice fat gem on Windows (OK, this is hacky!)
-  #s.files << Dir["lib/**/*.so"] if Gem.win_platform?
+  # Include the SOs if we want to make a nice fat gem on Windows (OK, this is hacky and should only be uncommented when building this type of gem!)
+  ### s.files << Dir["lib/**/*.so"]
 
   s.has_rdoc = 'yard'
   s.homepage = "http://banisterfiend.wordpress.com/2008/08/23/texplay-an-image-manipulation-tool-for-ruby-and-gosu/"
