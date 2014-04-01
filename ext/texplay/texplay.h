@@ -1,7 +1,7 @@
-/* texplay.h (C) John Mair 2008 
+/* texplay.h (C) John Mair 2008
  * This program is distributed under the terms of the MIT License
- *   
- *            
+ *
+ *
  *                                                   */
 
 #ifndef GUARD_TEXPLAY_H
@@ -19,7 +19,7 @@
 #define PI 3.14159265358979
 
 /* macros */
-#define SWAP(X, Y)  {(X) ^= (Y); (Y) ^= (X); (X) ^= (Y);} 
+#define SWAP(X, Y)  {(X) ^= (Y); (Y) ^= (X); (X) ^= (Y);}
 #define ROUND(X) (int)((X) + 0.5)
 #define ARY_SIZE(X) sizeof(X) / sizeof(*X)
 #define SGN(X) ((X) >= 0 ? 1 : -1)
@@ -38,7 +38,7 @@ typedef enum e_color {
 
 typedef enum e_sync_mode {
   lazy_sync, eager_sync, no_sync
-} sync;
+} sync_;
 
 
 typedef enum {
@@ -66,13 +66,13 @@ typedef struct s_rgba {
 typedef struct {
   rgba colors[RGBA_LIST_SIZE];
   int size;
-} rgba_list;  
+} rgba_list;
 
 
 /* stores image data */
 typedef struct {
-  int width, height;    
-  float top, left;    
+  int width, height;
+  float top, left;
   int tname;
   float * td_array;
   int yincr, firstpixel;
@@ -93,13 +93,13 @@ typedef struct {
 
 typedef struct action_struct {
   int xmin, ymin, xmax, ymax;
-  sync sync_mode;
+  sync_ sync_mode;
 
   /* pointer to associated texture */
   /* a bit of a kludge having this here
      since it's only being used by convert_image_local_color_to_rgba */
   texture_info * tex;
-    
+
   VALUE hash_arg;
 
   /* action color */
@@ -129,7 +129,7 @@ typedef struct action_struct {
     /* alpha blend */
     bool alpha_blend;
     alpha_blend_mode_t alpha_blend_mode;
-      
+
     /* drawing mode */
     bool has_drawing_mode;
     draw_mode drawing_mode;
@@ -144,7 +144,7 @@ typedef struct action_struct {
     rgba_list source_ignore;
     rgba_list dest_select;
     rgba_list dest_ignore;
-      
+
   } pen;
 
 } action_struct;

@@ -38,7 +38,7 @@ is_trace_match(action_struct * cur, rgba c, rgba trace_color, trace_mode_type tr
 
 trace_match
 line_do_action(int x1, int y1, int x2, int y2, texture_info * tex, VALUE hash_arg,
-               sync sync_mode, bool primary, action_struct * payload)
+               sync_ sync_mode, bool primary, action_struct * payload)
 {
     int x, y, W, H, F;
     int xinc, yinc;
@@ -48,10 +48,10 @@ line_do_action(int x1, int y1, int x2, int y2, texture_info * tex, VALUE hash_ar
     bool has_trace = false;
     rgba trace_color;
     trace_mode_type trace_mode = no_mode;
-    
-    if(has_optional_hash_arg(hash_arg, "thickness")) 
+
+    if(has_optional_hash_arg(hash_arg, "thickness"))
         thickness = NUM2INT(get_from_hash(hash_arg, "thickness"));
-    
+
     if(has_optional_hash_arg(hash_arg, "trace") && primary) {
       VALUE trace_hash = get_from_hash(hash_arg, "trace");
 
@@ -75,27 +75,27 @@ line_do_action(int x1, int y1, int x2, int y2, texture_info * tex, VALUE hash_ar
 
     draw_prologue(&cur, tex, x1, y1,
                   x2, y2, &hash_arg, sync_mode, primary, &payload);
-    
+
 
     /* clip the line */
     cohen_sutherland_clip(&x1, &y1, &x2, &y2, 0, 0, tex->width - 1, tex->height - 1);
-    
+
     W = ABS(x2 - x1);
     H = ABS(y2 - y1);
-    	
+
     if(x1 < x2)
         xinc = 1;
     else
         xinc = -1;
-		
+
     if(y1 < y2)
         yinc = 1;
     else
         yinc = -1;
-		
+
     x = x1;
     y = y1;
-	
+
     if(W >= H) {
         F = 2 * H - W;
         while(x != x2) {
@@ -105,7 +105,7 @@ line_do_action(int x1, int y1, int x2, int y2, texture_info * tex, VALUE hash_ar
              else {
                rgba c = get_pixel_color(tex, x, y);
 
-               if (is_trace_match(payload, c, trace_color, trace_mode)) 
+               if (is_trace_match(payload, c, trace_color, trace_mode))
                  return (trace_match) { x, y, c };
              }
             }
@@ -113,7 +113,7 @@ line_do_action(int x1, int y1, int x2, int y2, texture_info * tex, VALUE hash_ar
                 set_hash_value(hash_arg, "fill", Qtrue);
                 circle_do_action(x, y, thickness / 2, tex, hash_arg, no_sync, false, payload);
             }
-           
+
             if(F < 0)
                 F += 2 * H;
             else {
@@ -133,15 +133,15 @@ line_do_action(int x1, int y1, int x2, int y2, texture_info * tex, VALUE hash_ar
              else {
                rgba c = get_pixel_color(tex, x, y);
 
-               if (is_trace_match(payload, c, trace_color, trace_mode)) 
+               if (is_trace_match(payload, c, trace_color, trace_mode))
                  return (trace_match) { x, y, c };
-             }                
+             }
             }
             else {
                 set_hash_value(hash_arg, "fill", Qtrue);
                 circle_do_action(x, y, thickness / 2, tex, hash_arg, no_sync, false, payload);
             }
-            
+
             if(F < 0)
                 F += 2 * W;
             else {
@@ -157,15 +157,15 @@ line_do_action(int x1, int y1, int x2, int y2, texture_info * tex, VALUE hash_ar
           set_pixel_color_with_style(payload, tex, x2, y2);
         else {
           rgba c = get_pixel_color(tex, x, y);
-          
-          if (is_trace_match(payload, c, trace_color, trace_mode)) 
+
+          if (is_trace_match(payload, c, trace_color, trace_mode))
             return (trace_match) { x, y, c };
-        }        
+        }
     }
     else {
         set_hash_value(hash_arg, "fill", Qtrue);
         circle_do_action(x2, y2, thickness / 2, tex, hash_arg, no_sync, false, payload);
-                
+
     }
     draw_epilogue(&cur, tex, primary);
 
@@ -185,13 +185,13 @@ polyline_point(VALUE points, int k, int * x, int * y, int format, int draw_offse
                int draw_offset_y)
 {
     int xy_index;
-    
+
     switch(format) {
     case POINT_FORMAT:
         *x = NUM2INT(point_x(get_from_array(points, k))) + draw_offset_x;
         *y = NUM2INT(point_y(get_from_array(points, k))) + draw_offset_y;
         break;
-        
+
     case SIMPLE_FORMAT:
         xy_index = k * 2;
         *x = NUM2INT(get_from_array(points, xy_index)) + draw_offset_x;
@@ -202,10 +202,10 @@ polyline_point(VALUE points, int k, int * x, int * y, int format, int draw_offse
         rb_raise(rb_eArgError, "pixel format must be either POINT_FORMAT or SIMPLE_FORMAT");
     }
 }
-        
+
 void
 polyline_do_action(VALUE points, texture_info * tex, VALUE hash_arg,
-                   sync sync_mode, bool primary, action_struct * payload)
+                   sync_ sync_mode, bool primary, action_struct * payload)
 {
 
     int x1, y1, x2, y2;
@@ -216,7 +216,7 @@ polyline_do_action(VALUE points, texture_info * tex, VALUE hash_arg,
     action_struct cur;
     VALUE offset_val;
     bool closed = false;
-    
+
     draw_prologue(&cur, tex, XMAX_OOB, YMAX_OOB, XMIN_OOB, YMIN_OOB, &hash_arg, sync_mode, primary, &payload);
 
     /* calculate offset */
@@ -228,7 +228,7 @@ polyline_do_action(VALUE points, texture_info * tex, VALUE hash_arg,
     /* if the polyline is 'closed' make the last point the first */
     if(is_a_hash(hash_arg))
         if(RTEST(get_from_hash(hash_arg, "closed")) || RTEST(get_from_hash(hash_arg, "close"))) {
-            
+
             /* so that our additional point is not persistent */
             points = rb_obj_dup(points);
             closed = true;
@@ -261,20 +261,20 @@ polyline_do_action(VALUE points, texture_info * tex, VALUE hash_arg,
 
     /* calculate first point */
     polyline_point(points, 0, &x1, &y1, format, draw_offset_x, draw_offset_y);
-    
+
     /* calc the points and draw the polyline */
     for(k = 1; k < num_point_pairs; k++) {
 
         polyline_point(points, k, &x2, &y2, format, draw_offset_x, draw_offset_y);
-    
+
         line_do_action(x1, y1, x2, y2, tex, hash_arg, no_sync, false, payload);
 
         /* update drawing rectangle */
         update_bounds(payload, x1, y1, x2, y2);
-        
+
         x1 = x2; y1 = y2;
     }
-    
+
     draw_epilogue(&cur, tex, primary);
 }
 /** end polyline **/
@@ -282,7 +282,7 @@ polyline_do_action(VALUE points, texture_info * tex, VALUE hash_arg,
 /* regular polygon algorithm */
 void
 ngon_do_action(int x, int y, int r, int num_sides, texture_info * tex, VALUE hash_arg,
-               sync sync_mode, bool primary, action_struct * payload)
+               sync_ sync_mode, bool primary, action_struct * payload)
 {
     action_struct cur;
     int x1, y1, x2, y2, x0, y0;
@@ -308,7 +308,7 @@ ngon_do_action(int x, int y, int r, int num_sides, texture_info * tex, VALUE has
             angle = NUM2INT(get_from_hash(hash_arg, "start_angle")) / 360.0 * 2 * PI;
         }
     }
-    
+
     /* calculate first point */
     x0 = x1 = x + r * cos(angle);
     y0 = y1 = y + r * sin(angle);
@@ -326,12 +326,12 @@ ngon_do_action(int x, int y, int r, int num_sides, texture_info * tex, VALUE has
 
     draw_epilogue(&cur, tex, primary);
 }
-/** end of ngon */    
+/** end of ngon */
 
 /** rectangle algorithm **/
 void
 rect_do_action(int x1, int y1, int x2, int y2, texture_info * tex, VALUE hash_arg,
-               sync sync_mode, bool primary, action_struct * payload)
+               sync_ sync_mode, bool primary, action_struct * payload)
 {
     action_struct cur;
     bool fill = false;
@@ -340,7 +340,7 @@ rect_do_action(int x1, int y1, int x2, int y2, texture_info * tex, VALUE hash_ar
     draw_prologue(&cur, tex, x1, y1,
                   x2, y2, &hash_arg, sync_mode, primary, &payload);
 
-    
+
     if(is_a_hash(hash_arg)) {
 
         /* make our private copy of the hash so we can mess with it */
@@ -384,7 +384,7 @@ rect_do_action(int x1, int y1, int x2, int y2, texture_info * tex, VALUE hash_ar
 /** midpoint circle algorithm **/
 void
 circle_do_action(int x1, int y1, int r, texture_info * tex, VALUE hash_arg,
-                 sync sync_mode, bool primary, action_struct * payload)
+                 sync_ sync_mode, bool primary, action_struct * payload)
 {
 
     int x, y;
@@ -409,7 +409,7 @@ circle_do_action(int x1, int y1, int r, texture_info * tex, VALUE hash_arg,
             delete_from_hash(hash_arg, "thickness");
         }
     }
-    
+
     x = 0 ; y = r;
     p = 5 / 4 - r;
     if(!fill) {
@@ -458,7 +458,7 @@ circle_do_action(int x1, int y1, int r, texture_info * tex, VALUE hash_arg,
 /** set pixel  algorithm **/
 void
 pixel_do_action(int x1, int y1, texture_info * tex, VALUE hash_arg,
-                sync sync_mode, bool primary, action_struct * payload)
+                sync_ sync_mode, bool primary, action_struct * payload)
 {
     action_struct cur;
 
@@ -484,7 +484,7 @@ typedef struct { int x1, x2, y, dy; } LINESEGMENT;
 
 void
 flood_fill_do_action(int x, int y, texture_info * tex, VALUE hash_arg,
-                     sync sync_mode, bool primary, action_struct * payload)
+                     sync_ sync_mode, bool primary, action_struct * payload)
 {
     int left, x1, x2, dy;
     rgba old_color;
@@ -493,7 +493,7 @@ flood_fill_do_action(int x, int y, texture_info * tex, VALUE hash_arg,
     action_struct cur;
 
     int nMinX, nMinY, nMaxX, nMaxY;
-    
+
     /* NOTE: 1024 is just a place-holder to indicate maximum possible width/height.
        Values will be constrained to realistic dimensions by constrain_boundaries() function */
     draw_prologue(&cur, tex, 0, 0, 1024, 1024, &hash_arg, sync_mode, primary, &payload);
@@ -550,12 +550,12 @@ flood_fill_do_action(int x, int y, texture_info * tex, VALUE hash_arg,
 }
 /*** END FLOOD FILL ***/
 
-/** glow fill algorithm, from the gosu forums **/ 
+/** glow fill algorithm, from the gosu forums **/
 static void
 glow_floodFill( int x, int y, rgba * seed_color, action_struct * cur, texture_info * tex, texture_info * tex2 )
 {
     /* used to flood in both horizontal directions from the given point to form a line. */
-    int fillL, fillR;     
+    int fillL, fillR;
     int i;
 
     /* initialize the flood directions */
@@ -566,7 +566,7 @@ glow_floodFill( int x, int y, rgba * seed_color, action_struct * cur, texture_in
         /* for texture filling */
         if(tex2)
             cur->color = get_pixel_color(tex2, fillL % tex2->width, y % tex2->height);
-        
+
         /* TWO VERSIONS of below */
 
         /* SLOW BUT MODERN VERSION */
@@ -583,9 +583,9 @@ glow_floodFill( int x, int y, rgba * seed_color, action_struct * cur, texture_in
         //        for texture filling
         if(tex2)
             cur->color = get_pixel_color(tex2, fillR % tex2->width, y % tex2->height);
-        
+
         /*        set_pixel_color_with_style(cur, tex, fillR, y); */
-         
+
         set_pixel_color(&cur->color, tex, fillR, y);
 
         fillR++;
@@ -595,7 +595,7 @@ glow_floodFill( int x, int y, rgba * seed_color, action_struct * cur, texture_in
     for( i = fillL + 1; i < fillR; i++ ) {
         /* Flood above */
         if( ( y > 0 ) && ( cmp_color(get_pixel_color(tex, i, y - 1), *seed_color)  ) ) {
-            
+
             glow_floodFill( i, y-1, seed_color, cur, tex, tex2 );
         }
         /* flood below */
@@ -607,13 +607,13 @@ glow_floodFill( int x, int y, rgba * seed_color, action_struct * cur, texture_in
 
 void
 glow_fill_do_action(int x, int y, texture_info * tex, VALUE hash_arg,
-                    sync sync_mode, bool primary, action_struct * payload)
+                    sync_ sync_mode, bool primary, action_struct * payload)
 {
     action_struct cur;
     rgba seed_color;
     texture_info fill_image;
     texture_info * fill_image_ptr = NULL;
-    
+
     if(!bound_by_rect(x, y, 0, 0, tex->width, tex->height)) return;
 
     draw_prologue(&cur, tex, 0, 0, 1024, 1024, &hash_arg, sync_mode, primary, &payload);
@@ -645,47 +645,47 @@ int stack[stackSize];
 int stackPointer;
 
 static bool
-pop(int * x, int * y, int h) 
-{ 
-    if(stackPointer > 0) 
-        { 
-            int p = stack[stackPointer]; 
-            *x = p / h; 
-            *y = p % h; 
-            stackPointer--; 
-            return true; 
-        }     
-    else 
-        { 
+pop(int * x, int * y, int h)
+{
+    if(stackPointer > 0)
+        {
+            int p = stack[stackPointer];
+            *x = p / h;
+            *y = p % h;
+            stackPointer--;
+            return true;
+        }
+    else
+        {
             return false;
-        }    
-}    
+        }
+}
 
 static bool
-push(int x, int y, int h) 
-{ 
-    if(stackPointer < stackSize - 1) 
-        { 
-            stackPointer++; 
-            stack[stackPointer] = h * x + y; 
+push(int x, int y, int h)
+{
+    if(stackPointer < stackSize - 1)
+        {
+            stackPointer++;
+            stack[stackPointer] = h * x + y;
             return true;
-        }     
-    else 
-        { 
+        }
+    else
+        {
             return false;
-        }    
-}     
+        }
+}
 
 static void
-emptyStack() 
-{ 
-    int x, y; 
-    while(pop(&x, &y, 0)); 
+emptyStack()
+{
+    int x, y;
+    while(pop(&x, &y, 0));
 }
 
 void
 scan_fill_do_action(int x, int y, texture_info * tex, VALUE hash_arg,
-                    sync sync_mode, bool primary, action_struct * payload)
+                    sync_ sync_mode, bool primary, action_struct * payload)
 {
     action_struct cur;
     rgba old_color;
@@ -700,17 +700,17 @@ scan_fill_do_action(int x, int y, texture_info * tex, VALUE hash_arg,
 
     /* fill hates alpha_blend so let's turn it off */
     payload->pen.alpha_blend = false;
-    
+
     old_color = get_pixel_color(tex, x, y);
 
     if(cmp_color(old_color, cur.color)) return;
-    
+
     emptyStack();
-    
+
     if(!push(x, y, tex->width - 1)) return;
-    
+
     while(pop(&x, &y, tex->width - 1))
-        {    
+        {
             y1 = y;
             while(y1 >= 0 && cmp_color(old_color, get_pixel_color(tex, x, y1))) y1--;
             y1++;
@@ -722,7 +722,7 @@ scan_fill_do_action(int x, int y, texture_info * tex, VALUE hash_arg,
                     /* update the drawing rectangle */
                     update_bounds(payload, x, y1, x, y1);
 
-                    if(!spanLeft && x > 0 && cmp_color(old_color, get_pixel_color(tex, x - 1, y1))) 
+                    if(!spanLeft && x > 0 && cmp_color(old_color, get_pixel_color(tex, x - 1, y1)))
                         {
                             if(!push(x - 1, y1, tex->width - 1)) return;
                             spanLeft = true;
@@ -734,7 +734,7 @@ scan_fill_do_action(int x, int y, texture_info * tex, VALUE hash_arg,
                         }
 
                     if(!spanRight && x < tex->width - 1 && cmp_color(old_color,
-                                                                     get_pixel_color(tex, x + 1, y1))) 
+                                                                     get_pixel_color(tex, x + 1, y1)))
                         {
                             if(!push(x + 1, y1, tex->width - 1)) return;
                             spanRight = true;
@@ -743,7 +743,7 @@ scan_fill_do_action(int x, int y, texture_info * tex, VALUE hash_arg,
                     else if(spanRight && x < tex->width - 1 && !cmp_color(old_color,get_pixel_color(tex, x + 1, y1)))
                         {
                             spanRight = false;
-                        } 
+                        }
                     y1++;
                 }
         }
@@ -758,17 +758,17 @@ bezier_point(VALUE points, float u, float * x, float * y, int n, int format,
 {
     int xy_index;
     double sumx = 0, sumy = 0;
- 
+
 
     for(int k = 0; k < n; k++) {
         switch(format) {
         case POINT_FORMAT:
-            
+
             sumx += NUM2DBL(point_x(get_from_array(points, k))) * bernstein(n - 1, k, u);
             sumy += NUM2DBL(point_y(get_from_array(points, k))) * bernstein(n - 1, k, u);
             break;
         case SIMPLE_FORMAT:
-             
+
             xy_index = k * 2;
             sumx +=  NUM2DBL(get_from_array(points, xy_index)) * bernstein(n - 1, k, u);
             sumy +=  NUM2DBL(get_from_array(points, xy_index + 1)) * bernstein(n - 1, k, u);
@@ -783,7 +783,7 @@ bezier_point(VALUE points, float u, float * x, float * y, int n, int format,
 }
 
 void
-bezier_do_action(VALUE points, texture_info * tex, VALUE hash_arg, sync sync_mode,
+bezier_do_action(VALUE points, texture_info * tex, VALUE hash_arg, sync_ sync_mode,
                  bool primary, action_struct * payload)
 {
     float u = 0.0;
@@ -798,7 +798,7 @@ bezier_do_action(VALUE points, texture_info * tex, VALUE hash_arg, sync sync_mod
 
     /* defaults to 200 (1 / 0.005) samples per curve */
     float step_size = 0.005;
-    
+
     draw_prologue(&cur, tex, XMAX_OOB, YMAX_OOB, XMIN_OOB, YMIN_OOB, &hash_arg, sync_mode, primary, &payload);
 
     /* calculate offset */
@@ -816,7 +816,7 @@ bezier_do_action(VALUE points, texture_info * tex, VALUE hash_arg, sync sync_mod
             points = rb_obj_dup(points);
             closed = true;
         }
-        
+
         /* number of points to sample */
         if(RTEST(get_from_hash(hash_arg, "sample_size"))) {
             VALUE c = get_from_hash(hash_arg, "sample_size");
@@ -830,7 +830,7 @@ bezier_do_action(VALUE points, texture_info * tex, VALUE hash_arg, sync sync_mod
 
         if(closed)
             rb_ary_push(points, get_from_array(points, 0));
-        
+
         num_point_pairs = RARRAY_LEN(points);
     }
     else {
@@ -844,7 +844,7 @@ bezier_do_action(VALUE points, texture_info * tex, VALUE hash_arg, sync sync_mod
             rb_ary_push(points, get_from_array(points, 0));
             rb_ary_push(points, get_from_array(points, 1));
         }
-        
+
         num_point_pairs = RARRAY_LEN(points) / 2;
     }
 
@@ -861,7 +861,7 @@ bezier_do_action(VALUE points, texture_info * tex, VALUE hash_arg, sync sync_mod
 
     while(u <= 1) {
         bezier_point(points, u, &x2, &y2, num_point_pairs, format, draw_offset_x, draw_offset_y);
- 
+
         line_do_action(x1, y1, x2, y2, tex, hash_arg, no_sync, false, payload);
 
         /* update drawing rectangle */
@@ -890,15 +890,15 @@ set_color_array(VALUE ary, rgba * color)
     set_array_value(ary, 2, rb_float_new(color->blue));
     set_array_value(ary, 3, rb_float_new(color->alpha));
 }
-    
+
 void
 each_pixel_do_action(int x1, int y1, int x2, int y2, VALUE proc, texture_info * tex, VALUE hash_arg,
-                     sync sync_mode, bool primary, action_struct * payload)
+                     sync_ sync_mode, bool primary, action_struct * payload)
 {
     action_struct cur;
     int arity;
     VALUE rb_pix = rb_ary_new2(4);
-    
+
     draw_prologue(&cur, tex, x1, y1, x2, y2, &hash_arg, sync_mode, primary, &payload);
 
     arity = FIX2INT(rb_funcall(proc, rb_intern("arity"), 0));
@@ -908,7 +908,7 @@ each_pixel_do_action(int x1, int y1, int x2, int y2, VALUE proc, texture_info * 
             rgba pix = get_pixel_color(tex, x, y);
 
             set_color_array(rb_pix, &pix);
-            
+
             /* invoke the block */
             switch(arity) {
             case 1:
@@ -935,7 +935,7 @@ each_pixel_do_action(int x1, int y1, int x2, int y2, VALUE proc, texture_info * 
 /** splice algorithm **/
 void
 splice_do_action(int x0, int y0, int cx1, int cy1, int cx2, int cy2, texture_info * splice_tex,
-                 texture_info * tex, VALUE hash_arg, sync sync_mode,
+                 texture_info * tex, VALUE hash_arg, sync_ sync_mode,
                  bool primary, action_struct * payload)
 {
     action_struct cur;
@@ -972,20 +972,20 @@ splice_do_action(int x0, int y0, int cx1, int cy1, int cx2, int cy2, texture_inf
     /* NB: we do not use this in the general case since it's almost 1.5 times as slow.
        It is necessary for splicing from/to the same region of pixels though.
     */
-    if(same_image) 
+    if(same_image)
         image_buf = get_image_chunk(splice_tex, cx1, cy1, cx2, cy2);
-    
+
     for(int y = 0; y < ybound; y++)
         for(int x = 0; x < xbound; x++) {
-            
+
             if(!same_image)
                 payload->color = get_pixel_color(splice_tex, cx1 + x, cy1 + y);
-            else 
+            else
                 payload->color = get_pixel_color_from_chunk(image_buf, xbound, ybound, x, y);
-                
+
             if(has_chroma) {
                 bool chroma_match = cmp_color(payload->color, chromakey);
-                
+
                 /* look at released 0.2.0 code to see how USED to do this.
                    this is now a simplified boolean expression (XOR) */
                 if(chroma_match == inverse_chroma)
