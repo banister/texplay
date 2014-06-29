@@ -18,8 +18,4 @@
 # define RCLASS_IV_TBL(c) (RCLASS(c)->iv_tbl)
 #endif
 
-/* a useful macro. cannot use ordinary CLASS_OF as it does not return an lvalue */
-#define KLASS_OF(c) (RBASIC(c)->klass)
-
-
 #endif

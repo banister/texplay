@@ -303,7 +303,7 @@ m_clone_image(VALUE self)
     cloned_image = m_dup_image(self);
 
     /* the main diff b/w clone and dup is that clone also dups the singleton */
-    KLASS_OF(cloned_image) = rb_singleton_class_clone(self);
+    rb_obj_reveal(cloned_image, rb_singleton_class_clone(self));
 
     return cloned_image;
 }
