@@ -6,7 +6,7 @@
 #define DRAW_OFFSET 0
 #define LAZY_BOUNDS 1
 #define IMAGE_COLOR 2
-#define USER_DEFAULTS 3 
+#define USER_DEFAULTS 3
 
 /* shared global */
 extern const rgba not_a_color_v;
