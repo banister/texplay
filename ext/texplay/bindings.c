@@ -30,7 +30,7 @@
 /* lazy_sync  = sync at end of paint block */
 /* eager_sync = sync immediately (after action) */
 /* no_sync    = do not sync at all */
-sync sync_mode = eager_sync;
+sync_ sync_mode = eager_sync;
 
 static void
 process_x_y_pairs(VALUE image, int num_pairs, VALUE * argv, ...)
@@ -162,7 +162,7 @@ rb_lazy_bounds_to_image_bounds(VALUE image, image_bounds * bounds)
 static VALUE
 parse_sync_mode(VALUE user_sync_mode)
 {
-    sync mode;
+    sync_ mode;
 
     Check_Type(user_sync_mode, T_SYMBOL);
 
@@ -308,7 +308,7 @@ m_clone_image(VALUE self)
     cloned_image = m_dup_image(self);
 
     /* the main diff b/w clone and dup is that clone also dups the singleton */
-    KLASS_OF(cloned_image) = rb_singleton_class_clone(self);
+    rb_obj_reveal(cloned_image, rb_singleton_class_clone(self));
 
     return cloned_image;
 }

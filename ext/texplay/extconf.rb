@@ -9,13 +9,13 @@ dir_config name
 if RUBY_PLATFORM =~ /linux/
   exit unless have_library("glut")
   exit unless have_library("GL")
-    
+
 # macosx
 elsif RUBY_PLATFORM =~ /darwin/
   $LDFLAGS +=  " -framework GLUT"
   $CFLAGS += " -I/System/Library/Frameworks/GLUT.framework/Headers"
 
-# windows    
+# windows
 else
   freeglut_path = File.expand_path "vendor/freeglut", File.dirname(__FILE__)
 
