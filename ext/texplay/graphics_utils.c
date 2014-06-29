@@ -4,9 +4,14 @@
 #include "cache.h"
 
 #ifdef __APPLE__
-#include <glut.h>
+# include <AvailabilityMacros.h>
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9
+# include <GLUT/glut.h>
 #else
-#include <GL/glut.h>
+# include <GL/glut.h>
+#endif
+#else
+# include <GL/glut.h>
 #endif
 
 
