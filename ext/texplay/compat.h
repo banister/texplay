@@ -4,6 +4,7 @@
 #define GUARD_COMPAT_H
 
 #include <ruby.h>
+#include <ruby/version.h>
 
 /* macros for backwards compatibility with 1.8 */
 #ifndef RCLASS_M_TBL
@@ -16,6 +17,10 @@
 
 #ifndef RCLASS_IV_TBL
 # define RCLASS_IV_TBL(c) (RCLASS(c)->iv_tbl)
+#endif
+
+#if RUBY_API_VERSION_MAJOR <= 2 && RUBY_API_VERSION_MINOR < 1
+#define KLASS_OF(c) (RBASIC(c)->klass)
 #endif
 
 #endif

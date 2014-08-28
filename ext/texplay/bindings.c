@@ -1,4 +1,5 @@
 #include <ruby.h>
+#include <ruby/version.h>
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -307,8 +308,14 @@ m_clone_image(VALUE self)
 
     cloned_image = m_dup_image(self);
 
-    /* the main diff b/w clone and dup is that clone also dups the singleton */
-    rb_obj_reveal(cloned_image, rb_singleton_class_clone(self));
+    #if RUBY_API_VERSION_MAJOR >=2 && RUBY_API_VERSION_MINOR >= 1
+        /* the main diff b/w clone and dup is that clone also dups the singleton */
+        rb_obj_reveal(cloned_image, rb_singleton_class_clone(self));
+    #else
+        KLASS_OF(cloned_image) = rb_singleton_class_clone(self);
+    #endif
+
+
 
     return cloned_image;
 }
