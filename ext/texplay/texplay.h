@@ -28,9 +28,13 @@
 #define ABS(X) ((X) >= 0 ? (X) : -(X))
 
 /* enums */
+#ifdef __bool_true_false_are_defined
+/* Newer Ruby versions already include stdbool.h */
+#else
 typedef enum e_bool {
   false, true
 } bool;
+#endif
 
 typedef enum e_color {
   red, green, blue, alpha
